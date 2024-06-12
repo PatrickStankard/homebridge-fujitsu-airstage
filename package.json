@@ -19,6 +19,10 @@
   "scripts": {
       "test": "node --test"
   },
+  "funding": {
+      "type": "venmo",
+      "url": "https://account.venmo.com/u/patrickstankard"
+  },
   "keywords": [
     "homebridge",
     "homebridge-plugin"
