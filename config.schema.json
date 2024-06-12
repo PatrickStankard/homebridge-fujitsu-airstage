@@ -1,0 +1,92 @@
+{
+    "pluginAlias": "fujitsu-airstage",
+    "pluginType": "platform",
+    "singular": false,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "region": {
+                "title": "Region",
+                "type": "string",
+                "default": "us",
+                "required": true,
+                "oneOf": [
+                    {
+                        "title": "U.S.",
+                        "const": "us"
+                    },
+                    {
+                        "title": "Europe",
+                        "const": "eu"
+                    }
+                ]
+            },
+            "country": {
+                "title": "Country",
+                "type": "string",
+                "required": true,
+                "default": "United States"
+            },
+            "language": {
+                "title": "Language",
+                "type": "string",
+                "required": true,
+                "default": "en"
+            },
+            "email": {
+                "title": "Email",
+                "type": "string",
+                "required": true,
+                "default": "",
+                "description": "Airstage email"
+            },
+            "password": {
+                "title": "Password",
+                "type": "string",
+                "required": true,
+                "default": "",
+                "description": "Airstage password"
+            },
+            "enableThermostat": {
+                "title": "Enable thermostat control",
+                "type": "boolean",
+                "default": true
+            },
+            "enableFan": {
+                "title": "Enable fan control",
+                "type": "boolean",
+                "default": true
+            },
+            "enableVerticalSlats": {
+                "title": "Enable vertical slats control",
+                "type": "boolean",
+                "default": false
+            },
+            "enableDryModeSwitch": {
+                "title": "Enable 'Dry Mode' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableEconomySwitch": {
+                "title": "Enable 'Economy' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableEnergySavingFanSwitch": {
+                "title": "Enable 'Energy Saving Fan' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableFanModeSwitch": {
+                "title": "Enable 'Fan Mode' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enablePowerfulSwitch": {
+                "title": "Enable 'Powerful' switch",
+                "type": "boolean",
+                "default": false
+            }
+        }
+    }
+}
