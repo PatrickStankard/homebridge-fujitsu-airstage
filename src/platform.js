@@ -13,6 +13,11 @@ class Platform {
         this.config = config;
         this.api = api;
 
+        // Polyfill for Homebridge < 1.8.0
+        if (!this.log.success) {
+            this.log.success = this.log.info;
+        }
+
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
