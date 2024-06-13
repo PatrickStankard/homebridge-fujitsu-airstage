@@ -17,6 +17,10 @@ class Client {
         accessTokenExpiry = null,
         refreshToken = null
     ) {
+        if (typeof accessTokenExpiry === 'string') {
+            accessTokenExpiry = new Date(accessTokenExpiry);
+        }
+
         this.region = region;
         this.country = country;
         this.language = language;

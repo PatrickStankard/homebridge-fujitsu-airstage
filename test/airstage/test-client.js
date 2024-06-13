@@ -13,7 +13,7 @@ let client = new airstage.Client(
     null,
     null,
     'existingAccessToken',
-    new Date('2099-01-01'),
+    '2099-01-01',
     'existingRefreshToken'
 );
 
