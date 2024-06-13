@@ -163,7 +163,7 @@ class DryModeSwitchAccessory {
         }
 
         const on = fanModeSwitch.getCharacteristic(
-            this.platform.Characteristic.on
+            this.platform.Characteristic.On
         );
 
         on.emit('get', function(error, value) {

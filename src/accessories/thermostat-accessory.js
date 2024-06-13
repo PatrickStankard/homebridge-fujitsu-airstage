@@ -335,7 +335,7 @@ class ThermostatAccessory {
         }
 
         const on = fanModeSwitch.getCharacteristic(
-            this.platform.Characteristic.on
+            this.platform.Characteristic.On
         );
 
         on.emit('get', function(error, value) {
@@ -355,7 +355,7 @@ class ThermostatAccessory {
         }
 
         const on = dryModeSwitch.getCharacteristic(
-            this.platform.Characteristic.on
+            this.platform.Characteristic.On
         );
 
         on.emit('get', function(error, value) {
