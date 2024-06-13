@@ -35,6 +35,16 @@ class Client {
         this.resetDeviceCache(null);
     }
 
+    refreshTokenOrAuthenticate(callback) {
+        if (this._apiClient.accessToken && this._apiClient.refreshToken) {
+            this.refreshToken(callback);
+        } else if (this.email && this.password) {
+            this.authenticate(callback);
+        } else {
+            callback('Could not refresh token or authenticate', null);
+        }
+    }
+
     authenticate(callback) {
         this._apiClient.postUsersSignIn(
             this.email,
@@ -676,6 +686,18 @@ class Client {
                 delete this._deviceParameterCache[deviceId];
             }
         }
+    }
+
+    getAccessToken() {
+        return this._apiClient.accessToken;
+    }
+
+    getAccessTokenExpiry() {
+        return this._apiClient.accessTokenExpiry;
+    }
+
+    getRefreshToken() {
+        return this._apiClient.refreshToken;
     }
 
     _getDevices(
