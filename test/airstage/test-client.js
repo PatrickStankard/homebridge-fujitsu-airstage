@@ -136,11 +136,6 @@ test('airstage.Client#refreshTokenOrAuthenticate returns error', (context, done)
         'United States',
         'en'
     );
-    const expectedResponse = {
-        'accessToken': 'testAccessToken',
-        'expiresIn': 3600,
-        'refreshToken': 'testRefreshToken'
-    };
     context.mock.method(
         client._apiClient,
         'postUsersMeRefreshToken'
