@@ -40,18 +40,35 @@
                 "default": "en"
             },
             "email": {
-                "title": "Email",
+                "title": "Airstage Email",
                 "type": "string",
-                "required": true,
+                "format": "email",
                 "default": "",
-                "description": "Airstage email"
+                "description": "This will be automatically removed after the initial authentication with the Airstage API, and an access token will be used instead."
             },
             "password": {
-                "title": "Password",
+                "title": "Airstage Password",
                 "type": "string",
-                "required": true,
                 "default": "",
-                "description": "Airstage password"
+                "description": "This will be automatically removed after the initial authentication with the Airstage API, and an access token will be used instead."
+            },
+            "accessToken": {
+                "title": "Airstage Access Token",
+                "type": "string",
+                "default": "",
+                "description": "This will be automatically be set after the initial authentication with the Airstage API."
+            },
+            "accessTokenExpiry": {
+                "title": "Airstage Access Token Expiry",
+                "type": "string",
+                "default": "",
+                "description": "This will be automatically be set after the initial authentication with the Airstage API."
+            },
+            "refreshToken": {
+                "title": "Airstage Refresh Token",
+                "type": "string",
+                "default": "",
+                "description": "This will be automatically be set after the initial authentication with the Airstage API."
             },
             "enableThermostat": {
                 "title": "Enable thermostat control",

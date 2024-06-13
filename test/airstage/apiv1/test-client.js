@@ -11,7 +11,7 @@ const clientWithAccessToken = new airstage.apiv1.Client(
     null,
     null,
     'existingAccessToken',
-    new Date('2099-01-01'),
+    '2099-01-01',
     'existingRefreshToken'
 );
 
@@ -97,7 +97,7 @@ test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with
         null,
         null,
         'existingAccessToken',
-        new Date('2099-01-01'),
+        '2099-01-01',
         'existingRefreshToken'
     );
     const expectedResponse = {
@@ -143,7 +143,7 @@ test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with
         null,
         null,
         'existingAccessToken',
-        new Date('2099-01-01'),
+        '2099-01-01',
         'existingRefreshToken'
     );
     const expectedError = 'Error';

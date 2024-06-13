@@ -17,6 +17,10 @@ class Client {
         accessTokenExpiry = null,
         refreshToken = null
     ) {
+        if (typeof accessTokenExpiry === 'string') {
+            accessTokenExpiry = new Date(accessTokenExpiry);
+        }
+
         this.region = region;
         this.country = country;
         this.language = language;
@@ -220,6 +224,11 @@ class Client {
 
         if (this.accessToken) {
             requestHeaders[constants.REQUEST_HEADER_AUTHORIZATION] = 'Bearer ' + this.accessToken;
+        } else {
+            const result = structuredClone(constants.REQUEST_RESULT);
+            result.error = 'Access token not set';
+
+            return callback(result);
         }
 
         requestOptions = {
@@ -243,6 +252,11 @@ class Client {
 
         if (this.accessToken) {
             requestHeaders[constants.REQUEST_HEADER_AUTHORIZATION] = 'Bearer ' + this.accessToken;
+        } else if (path !== constants.PATH_USERS_SIGN_IN) {
+            const result = structuredClone(constants.REQUEST_RESULT);
+            result.error = 'Access token not set';
+
+            return callback(result);
         }
 
         requestOptions = {
