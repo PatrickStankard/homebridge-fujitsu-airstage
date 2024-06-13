@@ -57,27 +57,21 @@ class Platform {
     }
 
     discoverDevices() {
-        this.airstageClient.authenticate((function(error) {
+        this.airstageClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
-                throw new this.api.hap.HapStatusError(
-                    this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                );
+                return this.log.error('Error when attempting to authenticate with Airbridge:', error);
             }
 
             this._updateConfigWithAccessToken();
 
             this.airstageClient.getUserMetadata((function(error) {
                 if (error) {
-                    throw new this.api.hap.HapStatusError(
-                        this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                    );
+                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
                 }
 
                 this.airstageClient.getDevices(null, (function(error, result) {
                     if (error) {
-                        throw new this.api.hap.HapStatusError(
-                            this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                        );
+                        return this.log.error('Error when attempting to communicate with Airbridge:', error);
                     }
 
                     const deviceIds = Object.keys(result.metadata);
