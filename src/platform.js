@@ -1,5 +1,6 @@
 'use strict';
 
+const ConfigManager = require('./config-manager');
 const accessories = require('./accessories');
 const airstage = require('./airstage');
 const settings = require('./settings');
@@ -25,9 +26,16 @@ class Platform {
             this.config.region,
             this.config.country,
             this.config.language,
-            this.config.email,
-            this.config.password
+            this.config.email || null,
+            this.config.password || null,
+            null,
+            null,
+            this.config.accessToken || null,
+            this.config.accessTokenExpiry || null,
+            this.config.refreshToken || null
         );
+
+        this.configManager = new ConfigManager(this.config, this.api);
 
         setInterval(
             this._refreshAirstageClientCache.bind(this),
@@ -55,6 +63,8 @@ class Platform {
                     this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
                 );
             }
+
+            this._updateConfigWithAccessToken();
 
             this.airstageClient.getUserMetadata((function(error) {
                 if (error) {
@@ -113,6 +123,22 @@ class Platform {
                 }).bind(this));
             }).bind(this));
         }).bind(this));
+    }
+
+    _updateConfigWithAccessToken() {
+        const accessToken = this.airstageClient.getAccessToken();
+        const accessTokenExpiry = this.airstageClient.getAccessTokenExpiry();
+        const refreshToken = this.airstageClient.getRefreshToken();
+
+        if (accessToken && accessTokenExpiry && refreshToken) {
+            this.configManager.updateConfigWithAccessToken(
+                accessToken,
+                accessTokenExpiry,
+                refreshToken
+            );
+
+            this.log.debug('Updated config with Airstage client token');
+        }
     }
 
     _registerThermostat(deviceId, deviceName, model) {
@@ -427,6 +453,8 @@ class Platform {
                 );
             }
 
+            this._updateConfigWithAccessToken();
+
             this.log.debug('Refreshed Airstage client token');
         }).bind(this));
     }
@@ -458,8 +486,7 @@ class Platform {
                 }
 
                 this.log.debug('Refreshed Airstage client device cache');
-                }
-            ).bind(this)
+            }).bind(this)
         );
     }
 }
