@@ -84,6 +84,7 @@ module.exports.PARAMETER_RESULT_SUCCESS = 'success';
 module.exports.USER_TEMPERATURE_SCALE = 'tempUnit';
 
 // Message codes
+module.exports.MESSAGE_CODE_INVALID_LOGIN = 'AIRSTAGE_POST_USERS_SIGNIN_EMAIL_PASSWORD_INVALID';
 module.exports.MESSAGE_CODE_INVALID_TOKEN = 'AIRSTAGE_COMMON_TOKEN_INVALID';
 
 // Temperature scales

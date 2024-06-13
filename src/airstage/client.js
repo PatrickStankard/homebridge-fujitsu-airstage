@@ -24,11 +24,11 @@ class Client {
             region,
             country,
             language,
-            osVersion,
-            userAgent,
-            accessToken,
-            accessTokenExpiry,
-            refreshToken
+            osVersion || null,
+            userAgent || null,
+            accessToken || null,
+            accessTokenExpiry || null,
+            refreshToken || null
         );
 
         this.resetUserCache();
@@ -49,8 +49,12 @@ class Client {
         this._apiClient.postUsersSignIn(
             this.email,
             this.password,
-            function(result) {
+            (function(result) {
                 let response = null;
+
+                if (this._isInvalidLoginResult(result)) {
+                    return callback('Invalid email or password', null);
+                }
 
                 if (result.error) {
                     return callback(result.error, null);
@@ -61,7 +65,7 @@ class Client {
                 }
 
                 callback(null, response);
-            }
+            }).bind(this)
         );
     }
 
@@ -72,7 +76,7 @@ class Client {
                 let response = null;
 
                 if (this._isInvalidTokenResult(result)) {
-                    return this.authenticate(callback);
+                    return callback('Invalid access token', null);
                 }
 
                 if (result.error) {
@@ -111,6 +115,10 @@ class Client {
             (function(result) {
                 let responseScale = null;
                 let userMetadataCache = null;
+
+                if (this._isInvalidTokenResult(result)) {
+                    return callback('Invalid access token', null);
+                }
 
                 if (result.error) {
                     return callback(result.error, null);
@@ -650,23 +658,177 @@ class Client {
     }
 
     setParameter(deviceId, name, value, callback) {
-        this._setParameter(deviceId, name, value, callback);
+        const deviceSubId = '0';
+
+        this._apiClient.postDevicesSetParametersRequest(
+            deviceId,
+            deviceSubId,
+            name,
+            value,
+            (function(result) {
+                let requestId = null;
+
+                if (this._isInvalidTokenResult(result)) {
+                    return callback('Invalid access token', null);
+                }
+
+                if (result.error) {
+                    return callback(result.error, null);
+                }
+
+                if (result.response) {
+                    requestId = result.response.reqId;
+                }
+
+                this._pollRequestStatus(
+                    deviceId,
+                    requestId,
+                    callback
+                );
+            }).bind(this)
+        );
     }
 
     getRequestStatus(deviceId, requestId, callback) {
-        this._getRequestStatus(deviceId, requestId, callback);
+        this._apiClient.getDevicesRequest(
+            deviceId,
+            requestId,
+            (function(result) {
+                let response = null;
+
+                if (this._isInvalidTokenResult(result)) {
+                    return callback('Invalid access token', null);
+                }
+
+                if (result.error) {
+                    return callback(result.error, null);
+                }
+
+                if (result.response) {
+                    response = result.response;
+                }
+
+                callback(null, response);
+            }).bind(this)
+        );
     }
 
     getDevices(limit, callback) {
-        this._getDevices(limit, callback);
+        let deviceMetadata = this._getDeviceMetadataCache(null);
+        let deviceParameters = this._getDeviceParameterCache(null);
+
+        if (
+            deviceMetadata &&
+            Object.keys(deviceMetadata).length > 0 &&
+            deviceParameters &&
+            Object.keys(deviceParameters).length > 0
+        ) {
+            return callback(null, {
+                'metadata': deviceMetadata,
+                'parameters': deviceParameters
+            });
+        }
+
+        this._apiClient.getDevicesAll(
+            limit,
+            (function(result) {
+                if (this._isInvalidTokenResult(result)) {
+                    return callback('Invalid access token', null);
+                }
+
+                if (result.error) {
+                    return callback(result.error, null);
+                }
+
+                if (result.response) {
+                    result.response.devices.forEach(function(device) {
+                        this._setDeviceMetadataCache(
+                            device.deviceId,
+                            device
+                        );
+                        this._setDeviceParameterCache(
+                            device.deviceId,
+                            device
+                        );
+                    }, this);
+                }
+
+                deviceMetadata = this._getDeviceMetadataCache(null);
+                deviceParameters = this._getDeviceParameterCache(null);
+
+                callback(null, {
+                    'metadata': deviceMetadata,
+                    'parameters': deviceParameters
+                });
+            }).bind(this)
+        );
     }
 
     getDevice(deviceId, callback) {
-        this._getDevice(deviceId, callback);
+        let deviceMetadata = this._getDeviceMetadataCache(deviceId);
+        let deviceParameters = this._getDeviceParameterCache(deviceId);
+
+        if (deviceMetadata && deviceParameters) {
+            return callback(null, {
+                'metadata': deviceMetadata,
+                'parameters': deviceParameters
+            });
+        }
+
+        this._apiClient.getDevice(
+            deviceId,
+            (function(result) {
+                if (this._isInvalidTokenResult(result)) {
+                    return callback('Invalid access token', null);
+                }
+
+                if (result.error) {
+                    return callback(result.error, null);
+                }
+
+                if (result.response) {
+                    deviceMetadata = this._setDeviceMetadataCache(
+                        result.response.deviceId,
+                        result.response
+                    );
+                    deviceParameters = this._setDeviceParameterCache(
+                        result.response.deviceId,
+                        result.response
+                    );
+                }
+
+                callback(null, {
+                    'metadata': deviceMetadata,
+                    'parameters': deviceParameters
+                });
+            }).bind(this)
+        );
     }
 
     getUserMetadata(callback) {
-        this._getUserMetadata(callback);
+        let userMetadata = this._getUserMetadataCache();
+
+        if (userMetadata && Object.keys(userMetadata).length > 0) {
+            return callback(null, userMetadata);
+        }
+
+        this._apiClient.getUsersMe((function(result) {
+            if (this._isInvalidTokenResult(result)) {
+                return callback('Invalid access token', null);
+            }
+
+            if (result.error) {
+                return callback(result.error, null);
+            }
+
+            if (result.response) {
+                userMetadata = result.response;
+
+                this._setUserMetadataCache(userMetadata);
+            }
+
+            callback(null, userMetadata);
+        }).bind(this));
     }
 
     resetUserCache() {
@@ -700,386 +862,15 @@ class Client {
         return this._apiClient.refreshToken;
     }
 
-    _getDevices(
-        limit,
-        callback,
-        checkCache = true,
-        attemptRefreshToken = true,
-        attemptAuthenticate = true
-    ) {
-        let deviceMetadata = null;
-        let deviceParameters = null;
-
-        if (checkCache) {
-            deviceMetadata = this._getDeviceMetadataCache(null);
-            deviceParameters = this._getDeviceParameterCache(null);
-
-            if (
-                deviceMetadata &&
-                Object.keys(deviceMetadata).length > 0 &&
-                deviceParameters &&
-                Object.keys(deviceParameters).length > 0
-            ) {
-                return callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
-                });
-            }
-        }
-
-        if (this._shouldRefreshToken() && attemptRefreshToken) {
-            return this.refreshToken((function(error) {
-                if (error) {
-                    return callback(error, null);
-                }
-
-                attemptRefreshToken = false;
-
-                this.getDevices(
-                    limit,
-                    callback,
-                    checkCache,
-                    attemptRefreshToken,
-                    attemptAuthenticate
-                );
-            }).bind(this));
-        }
-
-        this._apiClient.getDevicesAll(
-            limit,
-            (function(result) {
-                if (this._isInvalidTokenResult(result) && attemptAuthenticate) {
-                    return this.authenticate((function(error) {
-                        if (error) {
-                            return callback(error, null);
-                        }
-
-                        attemptAuthenticate = false;
-
-                        this.getDevices(
-                            limit,
-                            callback,
-                            checkCache,
-                            attemptRefreshToken,
-                            attemptAuthenticate
-                        );
-                    }).bind(this));
-                }
-
-                if (result.error) {
-                    return callback(result.error, null);
-                }
-
-                if (result.response) {
-                    result.response.devices.forEach(function(device) {
-                        this._setDeviceMetadataCache(
-                            device.deviceId,
-                            device
-                        );
-                        this._setDeviceParameterCache(
-                            device.deviceId,
-                            device
-                        );
-                    }, this);
-                }
-
-                deviceMetadata = this._getDeviceMetadataCache(null);
-                deviceParameters = this._getDeviceParameterCache(null);
-
-                callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
-                });
-            }).bind(this)
+    _isInvalidLoginResult(result) {
+        return (
+            result.statusCode === 401 ||
+            (
+                result.response &&
+                'messageCode' in result.response &&
+                result.response.messageCode === apiv1.constants.MESSAGE_CODE_INVALID_LOGIN
+            )
         );
-    }
-
-    _getDevice(
-        deviceId,
-        callback,
-        checkCache = true,
-        attemptRefreshToken = true,
-        attemptAuthenticate = true
-    ) {
-        let deviceMetadata = null;
-        let deviceParameters = null;
-
-        if (checkCache) {
-            deviceMetadata = this._getDeviceMetadataCache(deviceId);
-            deviceParameters = this._getDeviceParameterCache(deviceId);
-
-            if (deviceMetadata && deviceParameters) {
-                return callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
-                });
-            }
-        }
-
-        if (this._shouldRefreshToken() && attemptRefreshToken) {
-            return this.refreshToken((function(error) {
-                if (error) {
-                    return callback(error, null);
-                }
-
-                attemptRefreshToken = false;
-
-                this.getDevice(
-                    deviceId,
-                    callback,
-                    checkCache,
-                    attemptRefreshToken,
-                    attemptAuthenticate
-                );
-            }).bind(this));
-        }
-
-        this._apiClient.getDevice(
-            deviceId,
-            (function(result) {
-                if (this._isInvalidTokenResult(result) && attemptAuthenticate) {
-                    return this.authenticate((function(error) {
-                        if (error) {
-                            return callback(error, null);
-                        }
-
-                        attemptAuthenticate = false;
-
-                        this.getDevice(
-                            deviceId,
-                            callback,
-                            checkCache,
-                            attemptRefreshToken,
-                            attemptAuthenticate
-                        );
-                    }).bind(this));
-                }
-
-                if (result.error) {
-                    return callback(result.error, null);
-                }
-
-                if (result.response) {
-                    deviceMetadata = this._setDeviceMetadataCache(
-                        result.response.deviceId,
-                        result.response
-                    );
-                    deviceParameters = this._setDeviceParameterCache(
-                        result.response.deviceId,
-                        result.response
-                    );
-                }
-
-                callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
-                });
-            }).bind(this)
-        );
-    }
-
-    _setParameter(
-        deviceId,
-        name,
-        value,
-        callback,
-        attemptRefreshToken = true,
-        attemptAuthenticate = true
-    ) {
-        const deviceSubId = '0';
-
-        if (this._shouldRefreshToken() && attemptRefreshToken) {
-            return this.refreshToken((function(error) {
-                if (error) {
-                    return callback(error, null);
-                }
-
-                attemptRefreshToken = false;
-
-                this.setParameter(
-                    deviceId,
-                    name,
-                    value,
-                    callback,
-                    attemptRefreshToken,
-                    attemptAuthenticate
-                );
-            }).bind(this));
-        }
-
-        this._apiClient.postDevicesSetParametersRequest(
-            deviceId,
-            deviceSubId,
-            name,
-            value,
-            (function(result) {
-                let requestId = null;
-
-                if (this._isInvalidTokenResult(result) && attemptAuthenticate) {
-                    return this.authenticate((function(error) {
-                        if (error) {
-                            return callback(error, null);
-                        }
-
-                        attemptAuthenticate = false;
-
-                        this.setParameter(
-                            deviceId,
-                            name,
-                            value,
-                            callback,
-                            attemptRefreshToken,
-                            attemptAuthenticate
-                        );
-                    }).bind(this));
-                }
-
-                if (result.error) {
-                    return callback(result.error, null);
-                }
-
-                if (result.response) {
-                    requestId = result.response.reqId;
-                }
-
-                this._pollRequestStatus(
-                    deviceId,
-                    requestId,
-                    callback
-                );
-            }).bind(this)
-        );
-    }
-
-    _getRequestStatus(
-        deviceId,
-        requestId,
-        callback,
-        attemptRefreshToken = true,
-        attemptAuthenticate = true
-    ) {
-        if (this._shouldRefreshToken() && attemptRefreshToken) {
-            return this.refreshToken((function(error) {
-                if (error) {
-                    return callback(error, null);
-                }
-
-                attemptRefreshToken = false;
-
-                this.getRequestStatus(
-                    deviceId,
-                    requestId,
-                    callback,
-                    attemptRefreshToken,
-                    attemptAuthenticate
-                );
-            }).bind(this));
-        }
-
-        this._apiClient.getDevicesRequest(
-            deviceId,
-            requestId,
-            (function(result) {
-                let response = null;
-
-                if (this._isInvalidTokenResult(result) && attemptAuthenticate) {
-                    return this.authenticate((function(error) {
-                        if (error) {
-                            return callback(error, null);
-                        }
-
-                        attemptAuthenticate = false;
-
-                        this.getRequestStatus(
-                            deviceId,
-                            requestId,
-                            callback,
-                            attemptRefreshToken,
-                            attemptAuthenticate
-                        );
-                    }).bind(this));
-                }
-
-                if (result.error) {
-                    return callback(result.error, null);
-                }
-
-                if (result.response) {
-                    response = result.response;
-                }
-
-                callback(null, response);
-            }).bind(this)
-        );
-    }
-
-    _getUserMetadata(
-        callback,
-        checkCache = true,
-        attemptRefreshToken = true,
-        attemptAuthenticate = true
-    ) {
-        let userMetadata = null;
-
-        if (checkCache) {
-            userMetadata = this._getUserMetadataCache();
-
-            if (userMetadata && Object.keys(userMetadata).length > 0) {
-                return callback(null, userMetadata);
-            }
-        }
-
-        if (this._shouldRefreshToken() && attemptRefreshToken) {
-            return this.refreshToken((function(error) {
-                if (error) {
-                    return callback(error, null);
-                }
-
-                attemptRefreshToken = false;
-
-                this.getUserMetadata(
-                    callback,
-                    checkCache,
-                    attemptRefreshToken,
-                    attemptAuthenticate
-                );
-            }).bind(this));
-        }
-
-        this._apiClient.getUsersMe((function(result) {
-            if (this._isInvalidTokenResult(result) && attemptAuthenticate) {
-                return this.authenticate((function(error) {
-                    if (error) {
-                        return callback(error, null);
-                    }
-
-                    attemptAuthenticate = false;
-
-                    this.getUserMetadata(
-                        callback,
-                        checkCache,
-                        attemptRefreshToken,
-                        attemptAuthenticate
-                    );
-                }).bind(this));
-            }
-
-            if (result.error) {
-                return callback(result.error, null);
-            }
-
-            if (result.response) {
-                userMetadata = result.response;
-
-                this._setUserMetadataCache(userMetadata);
-            }
-
-            callback(null, userMetadata);
-        }).bind(this));
-    }
-
-    _shouldAuthenticate() {
-        return (this._apiClient.accessToken === null);
     }
 
     _isInvalidTokenResult(result) {
@@ -1091,10 +882,6 @@ class Client {
                 result.response.messageCode === apiv1.constants.MESSAGE_CODE_INVALID_TOKEN
             )
         );
-    }
-
-    _shouldRefreshToken() {
-        return (this._apiClient.accessTokenExpiry <= new Date());
     }
 
     _getUserMetadataCache() {
@@ -1172,7 +959,7 @@ class Client {
         return this._getDeviceParameterCache(deviceId);
     }
 
-    _pollRequestStatus(deviceId, requestId, callback, attemptAuthenticate = true) {
+    _pollRequestStatus(deviceId, requestId, callback) {
         this._apiClient.getDevicesRequest(
             deviceId,
             requestId,
@@ -1180,22 +967,12 @@ class Client {
                 let deviceMetadata = null;
                 let deviceParameters = null;
 
-                if (this._isInvalidTokenResult(result) && attemptAuthenticate) {
-                    return this.authenticate((function(error) {
-                        if (error) {
-                            return callback(error, null);
-                        }
-
-                        this._pollRequestStatus(deviceId, requestId, callback, false);
-                    }).bind(this));
-                }
-
                 if (result.error) {
                     return callback(result.error, null);
                 }
 
                 if (result.response.status === apiv1.constants.PARAMETER_STATUS_WAITING) {
-                    this._pollRequestStatus(deviceId, requestId, callback, attemptAuthenticate);
+                    this._pollRequestStatus(deviceId, requestId, callback);
                 } else {
                     if (result.response.result === apiv1.constants.PARAMETER_RESULT_SUCCESS) {
                         deviceMetadata = this._setDeviceMetadataCache(
