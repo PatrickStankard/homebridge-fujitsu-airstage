@@ -73,13 +73,10 @@ class FanAccessory {
 
         this.airstageClient.setPowerState(this.deviceId, powerState, (function(error) {
             if (error) {
-                return callback(error, null);
+                return callback(error);
             }
 
-            this.service.updateCharacteristic(
-                this.platform.Characteristic.CurrentFanState,
-                this.platform.Characteristic.CurrentFanState.INACTIVE
-            );
+            this._updateThermostatServiceCharacteristics();
 
             callback(null);
         }).bind(this));
@@ -243,6 +240,53 @@ class FanAccessory {
                 callback(error);
             }
         );
+    }
+
+    _updateThermostatServiceCharacteristics() {
+        const thermostatService = this._getThermostatService();
+
+        if (thermostatService === null) {
+            return false;
+        }
+
+        const currentHeatingCoolingState = thermostatService.getCharacteristic(
+            this.platform.Characteristic.CurrentHeatingCoolingState
+        );
+        const targetHeatingCoolingState = thermostatService.getCharacteristic(
+            this.platform.Characteristic.TargetHeatingCoolingState
+        );
+
+        currentHeatingCoolingState.emit('get', function(error, value) {
+            if (error === null) {
+                currentHeatingCoolingState.sendEventNotification(value);
+            }
+        });
+
+        targetHeatingCoolingState.emit('get', function(error, value) {
+            if (error === null) {
+                targetHeatingCoolingState.sendEventNotification(value);
+            }
+        });
+
+        return true;
+    }
+
+    _getThermostatService() {
+        let thermostatService = null;
+        const uuid = this.platform.api.hap.uuid.generate(
+            this.deviceId + '-thermostat'
+        );
+        const existingAccessory = this.platform.accessories.find(
+            accessory => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+            thermostatService = existingAccessory.services.find(
+                service => service instanceof this.platform.Service.Thermostat
+            );
+        }
+
+        return thermostatService;
     }
 }
 
