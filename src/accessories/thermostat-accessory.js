@@ -145,7 +145,15 @@ class ThermostatAccessory {
                 this.deviceId,
                 airstage.constants.TOGGLE_OFF,
                 (function(error) {
-                    callback(error);
+                    if (error) {
+                        return callback(error);
+                    }
+
+                    this._updateFanServiceCharacteristics();
+                    this._updateFanModeSwitchCharacteristics();
+                    this._updateDryModeSwitchCharacteristics();
+
+                    callback(null);
                 }).bind(this)
             );
         }
@@ -170,7 +178,15 @@ class ThermostatAccessory {
                     this.deviceId,
                     operationMode,
                     (function(error) {
-                        callback(error);
+                        if (error) {
+                            return callback(error);
+                        }
+
+                        this._updateFanServiceCharacteristics();
+                        this._updateFanModeSwitchCharacteristics();
+                        this._updateDryModeSwitchCharacteristics();
+
+                        callback(null);
                     }).bind(this)
                 );
             }).bind(this)
@@ -262,6 +278,147 @@ class ThermostatAccessory {
 
             callback(null, name + ' Thermostat');
         });
+    }
+
+    _updateFanServiceCharacteristics() {
+        const fanService = this._getFanService();
+
+        if (fanService === null) {
+            return false;
+        }
+
+        const active = fanService.getCharacteristic(
+            this.platform.Characteristic.Active
+        );
+        const currentFanState = fanService.getCharacteristic(
+            this.platform.Characteristic.CurrentFanState
+        );
+        const targetFanState = fanService.getCharacteristic(
+            this.platform.Characteristic.TargetFanState
+        );
+        const rotationSpeed = fanService.getCharacteristic(
+            this.platform.Characteristic.RotationSpeed
+        );
+
+        active.emit('get', function(error, value) {
+            if (error === null) {
+                active.sendEventNotification(value);
+            }
+        });
+
+        currentFanState.emit('get', function(error, value) {
+            if (error === null) {
+                currentFanState.sendEventNotification(value);
+            }
+        });
+
+        targetFanState.emit('get', function(error, value) {
+            if (error === null) {
+                targetFanState.sendEventNotification(value);
+            }
+        });
+
+        rotationSpeed.emit('get', function(error, value) {
+            if (error === null) {
+                rotationSpeed.sendEventNotification(value);
+            }
+        });
+
+        return true;
+    }
+
+    _updateFanModeSwitchCharacteristics() {
+        const fanModeSwitch = this._getFanModeSwitch();
+
+        if (fanModeSwitch === null) {
+            return false;
+        }
+
+        const on = fanModeSwitch.getCharacteristic(
+            this.platform.Characteristic.on
+        );
+
+        on.emit('get', function(error, value) {
+            if (error === null) {
+                on.sendEventNotification(value);
+            }
+        });
+
+        return true;
+    }
+
+    _updateDryModeSwitchCharacteristics() {
+        const dryModeSwitch = this._getDryModeSwitch();
+
+        if (dryModeSwitch === null) {
+            return false;
+        }
+
+        const on = dryModeSwitch.getCharacteristic(
+            this.platform.Characteristic.on
+        );
+
+        on.emit('get', function(error, value) {
+            if (error === null) {
+                on.sendEventNotification(value);
+            }
+        });
+
+        return true;
+    }
+
+    _getFanService() {
+        let fanService = null;
+        const uuid = this.platform.api.hap.uuid.generate(
+            this.deviceId + '-fan'
+        );
+        const existingAccessory = this.platform.accessories.find(
+            accessory => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+            fanService = existingAccessory.services.find(
+                service => service instanceof this.platform.Service.Fanv2
+            );
+        }
+
+        return fanService;
+    }
+
+    _getFanModeSwitch() {
+        let fanModeSwitch = null;
+        const uuid = this.platform.api.hap.uuid.generate(
+            this.deviceId + '-fan-mode-switch'
+        );
+        const existingAccessory = this.platform.accessories.find(
+            accessory => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+            fanModeSwitch = existingAccessory.services.find(
+                service => service instanceof this.platform.Service.Switch
+            );
+        }
+
+        return fanModeSwitch;
+    }
+
+    _getDryModeSwitch() {
+        let dryModeSwitch = null;
+        const uuid = this.platform.api.hap.uuid.generate(
+            this.deviceId + '-dry-mode-switch'
+        );
+        const existingAccessory = this.platform.accessories.find(
+            accessory => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+            dryModeSwitch = existingAccessory.services.find(
+                service => service instanceof this.platform.Service.Switch
+            );
+        }
+
+        return dryModeSwitch;
     }
 }
 
