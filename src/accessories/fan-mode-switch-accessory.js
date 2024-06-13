@@ -55,9 +55,16 @@ class FanModeSwitchAccessory {
         this.airstageClient.setOperationMode(
             this.deviceId,
             operationMode,
-            function(error) {
-                callback(error);
-            }
+            (function(error) {
+                if (error) {
+                    return callback(error);
+                }
+
+                this._updateThermostatServiceCharacteristics();
+                this._updateDryModeSwitchCharacteristics();
+
+                callback(null);
+            }).bind(this)
         );
     }
 
@@ -69,6 +76,91 @@ class FanModeSwitchAccessory {
 
             callback(null, name + ' Fan Mode Switch');
         });
+    }
+
+    _updateThermostatServiceCharacteristics() {
+        const thermostatService = this._getThermostatService();
+
+        if (thermostatService === null) {
+            return false;
+        }
+
+        const currentHeatingCoolingState = thermostatService.getCharacteristic(
+            this.platform.Characteristic.CurrentHeatingCoolingState
+        );
+        const targetHeatingCoolingState = thermostatService.getCharacteristic(
+            this.platform.Characteristic.TargetHeatingCoolingState
+        );
+
+        currentHeatingCoolingState.emit('get', function(error, value) {
+            if (error === null) {
+                currentHeatingCoolingState.sendEventNotification(value);
+            }
+        });
+
+        targetHeatingCoolingState.emit('get', function(error, value) {
+            if (error === null) {
+                targetHeatingCoolingState.sendEventNotification(value);
+            }
+        });
+
+        return true;
+    }
+
+    _updateDryModeSwitchCharacteristics() {
+        const dryModeSwitch = this._getDryModeSwitch();
+
+        if (dryModeSwitch === null) {
+            return false;
+        }
+
+        const on = dryModeSwitch.getCharacteristic(
+            this.platform.Characteristic.on
+        );
+
+        on.emit('get', function(error, value) {
+            if (error === null) {
+                on.sendEventNotification(value);
+            }
+        });
+
+        return true;
+    }
+
+    _getThermostatService() {
+        let thermostatService = null;
+        const uuid = this.platform.api.hap.uuid.generate(
+            this.deviceId + '-thermostat'
+        );
+        const existingAccessory = this.platform.accessories.find(
+            accessory => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+            thermostatService = existingAccessory.services.find(
+                service => service instanceof this.platform.Service.Thermostat
+            );
+        }
+
+        return thermostatService;
+    }
+
+    _getDryModeSwitch() {
+        let dryModeSwitch = null;
+        const uuid = this.platform.api.hap.uuid.generate(
+            this.deviceId + '-dry-mode-switch'
+        );
+        const existingAccessory = this.platform.accessories.find(
+            accessory => accessory.UUID === uuid
+        );
+
+        if (existingAccessory) {
+            dryModeSwitch = existingAccessory.services.find(
+                service => service instanceof this.platform.Service.Switch
+            );
+        }
+
+        return dryModeSwitch;
     }
 }
 
