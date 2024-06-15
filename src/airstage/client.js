@@ -912,11 +912,11 @@ class Client {
         }
 
         if (device) {
-            apiv1.constants.METADATA_KEYS.forEach((function(key) {
+            apiv1.constants.METADATA_KEYS.forEach(function(key) {
                 if (key in device) {
                     this._deviceMetadataCache[deviceId][key] = device[key];
                 }
-            }.bind(this)));
+            }, this);
         }
 
         return this._getDeviceMetadataCache(deviceId);

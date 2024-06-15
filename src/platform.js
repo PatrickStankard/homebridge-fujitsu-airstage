@@ -78,7 +78,7 @@ class Platform {
 
                     const deviceIds = Object.keys(devices.metadata);
 
-                    deviceIds.forEach((function(deviceId) {
+                    deviceIds.forEach(function(deviceId) {
                         const deviceMetadata = devices.metadata[deviceId];
                         const deviceParameters = devices.parameters[deviceId];
                         const deviceName = deviceMetadata.deviceName;
@@ -91,7 +91,7 @@ class Platform {
                             deviceName,
                             model
                         );
-                    }).bind(this));
+                    }, this);
                 }).bind(this));
             }).bind(this));
         }).bind(this));
@@ -261,9 +261,9 @@ class Platform {
 
                         const deviceIds = Object.keys(devices.metadata);
 
-                        deviceIds.forEach((function(deviceId) {
+                        deviceIds.forEach(function(deviceId) {
                             this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId);
-                        }).bind(this));
+                        }, this);
                     }).bind(this)
                 );
             }).bind(this)

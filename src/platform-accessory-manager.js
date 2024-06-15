@@ -385,23 +385,21 @@ class PlatformAccessoryManager {
     }
 
     refreshServiceCharacteristics(service, characteristicClasses) {
-        characteristicClasses.forEach(
-            (function(characteristicClass) {
-                const characteristic = service.getCharacteristic(characteristicClass);
-                let logMessage = '[' + service.constructor.name + '][' + characteristic.constructor.name + '] Refreshing characteristic';
+        characteristicClasses.forEach(function(characteristicClass) {
+            const characteristic = service.getCharacteristic(characteristicClass);
+            let logMessage = '[' + service.constructor.name + '][' + characteristic.constructor.name + '] Refreshing characteristic';
 
-                this.platform.log.debug(logMessage);
+            this.platform.log.debug(logMessage);
 
-                characteristic.emit('get', function(error, value) {
-                    if (error === null) {
-                        characteristic.sendEventNotification(value);
-                    } else {
-                        logMessage = logMessage + ' failed with error: ' + error;
-                        this.platform.log.error(logMessage);
-                    }
-                });
-            }).bind(this)
-        );
+            characteristic.emit('get', function(error, value) {
+                if (error === null) {
+                    characteristic.sendEventNotification(value);
+                } else {
+                    logMessage = logMessage + ' failed with error: ' + error;
+                    this.platform.log.error(logMessage);
+                }
+            });
+        }, this);
 
         return true;
     }
