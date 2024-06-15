@@ -363,10 +363,6 @@ class Client {
                 return callback(error, null);
             }
 
-            if (indoorTemperature === null) {
-                return callback('Indoor temperature not available', null);
-            }
-
             this.getTargetTemperature(deviceId, scale, (function(error, targetTemperature) {
                 let temperatureDelta = null;
 
@@ -651,6 +647,10 @@ class Client {
 
             if (device.parameters) {
                 result = device.parameters[name];
+            }
+
+            if (result === null) {
+                return callback('Parameter not available: ' + name, null);
             }
 
             callback(null, result);
