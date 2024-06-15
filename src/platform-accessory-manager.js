@@ -254,6 +254,20 @@ class PlatformAccessoryManager {
         );
     }
 
+    refreshServiceCharacteristics(service, characteristicClasses) {
+        characteristicClasses.forEach(function(characteristicClass) {
+            const characteristic = service.getCharacteristic(characteristicClass);
+
+            characteristic.emit('get', function(error, value) {
+                if (error === null) {
+                    characteristic.sendEventNotification(value);
+                }
+            });
+        });
+
+        return true;
+    }
+
     _updateExistingAccessory(existingAccessory, deviceId, model) {
         this.platform.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
 
@@ -312,17 +326,10 @@ class PlatformAccessoryManager {
             return false;
         }
 
-        characteristicClasses.forEach(function(characteristicClass) {
-            const characteristic = service.getCharacteristic(characteristicClass);
-
-            characteristic.emit('get', function(error, value) {
-                if (error === null) {
-                    characteristic.sendEventNotification(value);
-                }
-            });
-        });
-
-        return true;
+        return this.refreshServiceCharacteristics(
+            service,
+            characteristicClasses
+        );
     }
 
     _getAccessoryName(deviceName, suffix) {

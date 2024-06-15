@@ -150,6 +150,7 @@ class ThermostatAccessory {
                     }
 
                     this._refreshRelatedAccessoryCharacteristics();
+                    this._refreshCurrentCharacteristics();
 
                     callback(null);
                 }).bind(this)
@@ -181,6 +182,7 @@ class ThermostatAccessory {
                         }
 
                         this._refreshRelatedAccessoryCharacteristics();
+                        this._refreshCurrentCharacteristics();
 
                         callback(null);
                     }).bind(this)
@@ -222,9 +224,15 @@ class ThermostatAccessory {
             this.deviceId,
             value,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-            function (error) {
-                callback(error);
-            }
+            (function (error) {
+                if (error) {
+                    return callback(error);
+                }
+
+                this._refreshCurrentCharacteristics();
+
+                return callback(null);
+            }).bind(this)
         );
     }
 
@@ -276,6 +284,18 @@ class ThermostatAccessory {
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+    }
+
+    _refreshCurrentCharacteristics() {
+        const accessoryManager = this.platform.accessoryManager;
+
+        accessoryManager.refreshServiceCharacteristics(
+            this.service,
+            [
+                this.platform.Characteristic.CurrentHeatingCoolingState,
+                this.platform.Characteristic.CurrentTemperature
+            ]
+        );
     }
 }
 

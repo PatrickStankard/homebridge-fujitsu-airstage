@@ -118,6 +118,8 @@ class FanAccessory {
 
     setTargetFanState(value, callback) {
         if (value !== this.platform.Characteristic.TargetFanState.AUTO) {
+            this._refreshCurrentCharacteristics();
+
             return callback(null);
         }
 
@@ -129,10 +131,7 @@ class FanAccessory {
                     return callback(error);
                 }
 
-                this.service.updateCharacteristic(
-                    this.platform.Characteristic.RotationSpeed,
-                    0
-                );
+                this._refreshCurrentCharacteristics();
 
                 callback(null);
             }).bind(this)
@@ -192,10 +191,7 @@ class FanAccessory {
                     return callback(error);
                 }
 
-                this.service.updateCharacteristic(
-                    this.platform.Characteristic.TargetFanState,
-                    this.platform.Characteristic.TargetFanState.MANUAL
-                );
+                this._refreshCurrentCharacteristics();
 
                 callback(null);
             }).bind(this)
@@ -246,6 +242,19 @@ class FanAccessory {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+    }
+
+    _refreshCurrentCharacteristics() {
+        const accessoryManager = this.platform.accessoryManager;
+
+        accessoryManager.refreshServiceCharacteristics(
+            this.service,
+            [
+                this.platform.Characteristic.CurrentFanState,
+                this.platform.Characteristic.TargetFanState,
+                this.platform.Characteristic.RotationSpeed
+            ]
+        );
     }
 }
 
