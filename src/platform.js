@@ -172,9 +172,7 @@ class Platform {
     _refreshAirstageClientToken() {
         this.airstageClient.refreshToken((function(error) {
             if (error) {
-                throw new this.api.hap.HapStatusError(
-                    this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                );
+                return this.log.error('Error when attempting to refresh Airbridge access token:', error);
             }
 
             this._updateConfigWithAccessToken();
@@ -190,9 +188,7 @@ class Platform {
         this.airstageClient.getUserMetadata(
             (function(error) {
                 if (error) {
-                    throw new this.api.hap.HapStatusError(
-                        this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                    );
+                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
                 }
 
                 this.log.debug('Refreshed Airstage client user metadata cache');
@@ -204,9 +200,7 @@ class Platform {
             limit,
             (function(error) {
                 if (error) {
-                    throw new this.api.hap.HapStatusError(
-                        this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                    );
+                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
                 }
 
                 this.log.debug('Refreshed Airstage client device cache');
