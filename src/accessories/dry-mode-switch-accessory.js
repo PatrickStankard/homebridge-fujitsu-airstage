@@ -82,9 +82,9 @@ class DryModeSwitchAccessory extends Accessory {
 
                         this._logMethodCallResult(methodName, null, null);
 
-                        callback(null);
-
                         this._refreshRelatedAccessoryCharacteristics();
+
+                        callback(null);
                     }).bind(this)
                 );
             }).bind(this)

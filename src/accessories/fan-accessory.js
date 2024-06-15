@@ -96,10 +96,10 @@ class FanAccessory extends Accessory {
 
                 this._logMethodCallResult(methodName, null, null);
 
-                callback(null);
-
                 this._refreshDynamicServiceCharacteristics();
                 this._refreshRelatedAccessoryCharacteristics();
+
+                callback(null);
             }).bind(this)
         );
     }
@@ -178,9 +178,9 @@ class FanAccessory extends Accessory {
 
                     this._logMethodCallResult(methodName, null, null);
 
-                    callback(null);
-
                     this._refreshDynamicServiceCharacteristics();
+
+                    callback(null);
                 }).bind(this)
             );
         } else {

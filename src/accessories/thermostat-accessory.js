@@ -189,10 +189,10 @@ class ThermostatAccessory extends Accessory {
 
                     this._logMethodCallResult(methodName, null, null);
 
-                    callback(null);
-
                     this._refreshDynamicServiceCharacteristics();
                     this._refreshRelatedAccessoryCharacteristics();
+
+                    callback(null);
                 }).bind(this)
             );
         }
@@ -227,10 +227,10 @@ class ThermostatAccessory extends Accessory {
 
                         this._logMethodCallResult(methodName, null, null);
 
-                        callback(null);
-
                         this._refreshDynamicServiceCharacteristics();
                         this._refreshRelatedAccessoryCharacteristics();
+
+                        callback(null);
                     }).bind(this)
                 );
             }).bind(this)
