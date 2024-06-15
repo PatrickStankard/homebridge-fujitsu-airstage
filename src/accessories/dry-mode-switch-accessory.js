@@ -10,6 +10,7 @@ class DryModeSwitchAccessory {
 
         this.deviceId = this.accessory.context.deviceId;
         this.airstageClient = this.accessory.context.airstageClient;
+        this.lastKnownOperationMode = null;
 
         this.accessory.getService(this.platform.Service.AccessoryInformation)
             .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
@@ -49,20 +50,31 @@ class DryModeSwitchAccessory {
         if (value) {
             operationMode = airstage.constants.OPERATION_MODE_DRY;
         } else {
-            operationMode = airstage.constants.OPERATION_MODE_AUTO;
+            if (this.lastKnownOperationMode !== null) {
+                operationMode = this.lastKnownOperationMode;
+            } else {
+                operationMode = airstage.constants.OPERATION_MODE_AUTO;
+            }
         }
 
-        this.airstageClient.setOperationMode(
+        this.airstageClient.getOperationMode(
             this.deviceId,
-            operationMode,
-            (function(error) {
-                if (error) {
-                    return callback(error);
-                }
+            (function(error, currentOperationMode) {
+                this.lastKnownOperationMode = currentOperationMode;
 
-                this._refreshRelatedAccessoryCharacteristics();
+                this.airstageClient.setOperationMode(
+                    this.deviceId,
+                    operationMode,
+                    (function(error) {
+                        if (error) {
+                            return callback(error);
+                        }
 
-                callback(null);
+                        this._refreshRelatedAccessoryCharacteristics();
+
+                        callback(null);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
