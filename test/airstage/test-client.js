@@ -1889,3 +1889,36 @@ test('airstage.Client#getRefreshToken returns access token', (context) => {
 
     assert.strictEqual(refreshToken, 'existingRefreshToken');
 });
+
+test('airstage.Client#getParameter calls _apiClient.getDevice with "Parameter not available" error', (context, done) => {
+    const expectedResponse = {
+        'parameters': [
+            {
+                'name': 'iu_indoor_tmp',
+                'value': '65535'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevice',
+        (deviceId, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
+        assert.strictEqual(error, 'Parameter not available: iu_indoor_tmp');
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});

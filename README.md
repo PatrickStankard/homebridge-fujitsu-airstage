@@ -6,12 +6,16 @@ A Homebridge plugin to control devices that use the Fujitsu Airstage API.
 
 ```json
 {
+    "name": "Airstage Platform",
     "platform": "fujitsu-airstage",
     "region": "us",
     "country": "United States",
     "language": "en",
     "email": "test@example.com",
     "password": "test1234",
+    "accessToken": null,
+    "accessTokenExpiry": null,
+    "refreshToken": null,
     "enableThermostat": true,
     "enableFan": true,
     "enableVerticalSlats": false,

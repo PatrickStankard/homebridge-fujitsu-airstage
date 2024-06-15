@@ -1,6 +1,7 @@
 'use strict';
 
 const ConfigManager = require('./config-manager');
+const PlatformAccessoryManager = require('./platform-accessory-manager');
 const accessories = require('./accessories');
 const airstage = require('./airstage');
 const settings = require('./settings');
@@ -36,6 +37,7 @@ class Platform {
         );
 
         this.configManager = new ConfigManager(this.config, this.api);
+        this.accessoryManager = new PlatformAccessoryManager(this);
 
         setInterval(
             this._refreshAirstageClientCache.bind(this),
@@ -69,51 +71,27 @@ class Platform {
                     return this.log.error('Error when attempting to communicate with Airbridge:', error);
                 }
 
-                this.airstageClient.getDevices(null, (function(error, result) {
+                this.airstageClient.getDevices(null, (function(error, devices) {
                     if (error) {
                         return this.log.error('Error when attempting to communicate with Airbridge:', error);
                     }
 
-                    const deviceIds = Object.keys(result.metadata);
+                    const deviceIds = Object.keys(devices.metadata);
 
-                    deviceIds.forEach((function(deviceId) {
-                        const deviceMetadata = result.metadata[deviceId];
-                        const deviceParameters = result.parameters[deviceId];
+                    deviceIds.forEach(function(deviceId) {
+                        const deviceMetadata = devices.metadata[deviceId];
+                        const deviceParameters = devices.parameters[deviceId];
                         const deviceName = deviceMetadata.deviceName;
                         const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL];
 
-                        if (this.config.enableThermostat) {
-                            this._registerThermostat(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enableFan) {
-                            this._registerFan(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enableVerticalSlats) {
-                            this._registerVerticalSlatsAccessory(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enableDryModeSwitch) {
-                            this._registerDryModeSwitch(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enableEconomySwitch) {
-                            this._registerEconomySwitch(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enableEnergySavingFanSwitch) {
-                            this._registerEnergySavingFanSwitch(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enableFanModeSwitch) {
-                            this._registerFanModeSwitch(deviceId, deviceName, model);
-                        }
-
-                        if (this.config.enablePowerfulSwitch) {
-                            this._registerPowerfulSwitch(deviceId, deviceName, model);
-                        }
-                    }).bind(this));
+                        this._configureAirstageDevice(
+                            deviceId,
+                            deviceMetadata,
+                            deviceParameters,
+                            deviceName,
+                            model
+                        );
+                    }, this);
                 }).bind(this));
             }).bind(this));
         }).bind(this));
@@ -135,306 +113,114 @@ class Platform {
         }
     }
 
-    _registerThermostat(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-thermostat');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.ThermostatAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Thermostat',
-                uuid
+    _configureAirstageDevice(
+        deviceId,
+        deviceMetadata,
+        deviceParameters,
+        deviceName,
+        model
+    ) {
+        if (this.config.enableThermostat) {
+            this.accessoryManager.registerThermostatAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.ThermostatAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterThermostatAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerFan(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-fan');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.FanAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Fan',
-                uuid
+        if (this.config.enableFan) {
+            this.accessoryManager.registerFanAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.FanAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterFanAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerVerticalSlatsAccessory(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-vertical-slats');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.VerticalSlatsAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Vertical Slats',
-                uuid
+        if (this.config.enableVerticalSlats) {
+            this.accessoryManager.registerVerticalSlatsAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.VerticalSlatsAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterVerticalSlatsAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerDryModeSwitch(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-dry-mode-switch');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.DryModeSwitchAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Dry Mode Switch',
-                uuid
+        if (this.config.enableDryModeSwitch) {
+            this.accessoryManager.registerDryModeSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.DryModeSwitchAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterDryModeSwitchAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerEconomySwitch(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-economy-switch');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.EconomySwitchAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Economy Switch',
-                uuid
+        if (this.config.enableEconomySwitch) {
+            this.accessoryManager.registerEconomySwitchAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.EconomySwitchAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterEconomySwitchAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerEnergySavingFanSwitch(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-energy-saving-fan-switch');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.EnergySavingFanSwitchAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Energy Saving Fan Switch',
-                uuid
+        if (this.config.enableEnergySavingFanSwitch) {
+            this.accessoryManager.registerEnergySavingFanSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.EnergySavingFanSwitchAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterEnergySavingFanSwitchAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerFanModeSwitch(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-fan-mode-switch');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.FanModeSwitchAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Fan Mode Switch',
-                uuid
+        if (this.config.enableFanModeSwitch) {
+            this.accessoryManager.registerFanModeSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.FanModeSwitchAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterFanModeSwitchAccessory(
+                deviceId,
+                deviceName
             );
         }
-    }
 
-    _registerPowerfulSwitch(deviceId, deviceName, model) {
-        const uuid = this.api.hap.uuid.generate(deviceId + '-powerful-switch');
-        const existingAccessory = this.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
-
-            existingAccessory.context.airstageClient = this.airstageClient;
-            existingAccessory.context.deviceId = deviceId;
-            existingAccessory.context.model = model;
-
-            this.api.updatePlatformAccessories([existingAccessory]);
-
-            new accessories.PowerfulSwitchAccessory(this, existingAccessory);
-        } else {
-            const accessory = new this.api.platformAccessory(
-                deviceName + ' Powerful Switch',
-                uuid
+        if (this.config.enablePowerfulSwitch) {
+            this.accessoryManager.registerPowerfulSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
             );
-
-            this.log.info('Adding new accessory:', accessory.displayName);
-
-            accessory.context.airstageClient = this.airstageClient;
-            accessory.context.deviceId = deviceId;
-            accessory.context.model = model;
-
-            new accessories.PowerfulSwitchAccessory(this, accessory);
-
-            this.api.registerPlatformAccessories(
-                settings.PLUGIN_NAME,
-                settings.PLATFORM_NAME,
-                [accessory]
+        } else {
+            this.accessoryManager.unregisterPowerfulSwitchAccessory(
+                deviceId,
+                deviceName
             );
         }
     }
@@ -442,9 +228,7 @@ class Platform {
     _refreshAirstageClientToken() {
         this.airstageClient.refreshToken((function(error) {
             if (error) {
-                throw new this.api.hap.HapStatusError(
-                    this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                );
+                return this.log.error('Error when attempting to refresh Airbridge access token:', error);
             }
 
             this._updateConfigWithAccessToken();
@@ -460,26 +244,28 @@ class Platform {
         this.airstageClient.getUserMetadata(
             (function(error) {
                 if (error) {
-                    throw new this.api.hap.HapStatusError(
-                        this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                    );
+                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
                 }
 
                 this.log.debug('Refreshed Airstage client user metadata cache');
-            }).bind(this)
-        );
 
-        this.airstageClient.resetDeviceCache();
-        this.airstageClient.getDevices(
-            limit,
-            (function(error) {
-                if (error) {
-                    throw new this.api.hap.HapStatusError(
-                        this.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                    );
-                }
+                this.airstageClient.resetDeviceCache();
+                this.airstageClient.getDevices(
+                    limit,
+                    (function(error, devices) {
+                        if (error) {
+                            return this.log.error('Error when attempting to communicate with Airbridge:', error);
+                        }
 
-                this.log.debug('Refreshed Airstage client device cache');
+                        this.log.debug('Refreshed Airstage client device cache');
+
+                        const deviceIds = Object.keys(devices.metadata);
+
+                        deviceIds.forEach(function(deviceId) {
+                            this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId);
+                        }, this);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }

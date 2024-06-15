@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Fujitsu Airstage",
   "name": "homebridge-fujitsu-airstage",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A Homebridge plugin to control devices that use the Fujitsu Airstage API.",
   "license": "MIT",
   "homepage": "https://github.com/PatrickStankard/homebridge-fujitsu-airstage",

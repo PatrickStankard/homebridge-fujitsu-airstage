@@ -32,7 +32,7 @@ class Client {
         );
 
         this.resetUserCache();
-        this.resetDeviceCache(null);
+        this.resetDeviceCache();
     }
 
     refreshTokenOrAuthenticate(callback) {
@@ -363,10 +363,6 @@ class Client {
                 return callback(error, null);
             }
 
-            if (indoorTemperature === null) {
-                return callback('Indoor temperature not available', null);
-            }
-
             this.getTargetTemperature(deviceId, scale, (function(error, targetTemperature) {
                 let temperatureDelta = null;
 
@@ -653,6 +649,10 @@ class Client {
                 result = device.parameters[name];
             }
 
+            if (result === null) {
+                return callback('Parameter not available: ' + name, null);
+            }
+
             callback(null, result);
         });
     }
@@ -835,7 +835,7 @@ class Client {
         this._userMetadataCache = {};
     }
 
-    resetDeviceCache(deviceId) {
+    resetDeviceCache(deviceId = null) {
         if (deviceId === null) {
             this._deviceMetadataCache = {};
             this._deviceParameterCache = {};
@@ -911,11 +911,13 @@ class Client {
             this._deviceMetadataCache[deviceId] = {};
         }
 
-        apiv1.constants.METADATA_KEYS.forEach((function(key) {
-            if (key in device) {
-                this._deviceMetadataCache[deviceId][key] = device[key];
-            }
-        }.bind(this)));
+        if (device) {
+            apiv1.constants.METADATA_KEYS.forEach(function(key) {
+                if (key in device) {
+                    this._deviceMetadataCache[deviceId][key] = device[key];
+                }
+            }, this);
+        }
 
         return this._getDeviceMetadataCache(deviceId);
     }
@@ -937,7 +939,7 @@ class Client {
             this._deviceParameterCache[deviceId] = {};
         }
 
-        if ('parameters' in device) {
+        if (device && 'parameters' in device) {
             device.parameters.forEach(function(parameter) {
                 let parameterName = null;
                 let parameterValue = null;
@@ -974,16 +976,14 @@ class Client {
                 if (result.response.status === apiv1.constants.PARAMETER_STATUS_WAITING) {
                     this._pollRequestStatus(deviceId, requestId, callback);
                 } else {
-                    if (result.response.result === apiv1.constants.PARAMETER_RESULT_SUCCESS) {
-                        deviceMetadata = this._setDeviceMetadataCache(
-                            deviceId,
-                            result.response
-                        );
-                        deviceParameters = this._setDeviceParameterCache(
-                            deviceId,
-                            result.response
-                        );
-                    }
+                    deviceMetadata = this._setDeviceMetadataCache(
+                        deviceId,
+                        result.response
+                    );
+                    deviceParameters = this._setDeviceParameterCache(
+                        deviceId,
+                        result.response
+                    );
 
                     callback(null, {
                         'metadata': deviceMetadata,

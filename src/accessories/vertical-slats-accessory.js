@@ -1,20 +1,12 @@
 'use strict';
 
+const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class VerticalSlatsAccessory {
+class VerticalSlatsAccessory extends Accessory {
 
     constructor(platform, accessory) {
-        this.platform = platform;
-        this.accessory = accessory;
-
-        this.deviceId = this.accessory.context.deviceId;
-        this.airstageClient = this.accessory.context.airstageClient;
-
-        this.accessory.getService(this.platform.Service.AccessoryInformation)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
-            .setCharacteristic(this.platform.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
+        super(platform, accessory);
 
         this.service = (
             this.accessory.getService(this.platform.Service.Slats) ||
@@ -43,44 +35,80 @@ class VerticalSlatsAccessory {
     }
 
     getCurrentSlatState(callback) {
-        this.airstageClient.getAirflowVerticalSwingState(this.deviceId, (function(error, swingState) {
-            let value = null;
+        const methodName = this.getCurrentSlatState.name;
 
-            if (error) {
-                return callback(error, null);
-            }
+        this._logMethodCall(methodName);
 
-            if (swingState === airstage.constants.TOGGLE_ON) {
-                value = this.platform.Characteristic.CurrentSlatState.SWINGING;
-            } else if (swingState === airstage.constants.TOGGLE_OFF) {
-                value = this.platform.Characteristic.CurrentSlatState.FIXED;
-            }
-
-            callback(null, value);
-        }).bind(this));
-    }
-
-    getSlatType(callback) {
-        callback(null, this.platform.Characteristic.SlatType.VERTICAL);
-    }
-
-    getName(callback) {
-        this.airstageClient.getName(this.deviceId, function(error, name) {
-            if (error) {
-                return callback(error, null);
-            }
-
-            callback(null, name + ' Vertical Slats');
-        });
-    }
-
-    getSwingMode(callback) {
         this.airstageClient.getAirflowVerticalSwingState(
             this.deviceId,
             (function(error, swingState) {
                 let value = null;
 
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (swingState === airstage.constants.TOGGLE_ON) {
+                    value = this.platform.Characteristic.CurrentSlatState.SWINGING;
+                } else if (swingState === airstage.constants.TOGGLE_OFF) {
+                    value = this.platform.Characteristic.CurrentSlatState.FIXED;
+                }
+
+                callback(null, value);
+            }).bind(this)
+        );
+    }
+
+    getSlatType(callback) {
+        const methodName = this.getSlatType.name;
+
+        this._logMethodCall(methodName);
+
+        const value = this.platform.Characteristic.SlatType.VERTICAL;
+
+        this._logMethodCallResult(methodName, null, value);
+
+        callback(null, value);
+    }
+
+    getName(callback) {
+        const methodName = this.getName.name;
+
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getName(
+            this.deviceId,
+            (function(error, name) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                const value = name + ' Vertical Slats';
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
+    }
+
+    getSwingMode(callback) {
+        const methodName = this.getSwingMode.name;
+
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getAirflowVerticalSwingState(
+            this.deviceId,
+            (function(error, swingState) {
+                let value = null;
+
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error, null);
                 }
 
@@ -90,12 +118,18 @@ class VerticalSlatsAccessory {
                     value = this.platform.Characteristic.SwingMode.SWING_DISABLED;
                 }
 
+                this._logMethodCallResult(methodName, null, value);
+
                 callback(null, value);
             }).bind(this)
         );
     }
 
     setSwingMode(value, callback) {
+        const methodName = this.setSwingMode.name;
+
+        this._logMethodCall(methodName, value);
+
         let swingState = null;
 
         if (value === this.platform.Characteristic.SwingMode.SWING_ENABLED) {
@@ -107,87 +141,129 @@ class VerticalSlatsAccessory {
         this.airstageClient.setAirflowVerticalSwingState(
             this.deviceId,
             swingState,
-            function(error) {
-                callback(error);
-            }
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                callback(null);
+            }).bind(this)
         );
     }
 
     getCurrentTiltAngle(callback) {
+        const methodName = this.getCurrentTiltAngle.name;
+
+        this._logMethodCall(methodName);
+
         let currentTiltAngle = null;
 
-        this.airstageClient.getPowerState(this.deviceId, (function(error, powerState) {
-            if (error) {
-                return callback(error, null);
-            }
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
 
-            if (powerState === airstage.constants.TOGGLE_OFF) {
-                currentTiltAngle = -90;
+                    return callback(error, null);
+                }
 
-                return callback(null, currentTiltAngle);
-            }
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    currentTiltAngle = -90;
 
-            this.airstageClient.getAirflowVerticalDirection(
-                this.deviceId,
-                function(error, airflowVerticalDirection) {
-                    if (error) {
-                        return callback(error, null);
-                    }
-
-                    if (airflowVerticalDirection === 1) {
-                        currentTiltAngle = -68;
-                    } else if (airflowVerticalDirection === 2) {
-                        currentTiltAngle = -46;
-                    } else if (airflowVerticalDirection === 3) {
-                        currentTiltAngle = -24
-                    } else if (airflowVerticalDirection === 4) {
-                        currentTiltAngle = 0;
-                    }
+                    this._logMethodCallResult(methodName, null, currentTiltAngle);
 
                     return callback(null, currentTiltAngle);
                 }
-            );
-        }).bind(this));
+
+                this.airstageClient.getAirflowVerticalDirection(
+                    this.deviceId,
+                    (function(error, airflowVerticalDirection) {
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (airflowVerticalDirection === 1) {
+                            currentTiltAngle = -68;
+                        } else if (airflowVerticalDirection === 2) {
+                            currentTiltAngle = -46;
+                        } else if (airflowVerticalDirection === 3) {
+                            currentTiltAngle = -24
+                        } else if (airflowVerticalDirection === 4) {
+                            currentTiltAngle = 0;
+                        }
+
+                        this._logMethodCallResult(methodName, null, currentTiltAngle);
+
+                        callback(null, currentTiltAngle);
+                    }).bind(this)
+                );
+            }).bind(this)
+        );
     }
 
     getTargetTiltAngle(callback) {
+        const methodName = this.getTargetTiltAngle.name;
+
+        this._logMethodCall(methodName);
+
         let targetTiltAngle = null;
 
-        this.airstageClient.getPowerState(this.deviceId, (function(error, powerState) {
-            if (error) {
-                return callback(error, null);
-            }
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
 
-            if (powerState === airstage.constants.TOGGLE_OFF) {
-                targetTiltAngle = -90;
+                    return callback(error, null);
+                }
 
-                return callback(null, targetTiltAngle);
-            }
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    targetTiltAngle = -90;
 
-            this.airstageClient.getAirflowVerticalDirection(
-                this.deviceId,
-                function(error, airflowVerticalDirection) {
-                    if (error) {
-                        return callback(error, null);
-                    }
-
-                    if (airflowVerticalDirection === 1) {
-                        targetTiltAngle = -67;
-                    } else if (airflowVerticalDirection === 2) {
-                        targetTiltAngle = -45;
-                    } else if (airflowVerticalDirection === 3) {
-                        targetTiltAngle = -22
-                    } else if (airflowVerticalDirection === 4) {
-                        targetTiltAngle = 0;
-                    }
+                    this._logMethodCallResult(methodName, null, targetTiltAngle);
 
                     return callback(null, targetTiltAngle);
                 }
-            );
-        }).bind(this));
+
+                this.airstageClient.getAirflowVerticalDirection(
+                    this.deviceId,
+                    (function(error, airflowVerticalDirection) {
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (airflowVerticalDirection === 1) {
+                            targetTiltAngle = -67;
+                        } else if (airflowVerticalDirection === 2) {
+                            targetTiltAngle = -45;
+                        } else if (airflowVerticalDirection === 3) {
+                            targetTiltAngle = -22
+                        } else if (airflowVerticalDirection === 4) {
+                            targetTiltAngle = 0;
+                        }
+
+                        this._logMethodCallResult(methodName, null, targetTiltAngle);
+
+                        callback(null, targetTiltAngle);
+                    }).bind(this)
+                );
+            }).bind(this)
+        );
     }
 
     setTargetTiltAngle(value, callback) {
+        const methodName = this.setTargetTiltAngle.name;
+
+        this._logMethodCall(methodName, value);
+
         let airflowVerticalDirection = null;
 
         if (value >= 0) {
@@ -203,9 +279,17 @@ class VerticalSlatsAccessory {
         this.airstageClient.setAirflowVerticalDirection(
             this.deviceId,
             airflowVerticalDirection,
-            function(error) {
-                callback(error);
-            }
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                callback(null);
+            }).bind(this)
         );
     }
 }

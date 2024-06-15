@@ -1,33 +1,28 @@
 'use strict';
 
+const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class FanAccessory {
+class FanAccessory extends Accessory {
 
     constructor(platform, accessory) {
-        this.platform = platform;
-        this.accessory = accessory;
-
-        this.deviceId = this.accessory.context.deviceId;
-        this.airstageClient = this.accessory.context.airstageClient;
-
-        this.accessory.getService(this.platform.Service.AccessoryInformation)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
-            .setCharacteristic(this.platform.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
+        super(platform, accessory);
 
         this.service = (
             this.accessory.getService(this.platform.Service.Fanv2) ||
             this.accessory.addService(this.platform.Service.Fanv2)
         );
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.Active);
         this.service.getCharacteristic(this.platform.Characteristic.Active)
             .on('get', this.getActive.bind(this))
             .on('set', this.setActive.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.CurrentFanState);
         this.service.getCharacteristic(this.platform.Characteristic.CurrentFanState)
             .on('get', this.getCurrentFanState.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.TargetFanState);
         this.service.getCharacteristic(this.platform.Characteristic.TargetFanState)
             .on('get', this.getTargetFanState.bind(this))
             .on('set', this.setTargetFanState.bind(this));
@@ -35,6 +30,7 @@ class FanAccessory {
         this.service.getCharacteristic(this.platform.Characteristic.Name)
             .on('get', this.getName.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.RotationSpeed);
         this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
             .on('get', this.getRotationSpeed.bind(this))
             .on('set', this.setRotationSpeed.bind(this));
@@ -42,27 +38,44 @@ class FanAccessory {
         this.service.getCharacteristic(this.platform.Characteristic.SwingMode)
             .on('get', this.getSwingMode.bind(this))
             .on('set', this.setSwingMode.bind(this));
+
+        this._setFanSpeedHandle = null;
     }
 
     getActive(callback) {
-        this.airstageClient.getPowerState(this.deviceId, (function(error, powerState) {
-            let value = null;
+        const methodName = this.getActive.name;
 
-            if (error) {
-                return callback(error, null);
-            }
+        this._logMethodCall(methodName);
 
-            if (powerState === airstage.constants.TOGGLE_ON) {
-                value = this.platform.Characteristic.Active.ACTIVE;
-            } else if (powerState === airstage.constants.TOGGLE_OFF) {
-                value = this.platform.Characteristic.Active.INACTIVE;
-            }
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
+                let value = null;
 
-            callback(null, value);
-        }).bind(this));
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (powerState === airstage.constants.TOGGLE_ON) {
+                    value = this.platform.Characteristic.Active.ACTIVE;
+                } else if (powerState === airstage.constants.TOGGLE_OFF) {
+                    value = this.platform.Characteristic.Active.INACTIVE;
+                }
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     setActive(value, callback) {
+        const methodName = this.setActive.name;
+
+        this._logMethodCall(methodName, value);
+
         let powerState = null;
 
         if (value === this.platform.Characteristic.Active.ACTIVE) {
@@ -71,107 +84,175 @@ class FanAccessory {
             powerState = airstage.constants.TOGGLE_OFF;
         }
 
-        this.airstageClient.setPowerState(this.deviceId, powerState, (function(error) {
-            if (error) {
-                return callback(error);
-            }
-
-            this._updateThermostatServiceCharacteristics();
-
-            callback(null);
-        }).bind(this));
-    }
-
-    getCurrentFanState(callback) {
-        this.airstageClient.getPowerState(this.deviceId, (function(error, powerState) {
-            let value = null;
-
-            if (error) {
-                return callback(error, null);
-            }
-
-            if (powerState === airstage.constants.TOGGLE_ON) {
-                value = this.platform.Characteristic.CurrentFanState.BLOWING_AIR;
-            } else if (powerState === airstage.constants.TOGGLE_OFF) {
-                value = this.platform.Characteristic.CurrentFanState.INACTIVE;
-            }
-
-            callback(null, value);
-        }).bind(this));
-    }
-
-    getTargetFanState(callback) {
-        this.airstageClient.getFanSpeed(this.deviceId, (function(error, fanSpeed) {
-            let value = this.platform.Characteristic.TargetFanState.MANUAL;
-
-            if (error) {
-                return callback(error, null);
-            }
-
-            if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
-                value = this.platform.Characteristic.TargetFanState.AUTO;
-            }
-
-            callback(null, value);
-        }).bind(this));
-    }
-
-    setTargetFanState(value, callback) {
-        if (value !== this.platform.Characteristic.TargetFanState.AUTO) {
-            return callback(null);
-        }
-
-        this.airstageClient.setFanSpeed(
+        this.airstageClient.setPowerState(
             this.deviceId,
-            airstage.constants.FAN_SPEED_AUTO,
+            powerState,
             (function(error) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error);
                 }
 
-                this.service.updateCharacteristic(
-                    this.platform.Characteristic.RotationSpeed,
-                    0
-                );
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshDynamicServiceCharacteristics();
+                this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
             }).bind(this)
         );
     }
 
-    getName(callback) {
-        this.airstageClient.getName(this.deviceId, function(error, name) {
-            if (error) {
-                return callback(error, null);
-            }
+    getCurrentFanState(callback) {
+        const methodName = this.getCurrentFanState.name;
 
-            callback(null, name + ' Fan');
-        });
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
+                let value = null;
+
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (powerState === airstage.constants.TOGGLE_ON) {
+                    value = this.platform.Characteristic.CurrentFanState.BLOWING_AIR;
+                } else if (powerState === airstage.constants.TOGGLE_OFF) {
+                    value = this.platform.Characteristic.CurrentFanState.INACTIVE;
+                }
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
+    }
+
+    getTargetFanState(callback) {
+        const methodName = this.getTargetFanState.name;
+
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getFanSpeed(
+            this.deviceId,
+            (function(error, fanSpeed) {
+                let value = this.platform.Characteristic.TargetFanState.MANUAL;
+
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
+                    value = this.platform.Characteristic.TargetFanState.AUTO;
+                }
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
+    }
+
+    setTargetFanState(value, callback) {
+        const methodName = this.setTargetFanState.name;
+
+        this._logMethodCall(methodName, value);
+
+        if (value === this.platform.Characteristic.TargetFanState.AUTO) {
+            this.airstageClient.setFanSpeed(
+                this.deviceId,
+                airstage.constants.FAN_SPEED_AUTO,
+                (function(error) {
+                    if (error) {
+                        this._logMethodCallResult(methodName, error);
+
+                        return callback(error);
+                    }
+
+                    this._logMethodCallResult(methodName, null, null);
+
+                    this._refreshDynamicServiceCharacteristics();
+
+                    callback(null);
+                }).bind(this)
+            );
+        } else {
+            this._logMethodCallResult(methodName, null, null);
+
+            callback(null);
+        }
+    }
+
+    getName(callback) {
+        const methodName = this.getName.name;
+
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getName(
+            this.deviceId,
+            (function(error, name) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                const value = name + ' Fan';
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     getRotationSpeed(callback) {
-        this.airstageClient.getFanSpeed(this.deviceId, (function(error, fanSpeed) {
-            let value = 0;
+        const methodName = this.getRotationSpeed.name;
 
-            if (error) {
-                return callback(error, null);
-            }
+        this._logMethodCall(methodName);
 
-            if (fanSpeed === airstage.constants.FAN_SPEED_QUIET) {
-                value = 25;
-            } else if (fanSpeed === airstage.constants.FAN_SPEED_LOW) {
-                value = 50;
-            } else if (fanSpeed === airstage.constants.FAN_SPEED_MEDIUM) {
-                value = 75;
-            } else if (fanSpeed === airstage.constants.FAN_SPEED_HIGH) {
-                value = 100;
-            }
+        this.airstageClient.getFanSpeed(
+            this.deviceId,
+            (function(error, fanSpeed) {
+                let value = null;
 
-            callback(null, value);
-        }).bind(this));
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
+                    value = 0;
+                } else if (fanSpeed === airstage.constants.FAN_SPEED_QUIET) {
+                    value = 25;
+                } else if (fanSpeed === airstage.constants.FAN_SPEED_LOW) {
+                    value = 50;
+                } else if (fanSpeed === airstage.constants.FAN_SPEED_MEDIUM) {
+                    value = 75;
+                } else if (fanSpeed === airstage.constants.FAN_SPEED_HIGH) {
+                    value = 100;
+                }
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     setRotationSpeed(value, callback) {
+        const methodName = this.setRotationSpeed.name;
+
+        this._logMethodCall(methodName, value);
+
         let fanSpeed = null;
 
         if (value <= 25) {
@@ -184,34 +265,36 @@ class FanAccessory {
             fanSpeed = airstage.constants.FAN_SPEED_HIGH;
         }
 
-        this.airstageClient.setFanSpeed(
-            this.deviceId,
-            fanSpeed,
-            (function(error) {
-                if (error) {
-                    return callback(error);
-                }
+        if (this._setFanSpeedHandle !== null) {
+            clearTimeout(this._setFanSpeedHandle);
+            this._setFanSpeedHandle = null;
+        }
 
-                this.service.updateCharacteristic(
-                    this.platform.Characteristic.TargetFanState,
-                    this.platform.Characteristic.TargetFanState.MANUAL
-                );
-
-                callback(null);
-            }).bind(this)
+        this._setFanSpeedHandle = setTimeout(
+            (function() {
+                this._setFanSpeed(methodName, fanSpeed);
+            }).bind(this),
+            500
         );
+
+        callback(null);
     }
 
     getSwingMode(callback) {
+        const methodName = this.getSwingMode.name;
+
+        this._logMethodCall(methodName);
+
         this.airstageClient.getAirflowVerticalSwingState(
             this.deviceId,
             (function(error, swingState) {
                 let value = null;
 
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error, null);
                 }
-
 
                 if (swingState === airstage.constants.TOGGLE_ON) {
                     value = this.platform.Characteristic.SwingMode.SWING_ENABLED;
@@ -219,12 +302,18 @@ class FanAccessory {
                     value = this.platform.Characteristic.SwingMode.SWING_DISABLED;
                 }
 
+                this._logMethodCallResult(methodName, null, value);
+
                 callback(null, value);
             }).bind(this)
         );
     }
 
     setSwingMode(value, callback) {
+        const methodName = this.setSwingMode.name;
+
+        this._logMethodCall(methodName, value);
+
         let swingState = null;
 
         if (value === this.platform.Characteristic.SwingMode.SWING_ENABLED) {
@@ -236,57 +325,44 @@ class FanAccessory {
         this.airstageClient.setAirflowVerticalSwingState(
             this.deviceId,
             swingState,
-            function(error) {
-                callback(error);
-            }
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                callback(null);
+            }).bind(this)
         );
     }
 
-    _updateThermostatServiceCharacteristics() {
-        const thermostatService = this._getThermostatService();
+    _setFanSpeed(methodName, fanSpeed) {
+        this.airstageClient.setFanSpeed(
+            this.deviceId,
+            fanSpeed,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
 
-        if (thermostatService === null) {
-            return false;
-        }
+                    return;
+                }
 
-        const currentHeatingCoolingState = thermostatService.getCharacteristic(
-            this.platform.Characteristic.CurrentHeatingCoolingState
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshDynamicServiceCharacteristics();
+
+                this._setFanSpeedHandle = null;
+            }).bind(this)
         );
-        const targetHeatingCoolingState = thermostatService.getCharacteristic(
-            this.platform.Characteristic.TargetHeatingCoolingState
-        );
-
-        currentHeatingCoolingState.emit('get', function(error, value) {
-            if (error === null) {
-                currentHeatingCoolingState.sendEventNotification(value);
-            }
-        });
-
-        targetHeatingCoolingState.emit('get', function(error, value) {
-            if (error === null) {
-                targetHeatingCoolingState.sendEventNotification(value);
-            }
-        });
-
-        return true;
     }
 
-    _getThermostatService() {
-        let thermostatService = null;
-        const uuid = this.platform.api.hap.uuid.generate(
-            this.deviceId + '-thermostat'
-        );
-        const existingAccessory = this.platform.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
+    _refreshRelatedAccessoryCharacteristics() {
+        const accessoryManager = this.platform.accessoryManager;
 
-        if (existingAccessory) {
-            thermostatService = existingAccessory.services.find(
-                service => service instanceof this.platform.Service.Thermostat
-            );
-        }
-
-        return thermostatService;
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
     }
 }
 
