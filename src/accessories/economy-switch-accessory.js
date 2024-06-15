@@ -1,20 +1,12 @@
 'use strict';
 
+const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class EconomySwitchAccessory {
+class EconomySwitchAccessory extends Accessory {
 
     constructor(platform, accessory) {
-        this.platform = platform;
-        this.accessory = accessory;
-
-        this.deviceId = this.accessory.context.deviceId;
-        this.airstageClient = this.accessory.context.airstageClient;
-
-        this.accessory.getService(this.platform.Service.AccessoryInformation)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
-            .setCharacteristic(this.platform.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
+        super(platform, accessory);
 
         this.service = (
             this.accessory.getService(this.platform.Service.Switch) ||
@@ -30,24 +22,39 @@ class EconomySwitchAccessory {
     }
 
     getOn(callback) {
-        this.airstageClient.getEconomyState(this.deviceId, function(error, economyState) {
-            let value = null;
+        const methodName = this.getOn.name;
 
-            if (error) {
-                return callback(error, null);
-            }
+        this._logMethodCall(methodName);
 
-            if (economyState === airstage.constants.TOGGLE_ON) {
-                value = true;
-            } else if (economyState === airstage.constants.TOGGLE_OFF) {
-                value = false;
-            }
+        this.airstageClient.getEconomyState(
+            this.deviceId,
+            (function(error, economyState) {
+                let value = null;
 
-            callback(null, value);
-        });
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (economyState === airstage.constants.TOGGLE_ON) {
+                    value = true;
+                } else if (economyState === airstage.constants.TOGGLE_OFF) {
+                    value = false;
+                }
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     setOn(value, callback) {
+        const methodName = this.setOn.name;
+
+        this._logMethodCall(methodName, value);
+
         let economyState = null;
 
         if (value) {
@@ -59,20 +66,41 @@ class EconomySwitchAccessory {
         this.airstageClient.setEconomyState(
             this.deviceId,
             economyState,
-            function(error) {
-                callback(error);
-            }
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                callback(null);
+            }).bind(this)
         );
     }
 
     getName(callback) {
-        this.airstageClient.getName(this.deviceId, function(error, name) {
-            if (error) {
-                return callback(error, null);
-            }
+        const methodName = this.getName.name;
 
-            callback(null, name + ' Economy Switch');
-        });
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getName(
+            this.deviceId,
+            (function(error, name) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                const value = name + ' Economy Switch';
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 }
 

@@ -1,36 +1,32 @@
 'use strict';
 
+const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class ThermostatAccessory {
+class ThermostatAccessory extends Accessory {
 
     constructor(platform, accessory) {
-        this.platform = platform;
-        this.accessory = accessory;
-
-        this.deviceId = this.accessory.context.deviceId;
-        this.airstageClient = this.accessory.context.airstageClient;
-
-        this.accessory.getService(this.platform.Service.AccessoryInformation)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
-            .setCharacteristic(this.platform.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
+        super(platform, accessory);
 
         this.service = (
             this.accessory.getService(this.platform.Service.Thermostat) ||
             this.accessory.addService(this.platform.Service.Thermostat)
         );
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.CurrentHeatingCoolingState);
         this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
             .on('get', this.getCurrentHeatingCoolingState.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.TargetHeatingCoolingState);
         this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
             .on('get', this.getTargetHeatingCoolingState.bind(this))
             .on('set', this.setTargetHeatingCoolingState.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.CurrentTemperature);
         this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
             .on('get', this.getCurrentTemperature.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.TargetTemperature);
         this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature)
             .on('get', this.getTargetTemperature.bind(this))
             .on('set', this.setTargetTemperature.bind(this));
@@ -44,100 +40,140 @@ class ThermostatAccessory {
     }
 
     getCurrentHeatingCoolingState(callback) {
-        this.airstageClient.getPowerState(this.deviceId, (function(error, powerState) {
-            if (error) {
-                return callback(error, null);
-            }
+        const methodName = this.getCurrentHeatingCoolingState.name;
 
-            if (powerState === airstage.constants.TOGGLE_OFF) {
-                return callback(
-                    null,
-                    this.platform.Characteristic.CurrentHeatingCoolingState.OFF
-                );
-            }
+        this._logMethodCall(methodName);
 
-            this.airstageClient.getOperationMode(this.deviceId, (function(error, operationMode) {
-                let currentHeatingCoolingState = null;
-
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error, null);
                 }
 
-                if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
-                    return this.airstageClient.getTemperatureDelta(
-                        this.deviceId,
-                        airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-                        (function(error, temperatureDelta) {
-                            if (error) {
-                                return callback(error, null);
-                            }
-
-                            if (temperatureDelta > 0) {
-                                currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
-                            } else if (temperatureDelta < 0) {
-                                currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
-                            } else {
-                                currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
-                            }
-
-                            callback(null, currentHeatingCoolingState);
-                        }).bind(this)
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    return callback(
+                        null,
+                        this.platform.Characteristic.CurrentHeatingCoolingState.OFF
                     );
                 }
 
-                if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
-                    currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
-                    currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
-                    currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
-                    currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
-                }
+                this.airstageClient.getOperationMode(
+                    this.deviceId,
+                    (function(error, operationMode) {
+                        let currentHeatingCoolingState = null;
 
-                callback(null, currentHeatingCoolingState);
-            }).bind(this));
-        }).bind(this));
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
+                            return this.airstageClient.getTemperatureDelta(
+                                this.deviceId,
+                                airstage.constants.TEMPERATURE_SCALE_CELSIUS,
+                                (function(error, temperatureDelta) {
+                                    if (error) {
+                                        this._logMethodCallResult(methodName, error);
+
+                                        return callback(error, null);
+                                    }
+
+                                    if (temperatureDelta > 0) {
+                                        currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+                                    } else if (temperatureDelta < 0) {
+                                        currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+                                    } else {
+                                        currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
+                                    }
+
+                                    this._logMethodCallResult(methodName, null, currentHeatingCoolingState);
+
+                                    callback(null, currentHeatingCoolingState);
+                                }).bind(this)
+                            );
+                        }
+
+                        if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
+                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
+                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
+                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
+                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+                        }
+
+                        this._logMethodCallResult(methodName, null, currentHeatingCoolingState);
+
+                        callback(null, currentHeatingCoolingState);
+                    }).bind(this)
+                );
+            }).bind(this)
+        );
     }
 
     getTargetHeatingCoolingState(callback) {
-        this.airstageClient.getPowerState(this.deviceId, (function(error, powerState) {
-            if (error) {
-                return callback(error, null);
-            }
+        const methodName = this.getTargetHeatingCoolingState.name;
 
-            if (powerState === airstage.constants.TOGGLE_OFF) {
-                return callback(
-                    null,
-                    this.platform.Characteristic.TargetHeatingCoolingState.OFF
-                );
-            }
+        this._logMethodCall(methodName);
 
-            this.airstageClient.getOperationMode(this.deviceId, (function(error, operationMode) {
-                let targetHeatingCoolingState = null;
-
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error, null);
                 }
 
-                if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
-                    targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.COOL;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
-                    targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.COOL;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
-                    targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.OFF;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
-                    targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
-                } else if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
-                    targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.AUTO;
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    return callback(
+                        null,
+                        this.platform.Characteristic.TargetHeatingCoolingState.OFF
+                    );
                 }
 
-                callback(null, targetHeatingCoolingState);
-            }).bind(this));
-        }).bind(this));
+                this.airstageClient.getOperationMode(
+                    this.deviceId,
+                    (function(error, operationMode) {
+                        let targetHeatingCoolingState = null;
+
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
+                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.COOL;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
+                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.COOL;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
+                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.OFF;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
+                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
+                        } else if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
+                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.AUTO;
+                        }
+
+                        this._logMethodCallResult(methodName, null, targetHeatingCoolingState);
+
+                        callback(null, targetHeatingCoolingState);
+                    }).bind(this)
+                );
+            }).bind(this)
+        );
     }
 
     setTargetHeatingCoolingState(value, callback) {
+        const methodName = this.setTargetHeatingCoolingState.name;
+
+        this._logMethodCall(methodName, value);
+
         let operationMode = null;
 
         if (value === this.platform.Characteristic.TargetHeatingCoolingState.OFF) {
@@ -146,13 +182,17 @@ class ThermostatAccessory {
                 airstage.constants.TOGGLE_OFF,
                 (function(error) {
                     if (error) {
+                        this._logMethodCallResult(methodName, error);
+
                         return callback(error);
                     }
 
-                    this._refreshRelatedAccessoryCharacteristics();
-                    this._refreshCurrentCharacteristics();
+                    this._logMethodCallResult(methodName, null, null);
 
                     callback(null);
+
+                    this._refreshDynamicServiceCharacteristics();
+                    this._refreshRelatedAccessoryCharacteristics();
                 }).bind(this)
             );
         }
@@ -162,6 +202,8 @@ class ThermostatAccessory {
             airstage.constants.TOGGLE_ON,
             (function(error) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error);
                 }
 
@@ -178,13 +220,17 @@ class ThermostatAccessory {
                     operationMode,
                     (function(error) {
                         if (error) {
+                            this._logMethodCallResult(methodName, error);
+
                             return callback(error);
                         }
 
-                        this._refreshRelatedAccessoryCharacteristics();
-                        this._refreshCurrentCharacteristics();
+                        this._logMethodCallResult(methodName, null, null);
 
                         callback(null);
+
+                        this._refreshDynamicServiceCharacteristics();
+                        this._refreshRelatedAccessoryCharacteristics();
                     }).bind(this)
                 );
             }).bind(this)
@@ -192,69 +238,107 @@ class ThermostatAccessory {
     }
 
     getCurrentTemperature(callback) {
+        const methodName = this.getCurrentTemperature.name;
+
+        this._logMethodCall(methodName);
+
         this.airstageClient.getIndoorTemperature(
             this.deviceId,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-            function (error, indoorTemperature) {
+            (function (error, indoorTemperature) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error, null);
                 }
 
+                this._logMethodCallResult(methodName, null, indoorTemperature);
+
                 callback(null, indoorTemperature);
-            }
+            }).bind(this)
         );
     }
 
     getTargetTemperature(callback) {
+        const methodName = this.getTargetTemperature.name;
+
+        this._logMethodCall(methodName);
+
         this.airstageClient.getTargetTemperature(
             this.deviceId,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-            function (error, targetTemperature) {
+            (function (error, targetTemperature) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error, null);
                 }
 
+                this._logMethodCallResult(methodName, null, targetTemperature);
+
                 callback(null, targetTemperature);
-            }
+            }).bind(this)
         );
     }
 
     setTargetTemperature(value, callback) {
+        const methodName = this.setTargetTemperature.name;
+
+        this._logMethodCall(methodName, value);
+
         this.airstageClient.setTargetTemperature(
             this.deviceId,
             value,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
             (function (error) {
                 if (error) {
+                    this._logMethodCallResult(methodName, error);
+
                     return callback(error);
                 }
 
-                this._refreshCurrentCharacteristics();
+                this._logMethodCallResult(methodName, null, null);
 
-                return callback(null);
+                this._refreshDynamicServiceCharacteristics();
+
+                callback(null);
             }).bind(this)
         );
     }
 
     getTemperatureDisplayUnits(callback) {
-        this.airstageClient.getTemperatureScale((function (error, temperatureScale) {
-            let temperatureDisplayUnits = null;
+        const methodName = this.getTemperatureDisplayUnits.name;
 
-            if (error) {
-                return callback(error, null);
-            }
+        this._logMethodCall(methodName);
 
-            if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_CELSIUS) {
-                temperatureDisplayUnits = this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS;
-            } else if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
-                temperatureDisplayUnits = this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT;
-            }
+        this.airstageClient.getTemperatureScale(
+            (function (error, temperatureScale) {
+                let temperatureDisplayUnits = null;
 
-            callback(null, temperatureDisplayUnits);
-        }).bind(this));
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_CELSIUS) {
+                    temperatureDisplayUnits = this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS;
+                } else if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+                    temperatureDisplayUnits = this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT;
+                }
+
+                this._logMethodCallResult(methodName, null, temperatureDisplayUnits);
+
+                callback(null, temperatureDisplayUnits);
+            }).bind(this)
+        );
     }
 
     setTemperatureDisplayUnits(value, callback) {
+        const methodName = this.setTemperatureDisplayUnits.name;
+
+        this._logMethodCall(methodName, value);
+
         let scale = null;
 
         if (value === this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
@@ -263,19 +347,43 @@ class ThermostatAccessory {
             temperatureScale = airstage.constants.TEMPERATURE_SCALE_CELSIUS;
         }
 
-        this.airstageClient.setTemperatureScale(scale, function(error) {
-            callback(error);
-        });
+        this.airstageClient.setTemperatureScale(
+            scale,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                callback(null);
+            }).bind(this)
+        );
     }
 
     getName(callback) {
-        this.airstageClient.getName(this.deviceId, function(error, name) {
-            if (error) {
-                return callback(error, null);
-            }
+        const methodName = this.getName.name;
 
-            callback(null, name + ' Thermostat');
-        });
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getName(
+            this.deviceId,
+            (function(error, name) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                const value = name + ' Thermostat';
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
@@ -284,18 +392,6 @@ class ThermostatAccessory {
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
-    }
-
-    _refreshCurrentCharacteristics() {
-        const accessoryManager = this.platform.accessoryManager;
-
-        accessoryManager.refreshServiceCharacteristics(
-            this.service,
-            [
-                this.platform.Characteristic.CurrentHeatingCoolingState,
-                this.platform.Characteristic.CurrentTemperature
-            ]
-        );
     }
 }
 

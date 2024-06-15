@@ -1,21 +1,14 @@
 'use strict';
 
+const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class DryModeSwitchAccessory {
+class DryModeSwitchAccessory extends Accessory {
 
     constructor(platform, accessory) {
-        this.platform = platform;
-        this.accessory = accessory;
+        super(platform, accessory);
 
-        this.deviceId = this.accessory.context.deviceId;
-        this.airstageClient = this.accessory.context.airstageClient;
         this.lastKnownOperationMode = null;
-
-        this.accessory.getService(this.platform.Service.AccessoryInformation)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
-            .setCharacteristic(this.platform.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
 
         this.service = (
             this.accessory.getService(this.platform.Service.Switch) ||
@@ -31,20 +24,35 @@ class DryModeSwitchAccessory {
     }
 
     getOn(callback) {
-        this.airstageClient.getOperationMode(this.deviceId, function(error, operationMode) {
-            let value = null;
+        const methodName = this.getOn.name;
 
-            if (error) {
-                return callback(error, null);
-            }
+        this._logMethodCall(methodName);
 
-            value = (operationMode === airstage.constants.OPERATION_MODE_DRY);
+        this.airstageClient.getOperationMode(
+            this.deviceId,
+            (function(error, operationMode) {
+                let value = null;
 
-            callback(null, value);
-        });
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                value = (operationMode === airstage.constants.OPERATION_MODE_DRY);
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     setOn(value, callback) {
+        const methodName = this.setOn.name;
+
+        this._logMethodCall(methodName, value);
+
         let operationMode = null;
 
         if (value) {
@@ -67,12 +75,16 @@ class DryModeSwitchAccessory {
                     operationMode,
                     (function(error) {
                         if (error) {
+                            this._logMethodCallResult(methodName, error);
+
                             return callback(error);
                         }
 
-                        this._refreshRelatedAccessoryCharacteristics();
+                        this._logMethodCallResult(methodName, null, null);
 
                         callback(null);
+
+                        this._refreshRelatedAccessoryCharacteristics();
                     }).bind(this)
                 );
             }).bind(this)
@@ -80,13 +92,26 @@ class DryModeSwitchAccessory {
     }
 
     getName(callback) {
-        this.airstageClient.getName(this.deviceId, function(error, name) {
-            if (error) {
-                return callback(error, null);
-            }
+        const methodName = this.getName.name;
 
-            callback(null, name + ' Dry Mode Switch');
-        });
+        this._logMethodCall(methodName);
+
+        this.airstageClient.getName(
+            this.deviceId,
+            (function(error, name) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                const value = name + ' Dry Mode Switch';
+
+                this._logMethodCallResult(methodName, null, value);
+
+                callback(null, value);
+            }).bind(this)
+        );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
