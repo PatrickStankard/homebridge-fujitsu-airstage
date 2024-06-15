@@ -198,12 +198,6 @@ class ThermostatAccessory {
                     return callback(error, null);
                 }
 
-                if (indoorTemperature === null) {
-                    throw new this.platform.api.hap.HapStatusError(
-                        this.platform.api.hap.HAPStatus.SERVICE_COMMUNICATION_FAILURE
-                    );
-                }
-
                 callback(null, indoorTemperature);
             }
         );
