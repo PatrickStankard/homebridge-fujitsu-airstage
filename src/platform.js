@@ -71,82 +71,26 @@ class Platform {
                     return this.log.error('Error when attempting to communicate with Airbridge:', error);
                 }
 
-                this.airstageClient.getDevices(null, (function(error, result) {
+                this.airstageClient.getDevices(null, (function(error, devices) {
                     if (error) {
                         return this.log.error('Error when attempting to communicate with Airbridge:', error);
                     }
 
-                    const deviceIds = Object.keys(result.metadata);
+                    const deviceIds = Object.keys(devices.metadata);
 
                     deviceIds.forEach((function(deviceId) {
-                        const deviceMetadata = result.metadata[deviceId];
-                        const deviceParameters = result.parameters[deviceId];
+                        const deviceMetadata = devices.metadata[deviceId];
+                        const deviceParameters = devices.parameters[deviceId];
                         const deviceName = deviceMetadata.deviceName;
                         const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL];
 
-                        if (this.config.enableThermostat) {
-                            this.accessoryManager.registerThermostatAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enableFan) {
-                            this.accessoryManager.registerFanAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enableVerticalSlats) {
-                            this.accessoryManager.registerVerticalSlatsAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enableDryModeSwitch) {
-                            this.accessoryManager.registerDryModeSwitchAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enableEconomySwitch) {
-                            this.accessoryManager.registerEconomySwitchAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enableEnergySavingFanSwitch) {
-                            this.accessoryManager.registerEnergySavingFanSwitchAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enableFanModeSwitch) {
-                            this.accessoryManager.registerFanModeSwitchAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
-
-                        if (this.config.enablePowerfulSwitch) {
-                            this.accessoryManager.registerPowerfulSwitchAccessory(
-                                deviceId,
-                                deviceName,
-                                model
-                            );
-                        }
+                        this._configureAirstageDevice(
+                            deviceId,
+                            deviceMetadata,
+                            deviceParameters,
+                            deviceName,
+                            model
+                        );
                     }).bind(this));
                 }).bind(this));
             }).bind(this));
@@ -166,6 +110,118 @@ class Platform {
             );
 
             this.log.debug('Updated config with Airstage client token');
+        }
+    }
+
+    _configureAirstageDevice(
+        deviceId,
+        deviceMetadata,
+        deviceParameters,
+        deviceName,
+        model
+    ) {
+        if (this.config.enableThermostat) {
+            this.accessoryManager.registerThermostatAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterThermostatAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enableFan) {
+            this.accessoryManager.registerFanAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterFanAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enableVerticalSlats) {
+            this.accessoryManager.registerVerticalSlatsAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterVerticalSlatsAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enableDryModeSwitch) {
+            this.accessoryManager.registerDryModeSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterDryModeSwitchAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enableEconomySwitch) {
+            this.accessoryManager.registerEconomySwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterEconomySwitchAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enableEnergySavingFanSwitch) {
+            this.accessoryManager.registerEnergySavingFanSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterEnergySavingFanSwitchAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enableFanModeSwitch) {
+            this.accessoryManager.registerFanModeSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterFanModeSwitchAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
+        if (this.config.enablePowerfulSwitch) {
+            this.accessoryManager.registerPowerfulSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterPowerfulSwitchAccessory(
+                deviceId,
+                deviceName
+            );
         }
     }
 
@@ -192,18 +248,24 @@ class Platform {
                 }
 
                 this.log.debug('Refreshed Airstage client user metadata cache');
-            }).bind(this)
-        );
 
-        this.airstageClient.resetDeviceCache();
-        this.airstageClient.getDevices(
-            limit,
-            (function(error) {
-                if (error) {
-                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
-                }
+                this.airstageClient.resetDeviceCache();
+                this.airstageClient.getDevices(
+                    limit,
+                    (function(error, devices) {
+                        if (error) {
+                            return this.log.error('Error when attempting to communicate with Airbridge:', error);
+                        }
 
-                this.log.debug('Refreshed Airstage client device cache');
+                        this.log.debug('Refreshed Airstage client device cache');
+
+                        const deviceIds = Object.keys(devices.metadata);
+
+                        deviceIds.forEach((function(deviceId) {
+                            this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId);
+                        }).bind(this));
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
