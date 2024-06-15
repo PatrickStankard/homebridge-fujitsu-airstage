@@ -98,28 +98,6 @@ class PlatformAccessoryManager {
         }
     }
 
-    registerFanModeSwitchAccessory(deviceId, deviceName, model) {
-        const suffix = constants.ACCESSORY_SUFFIX_FAN_MODE_SWITCH;
-        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
-
-        if (existingAccessory) {
-            this._updateExistingAccessory(existingAccessory, deviceId, model);
-
-            new accessories.FanModeSwitchAccessory(this.platform, existingAccessory);
-        } else {
-            const newAccessory = this._instantiateNewAccessory(
-                deviceId,
-                deviceName,
-                model,
-                suffix
-            );
-
-            new accessories.FanModeSwitchAccessory(this.platform, newAccessory);
-
-            this._registerNewAccessory(newAccessory, deviceId, model);
-        }
-    }
-
     registerEconomySwitchAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_ECONOMY_SWITCH;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -164,6 +142,28 @@ class PlatformAccessoryManager {
         }
     }
 
+    registerFanModeSwitchAccessory(deviceId, deviceName, model) {
+        const suffix = constants.ACCESSORY_SUFFIX_FAN_MODE_SWITCH;
+        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (existingAccessory) {
+            this._updateExistingAccessory(existingAccessory, deviceId, model);
+
+            new accessories.FanModeSwitchAccessory(this.platform, existingAccessory);
+        } else {
+            const newAccessory = this._instantiateNewAccessory(
+                deviceId,
+                deviceName,
+                model,
+                suffix
+            );
+
+            new accessories.FanModeSwitchAccessory(this.platform, newAccessory);
+
+            this._registerNewAccessory(newAccessory, deviceId, model);
+        }
+    }
+
     registerPowerfulSwitchAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_POWERFUL_SWITCH;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -186,6 +186,65 @@ class PlatformAccessoryManager {
         }
     }
 
+    unregisterThermostatAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_THERMOSTAT;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterFanAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_FAN;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterVerticalSlatsAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_SLATS;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterDryModeSwitchAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_DRY_MODE_SWITCH;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterEconomySwitchAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_ECONOMY_SWITCH;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterEnergySavingFanSwitchAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_ENERGY_SAVING_FAN_SWITCH;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterFanModeSwitchAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_FAN_MODE_SWITCH;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    unregisterPowerfulSwitchAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_POWERFUL_SWITCH;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
+    refreshAllAccessoryCharacteristics(deviceId) {
+        this.refreshThermostatAccessoryCharacteristics(deviceId);
+        this.refreshFanAccessoryCharacteristics(deviceId);
+        this.refreshVerticalSlatsAccessoryCharacteristics(deviceId);
+        this.refreshDryModeSwitchAccessoryCharacteristics(deviceId);
+        this.refreshEconomySwitchAccessoryCharacteristics(deviceId);
+        this.refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId);
+        this.refreshFanModeSwitchAccessoryCharacteristics(deviceId);
+        this.refreshPowerfulSwitchAccessoryCharacteristics(deviceId);
+    }
+
     refreshThermostatAccessoryCharacteristics(deviceId) {
         const suffix = constants.ACCESSORY_SUFFIX_THERMOSTAT;
         const accessory = this._getExistingAccessory(deviceId, suffix);
@@ -198,7 +257,10 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.platform.Characteristic.CurrentHeatingCoolingState,
-                this.platform.Characteristic.TargetHeatingCoolingState
+                this.platform.Characteristic.TargetHeatingCoolingState,
+                this.platform.Characteristic.CurrentTemperature,
+                this.platform.Characteristic.TargetTemperature,
+                this.platform.Characteristic.TemperatureDisplayUnits
             ]
         );
     }
@@ -217,13 +279,65 @@ class PlatformAccessoryManager {
                 this.platform.Characteristic.Active,
                 this.platform.Characteristic.CurrentFanState,
                 this.platform.Characteristic.TargetFanState,
-                this.platform.Characteristic.RotationSpeed
+                this.platform.Characteristic.RotationSpeed,
+                this.platform.Characteristic.SwingMode
+            ]
+        );
+    }
+
+    refreshVerticalSlatsAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_SLATS;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.platform.Characteristic.CurrentSlatState,
+                this.platform.Characteristic.SwingMode,
+                this.platform.Characteristic.CurrentTiltAngle,
+                this.platform.Characteristic.TargetTiltAngle
             ]
         );
     }
 
     refreshDryModeSwitchAccessoryCharacteristics(deviceId) {
         const suffix = constants.ACCESSORY_SUFFIX_DRY_MODE_SWITCH;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.platform.Characteristic.On
+            ]
+        );
+    }
+
+    refreshEconomySwitchAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_ECONOMY_SWITCH;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.platform.Characteristic.On
+            ]
+        );
+    }
+
+    refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_ENERGY_SAVING_FAN_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
         if (accessory === null) {
@@ -254,16 +368,40 @@ class PlatformAccessoryManager {
         );
     }
 
-    refreshServiceCharacteristics(service, characteristicClasses) {
-        characteristicClasses.forEach(function(characteristicClass) {
-            const characteristic = service.getCharacteristic(characteristicClass);
+    refreshPowerfulSwitchAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_POWERFUL_SWITCH;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
 
-            characteristic.emit('get', function(error, value) {
-                if (error === null) {
-                    characteristic.sendEventNotification(value);
-                }
-            });
-        });
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.platform.Characteristic.On
+            ]
+        );
+    }
+
+    refreshServiceCharacteristics(service, characteristicClasses) {
+        characteristicClasses.forEach(
+            (function(characteristicClass) {
+                const characteristic = service.getCharacteristic(characteristicClass);
+                let logMessage = '[' + service.constructor.name + '][' + characteristic.constructor.name + '] Refreshing characteristic';
+
+                this.platform.log.debug(logMessage);
+
+                characteristic.emit('get', function(error, value) {
+                    if (error === null) {
+                        characteristic.sendEventNotification(value);
+                    } else {
+                        logMessage = logMessage + ' failed with error: ' + error;
+                        this.platform.log.error(logMessage);
+                    }
+                });
+            }).bind(this)
+        );
 
         return true;
     }
@@ -276,6 +414,30 @@ class PlatformAccessoryManager {
         existingAccessory.context.model = model;
 
         this.platform.api.updatePlatformAccessories([existingAccessory]);
+    }
+
+    _unregisterAccessory(deviceId, deviceName, suffix) {
+        const accessoryName = this._getAccessoryName(deviceName, suffix);
+        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
+
+        this.platform.log.info(
+            'Not adding accessory because it is disabled in the config:',
+            accessoryName
+        );
+
+        if (existingAccessory) {
+            this._unregisterExistingAccessory(existingAccessory);
+        }
+    }
+
+    _unregisterExistingAccessory(existingAccessory) {
+        this.platform.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
+
+        this.platform.api.unregisterPlatformAccessories(
+            settings.PLUGIN_NAME,
+            settings.PLATFORM_NAME,
+            [existingAccessory]
+        );
     }
 
     _registerNewAccessory(newAccessory, deviceId, model) {
