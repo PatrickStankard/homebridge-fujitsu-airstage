@@ -76,7 +76,7 @@ class FanAccessory {
                 return callback(error);
             }
 
-            this._updateThermostatServiceCharacteristics();
+            this._refreshRelatedAccessoryCharacteristics();
 
             callback(null);
         }).bind(this));
@@ -242,51 +242,10 @@ class FanAccessory {
         );
     }
 
-    _updateThermostatServiceCharacteristics() {
-        const thermostatService = this._getThermostatService();
+    _refreshRelatedAccessoryCharacteristics() {
+        const accessoryManager = this.platform.accessoryManager;
 
-        if (thermostatService === null) {
-            return false;
-        }
-
-        const currentHeatingCoolingState = thermostatService.getCharacteristic(
-            this.platform.Characteristic.CurrentHeatingCoolingState
-        );
-        const targetHeatingCoolingState = thermostatService.getCharacteristic(
-            this.platform.Characteristic.TargetHeatingCoolingState
-        );
-
-        currentHeatingCoolingState.emit('get', function(error, value) {
-            if (error === null) {
-                currentHeatingCoolingState.sendEventNotification(value);
-            }
-        });
-
-        targetHeatingCoolingState.emit('get', function(error, value) {
-            if (error === null) {
-                targetHeatingCoolingState.sendEventNotification(value);
-            }
-        });
-
-        return true;
-    }
-
-    _getThermostatService() {
-        let thermostatService = null;
-        const uuid = this.platform.api.hap.uuid.generate(
-            this.deviceId + '-thermostat'
-        );
-        const existingAccessory = this.platform.accessories.find(
-            accessory => accessory.UUID === uuid
-        );
-
-        if (existingAccessory) {
-            thermostatService = existingAccessory.services.find(
-                service => service instanceof this.platform.Service.Thermostat
-            );
-        }
-
-        return thermostatService;
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
     }
 }
 
