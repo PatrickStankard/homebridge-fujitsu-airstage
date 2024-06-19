@@ -260,6 +260,23 @@ class Client {
                     return callback(error, null);
                 }
 
+                if (operationMode === constants.OPERATION_MODE_DRY) {
+                    // The fan speed is automatically set to "AUTO" on the
+                    // Airstage side, so let's reflect that in the local
+                    // device cache
+                    this._setDeviceParameterCache(
+                        deviceId,
+                        {
+                            'parameters': [
+                                {
+                                    'name': apiv1.constants.PARAMETER_FAN_SPEED,
+                                    'value': apiv1.constants.PARAMETER_FAN_SPEED_AUTO
+                                }
+                            ]
+                        }
+                    );
+                }
+
                 if (device.parameters) {
                     result = this._parameterValueToOperationMode(
                         device.parameters[apiv1.constants.PARAMETER_OPERATION_MODE]

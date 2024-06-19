@@ -783,6 +783,57 @@ test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParameters
     });
 });
 
+test('airstage.Client#setOperationMode updates fan speed in device cache to AUTO when DRY with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_op_mode',
+                'value': '2'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_op_mode');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '2');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setOperationMode('12345', 'DRY', (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 'DRY');
+
+        clientWithAccessToken.getFanSpeed('12345', (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, 'AUTO');
+
+            done();
+        });
+    });
+});
+
 test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
