@@ -105,6 +105,11 @@
                 "type": "boolean",
                 "default": false
             },
+            "enableMinimumHeatModeSwitch": {
+                "title": "Enable 'Minimum Heat Mode' switch",
+                "type": "boolean",
+                "default": false
+            },
             "enablePowerfulSwitch": {
                 "title": "Enable 'Powerful' switch",
                 "type": "boolean",
