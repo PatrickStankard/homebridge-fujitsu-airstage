@@ -94,6 +94,7 @@ module.exports.MIN_CELSIUS = 18.0;
 module.exports.MAX_CELSIUS = 30.0;
 
 module.exports.FAHRENHEIT_TO_CELSIUS_MAP = {
+    50: 10.0,
     64: 18.0,
     65: 18.5,
     66: 19.0,
@@ -122,6 +123,7 @@ module.exports.FAHRENHEIT_TO_CELSIUS_MAP = {
 };
 
 module.exports.CELSIUS_TO_FAHRENHEIT_MAP = {
+    10.0: 50,
     18.0: 64,
     18.5: 65,
     19.0: 66,
