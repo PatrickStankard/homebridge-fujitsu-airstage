@@ -164,6 +164,28 @@ class PlatformAccessoryManager {
         }
     }
 
+    registerMinimumHeatModeSwitchAccessory(deviceId, deviceName, model) {
+        const suffix = constants.ACCESSORY_SUFFIX_MINIMUM_HEAT_MODE_SWITCH;
+        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (existingAccessory) {
+            this._updateExistingAccessory(existingAccessory, deviceId, model);
+
+            new accessories.MinimumHeatModeSwitchAccessory(this.platform, existingAccessory);
+        } else {
+            const newAccessory = this._instantiateNewAccessory(
+                deviceId,
+                deviceName,
+                model,
+                suffix
+            );
+
+            new accessories.MinimumHeatModeSwitchAccessory(this.platform, newAccessory);
+
+            this._registerNewAccessory(newAccessory, deviceId, model);
+        }
+    }
+
     registerPowerfulSwitchAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_POWERFUL_SWITCH;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -228,6 +250,12 @@ class PlatformAccessoryManager {
         this._unregisterAccessory(deviceId, deviceName, suffix);
     }
 
+    unregisterMinimumHeatModeSwitchAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_MINIMUM_HEAT_MODE_SWITCH;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
     unregisterPowerfulSwitchAccessory(deviceId, deviceName) {
         const suffix = constants.ACCESSORY_SUFFIX_POWERFUL_SWITCH;
 
@@ -242,6 +270,7 @@ class PlatformAccessoryManager {
         this.refreshEconomySwitchAccessoryCharacteristics(deviceId);
         this.refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId);
         this.refreshFanModeSwitchAccessoryCharacteristics(deviceId);
+        this.refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId);
         this.refreshPowerfulSwitchAccessoryCharacteristics(deviceId);
     }
 
@@ -354,6 +383,22 @@ class PlatformAccessoryManager {
 
     refreshFanModeSwitchAccessoryCharacteristics(deviceId) {
         const suffix = constants.ACCESSORY_SUFFIX_FAN_MODE_SWITCH;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.platform.Characteristic.On
+            ]
+        );
+    }
+
+    refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_MINIMUM_HEAT_MODE_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
         if (accessory === null) {

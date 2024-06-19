@@ -654,6 +654,94 @@ class Client {
         );
     }
 
+    getMinimumHeatState(deviceId, callback) {
+        this.getParameter(
+            deviceId,
+            apiv1.constants.PARAMETER_MINIMUM_HEAT,
+            (function(error, parameterValue) {
+                let result = null;
+
+                if (error) {
+                    return callback(error, null);
+                }
+
+                result = this._parameterValueToToggle(parameterValue);
+
+                callback(null, result);
+            }).bind(this)
+        );
+    }
+
+    setMinimumHeatState(deviceId, toggle, callback) {
+        const parameterValue = this._toggleToParameterValue(toggle);
+
+        this.setParameter(
+            deviceId,
+            apiv1.constants.PARAMETER_MINIMUM_HEAT,
+            parameterValue,
+            (function(error, device) {
+                let result = null;
+
+                if (error) {
+                    return callback(error, null);
+                }
+
+                if (toggle === constants.TOGGLE_ON) {
+                    // The power state is automatically set to "ON", the fan
+                    // speed is automatically set to "AUTO", the operation
+                    // mode is automatically set to "HEAT", and the temperature
+                    // is automatically set to 50 degrees (F) on the Airstage
+                    // side, so let's reflect that in the local device cache
+                    this._setDeviceParameterCache(
+                        deviceId,
+                        {
+                            'parameters': [
+                                {
+                                    'name': apiv1.constants.PARAMETER_ON_OFF,
+                                    'value': apiv1.constants.PARAMETER_ON
+                                },
+                                {
+                                    'name': apiv1.constants.PARAMETER_FAN_SPEED,
+                                    'value': apiv1.constants.PARAMETER_FAN_SPEED_AUTO
+                                },
+                                {
+                                    'name': apiv1.constants.PARAMETER_OPERATION_MODE,
+                                    'value': apiv1.constants.PARAMETER_OPERATION_MODE_HEAT
+                                },
+                                {
+                                    'name': apiv1.constants.PARAMETER_SET_TEMPERATURE,
+                                    'value': '100'
+                                }
+                            ]
+                        }
+                    );
+                } else if (toggle === constants.TOGGLE_OFF) {
+                    // The power state is automatically set to "OFF" on the
+                    // Airstage side, so let's reflect that in the local device cache
+                    this._setDeviceParameterCache(
+                        deviceId,
+                        {
+                            'parameters': [
+                                {
+                                    'name': apiv1.constants.PARAMETER_ON_OFF,
+                                    'value': apiv1.constants.PARAMETER_OFF
+                                }
+                            ]
+                        }
+                    );
+                }
+
+                if (device.parameters) {
+                    result = this._parameterValueToToggle(
+                        device.parameters[apiv1.constants.PARAMETER_MINIMUM_HEAT]
+                    );
+                }
+
+                callback(null, result);
+            }).bind(this)
+        );
+    }
+
     getParameter(deviceId, name, callback) {
         this.getDevice(deviceId, function(error, device) {
             let result = null;

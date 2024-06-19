@@ -1923,6 +1923,211 @@ test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetPar
     });
 });
 
+test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with success', (context, done) => {
+    const expectedResponse = {
+        'parameters': [
+            {
+                'name': 'iu_min_heat',
+                'value': '1'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevice',
+        (deviceId, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.getMinimumHeatState('12345', (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 'ON');
+
+        done();
+    });
+});
+
+test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with error', (context, done) => {
+    const expectedError = 'Error';
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevice',
+        (deviceId, callback) => {
+            callback({'error': expectedError, 'response': null});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.getMinimumHeatState('12345', (error, result) => {
+        assert.strictEqual(error, expectedError);
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
+test('airstage.Client#setMinimumHeatState with "ON" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_min_heat',
+                'value': '1'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_min_heat');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setMinimumHeatState('12345', 'ON', (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 'ON');
+
+        clientWithAccessToken.getPowerState('12345', (error, powerState) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(powerState, 'ON');
+
+            clientWithAccessToken.getFanSpeed('12345', (error, fanSpeed) => {
+                assert.strictEqual(error, null);
+                assert.strictEqual(fanSpeed, 'AUTO');
+
+                clientWithAccessToken.getOperationMode('12345', (error, operationMode) => {
+                    assert.strictEqual(error, null);
+                    assert.strictEqual(operationMode, 'HEAT');
+
+                    clientWithAccessToken.getTargetTemperature('12345', 'F', (error, targetTemperature) => {
+                        assert.strictEqual(error, null);
+                        assert.strictEqual(targetTemperature, 50);
+
+                        done();
+                    });
+                });
+            });
+        });
+    });
+});
+
+test('airstage.Client#setMinimumHeatState with "OFF" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_min_heat',
+                'value': '0'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_min_heat');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '0');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setMinimumHeatState('12345', 'OFF', (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 'OFF');
+
+        clientWithAccessToken.getPowerState('12345', (error, powerState) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(powerState, 'OFF');
+
+            done();
+        });
+    });
+});
+
+test('airstage.Client#setMinimumHeatState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+    const expectedError = 'Error';
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': expectedError, 'response': null});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_min_heat');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setMinimumHeatState('12345', 'ON', (error, result) => {
+        assert.strictEqual(error, expectedError);
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
 test('airstage.Client#getAccessToken returns access token', (context) => {
     const accessToken = clientWithAccessToken.getAccessToken();
 

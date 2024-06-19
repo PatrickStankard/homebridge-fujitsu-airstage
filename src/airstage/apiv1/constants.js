@@ -57,6 +57,7 @@ module.exports.PARAMETER_AIRFLOW_VERTICAL_SWING = 'iu_af_swg_vrt';
 module.exports.PARAMETER_POWERFUL = 'iu_powerful';
 module.exports.PARAMETER_ECONOMY = 'iu_economy';
 module.exports.PARAMETER_ENERGY_SAVING_FAN = 'iu_fan_ctrl';
+module.exports.PARAMETER_MINIMUM_HEAT = 'iu_min_heat';
 
 // Parameter values
 module.exports.PARAMETER_ON = '1';

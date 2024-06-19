@@ -23,6 +23,7 @@ A Homebridge plugin to control devices that use the Fujitsu Airstage API.
     "enableEconomySwitch": false,
     "enableEnergySavingFanSwitch": false,
     "enableFanModeSwitch": false,
+    "enableMinimumHeatModeSwitch": false,
     "enablePowerfulSwitch": false
 }
 ```

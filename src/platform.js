@@ -211,6 +211,19 @@ class Platform {
             );
         }
 
+        if (this.config.enableMinimumHeatModeSwitch) {
+            this.accessoryManager.registerMinimumHeatModeSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterMinimumHeatModeSwitchAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
         if (this.config.enablePowerfulSwitch) {
             this.accessoryManager.registerPowerfulSwitchAccessory(
                 deviceId,
