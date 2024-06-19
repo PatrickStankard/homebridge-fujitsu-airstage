@@ -392,6 +392,7 @@ class ThermostatAccessory extends Accessory {
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

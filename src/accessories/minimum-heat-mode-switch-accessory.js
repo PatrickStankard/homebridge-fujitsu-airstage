@@ -202,4 +202,4 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
     }
 }
 
-module.exports = MinimumHeatSwitchAccessory;
+module.exports = MinimumHeatModeSwitchAccessory;
