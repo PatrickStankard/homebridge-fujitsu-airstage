@@ -9,33 +9,33 @@ class FanAccessory extends Accessory {
         super(platform, accessory);
 
         this.service = (
-            this.accessory.getService(this.platform.Service.Fanv2) ||
-            this.accessory.addService(this.platform.Service.Fanv2)
+            this.accessory.getService(this.Service.Fanv2) ||
+            this.accessory.addService(this.Service.Fanv2)
         );
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.Active);
-        this.service.getCharacteristic(this.platform.Characteristic.Active)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.Active);
+        this.service.getCharacteristic(this.Characteristic.Active)
             .on('get', this.getActive.bind(this))
             .on('set', this.setActive.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.CurrentFanState);
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentFanState)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.CurrentFanState);
+        this.service.getCharacteristic(this.Characteristic.CurrentFanState)
             .on('get', this.getCurrentFanState.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.TargetFanState);
-        this.service.getCharacteristic(this.platform.Characteristic.TargetFanState)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.TargetFanState);
+        this.service.getCharacteristic(this.Characteristic.TargetFanState)
             .on('get', this.getTargetFanState.bind(this))
             .on('set', this.setTargetFanState.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.Name)
+        this.service.getCharacteristic(this.Characteristic.Name)
             .on('get', this.getName.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.RotationSpeed);
-        this.service.getCharacteristic(this.platform.Characteristic.RotationSpeed)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.RotationSpeed);
+        this.service.getCharacteristic(this.Characteristic.RotationSpeed)
             .on('get', this.getRotationSpeed.bind(this))
             .on('set', this.setRotationSpeed.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.SwingMode)
+        this.service.getCharacteristic(this.Characteristic.SwingMode)
             .on('get', this.getSwingMode.bind(this))
             .on('set', this.setSwingMode.bind(this));
 
@@ -59,9 +59,9 @@ class FanAccessory extends Accessory {
                 }
 
                 if (powerState === airstage.constants.TOGGLE_ON) {
-                    value = this.platform.Characteristic.Active.ACTIVE;
+                    value = this.Characteristic.Active.ACTIVE;
                 } else if (powerState === airstage.constants.TOGGLE_OFF) {
-                    value = this.platform.Characteristic.Active.INACTIVE;
+                    value = this.Characteristic.Active.INACTIVE;
                 }
 
                 this._logMethodCallResult(methodName, null, value);
@@ -78,9 +78,9 @@ class FanAccessory extends Accessory {
 
         let powerState = null;
 
-        if (value === this.platform.Characteristic.Active.ACTIVE) {
+        if (value === this.Characteristic.Active.ACTIVE) {
             powerState = airstage.constants.TOGGLE_ON;
-        } else if (value === this.platform.Characteristic.Active.INACTIVE) {
+        } else if (value === this.Characteristic.Active.INACTIVE) {
             powerState = airstage.constants.TOGGLE_OFF;
         }
 
@@ -121,9 +121,9 @@ class FanAccessory extends Accessory {
                 }
 
                 if (powerState === airstage.constants.TOGGLE_ON) {
-                    value = this.platform.Characteristic.CurrentFanState.BLOWING_AIR;
+                    value = this.Characteristic.CurrentFanState.BLOWING_AIR;
                 } else if (powerState === airstage.constants.TOGGLE_OFF) {
-                    value = this.platform.Characteristic.CurrentFanState.INACTIVE;
+                    value = this.Characteristic.CurrentFanState.INACTIVE;
                 }
 
                 this._logMethodCallResult(methodName, null, value);
@@ -141,7 +141,7 @@ class FanAccessory extends Accessory {
         this.airstageClient.getFanSpeed(
             this.deviceId,
             (function(error, fanSpeed) {
-                let value = this.platform.Characteristic.TargetFanState.MANUAL;
+                let value = this.Characteristic.TargetFanState.MANUAL;
 
                 if (error) {
                     this._logMethodCallResult(methodName, error);
@@ -150,7 +150,7 @@ class FanAccessory extends Accessory {
                 }
 
                 if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
-                    value = this.platform.Characteristic.TargetFanState.AUTO;
+                    value = this.Characteristic.TargetFanState.AUTO;
                 }
 
                 this._logMethodCallResult(methodName, null, value);
@@ -165,7 +165,7 @@ class FanAccessory extends Accessory {
 
         this._logMethodCall(methodName, value);
 
-        if (value === this.platform.Characteristic.TargetFanState.AUTO) {
+        if (value === this.Characteristic.TargetFanState.AUTO) {
             this.airstageClient.setFanSpeed(
                 this.deviceId,
                 airstage.constants.FAN_SPEED_AUTO,
@@ -297,9 +297,9 @@ class FanAccessory extends Accessory {
                 }
 
                 if (swingState === airstage.constants.TOGGLE_ON) {
-                    value = this.platform.Characteristic.SwingMode.SWING_ENABLED;
+                    value = this.Characteristic.SwingMode.SWING_ENABLED;
                 } else if (swingState === airstage.constants.TOGGLE_OFF) {
-                    value = this.platform.Characteristic.SwingMode.SWING_DISABLED;
+                    value = this.Characteristic.SwingMode.SWING_DISABLED;
                 }
 
                 this._logMethodCallResult(methodName, null, value);
@@ -316,9 +316,9 @@ class FanAccessory extends Accessory {
 
         let swingState = null;
 
-        if (value === this.platform.Characteristic.SwingMode.SWING_ENABLED) {
+        if (value === this.Characteristic.SwingMode.SWING_ENABLED) {
             swingState = airstage.constants.TOGGLE_ON;
-        } else if (value === this.platform.Characteristic.SwingMode.SWING_DISABLED) {
+        } else if (value === this.Characteristic.SwingMode.SWING_DISABLED) {
             swingState = airstage.constants.TOGGLE_OFF;
         }
 

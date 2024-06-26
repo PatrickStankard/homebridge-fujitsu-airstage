@@ -9,27 +9,27 @@ class VerticalSlatsAccessory extends Accessory {
         super(platform, accessory);
 
         this.service = (
-            this.accessory.getService(this.platform.Service.Slats) ||
-            this.accessory.addService(this.platform.Service.Slats)
+            this.accessory.getService(this.Service.Slats) ||
+            this.accessory.addService(this.Service.Slats)
         );
 
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentSlatState)
+        this.service.getCharacteristic(this.Characteristic.CurrentSlatState)
             .on('get', this.getCurrentSlatState.bind(this))
 
-        this.service.getCharacteristic(this.platform.Characteristic.SlatType)
+        this.service.getCharacteristic(this.Characteristic.SlatType)
             .on('get', this.getSlatType.bind(this))
 
-        this.service.getCharacteristic(this.platform.Characteristic.Name)
+        this.service.getCharacteristic(this.Characteristic.Name)
             .on('get', this.getName.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.SwingMode)
+        this.service.getCharacteristic(this.Characteristic.SwingMode)
             .on('get', this.getSwingMode.bind(this))
             .on('set', this.setSwingMode.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentTiltAngle)
+        this.service.getCharacteristic(this.Characteristic.CurrentTiltAngle)
             .on('get', this.getCurrentTiltAngle.bind(this))
 
-        this.service.getCharacteristic(this.platform.Characteristic.TargetTiltAngle)
+        this.service.getCharacteristic(this.Characteristic.TargetTiltAngle)
             .on('get', this.getTargetTiltAngle.bind(this))
             .on('set', this.setTargetTiltAngle.bind(this));
     }
@@ -51,9 +51,9 @@ class VerticalSlatsAccessory extends Accessory {
                 }
 
                 if (swingState === airstage.constants.TOGGLE_ON) {
-                    value = this.platform.Characteristic.CurrentSlatState.SWINGING;
+                    value = this.Characteristic.CurrentSlatState.SWINGING;
                 } else if (swingState === airstage.constants.TOGGLE_OFF) {
-                    value = this.platform.Characteristic.CurrentSlatState.FIXED;
+                    value = this.Characteristic.CurrentSlatState.FIXED;
                 }
 
                 callback(null, value);
@@ -66,7 +66,7 @@ class VerticalSlatsAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
-        const value = this.platform.Characteristic.SlatType.VERTICAL;
+        const value = this.Characteristic.SlatType.VERTICAL;
 
         this._logMethodCallResult(methodName, null, value);
 
@@ -113,9 +113,9 @@ class VerticalSlatsAccessory extends Accessory {
                 }
 
                 if (swingState === airstage.constants.TOGGLE_ON) {
-                    value = this.platform.Characteristic.SwingMode.SWING_ENABLED;
+                    value = this.Characteristic.SwingMode.SWING_ENABLED;
                 } else if (swingState === airstage.constants.TOGGLE_OFF) {
-                    value = this.platform.Characteristic.SwingMode.SWING_DISABLED;
+                    value = this.Characteristic.SwingMode.SWING_DISABLED;
                 }
 
                 this._logMethodCallResult(methodName, null, value);
@@ -132,9 +132,9 @@ class VerticalSlatsAccessory extends Accessory {
 
         let swingState = null;
 
-        if (value === this.platform.Characteristic.SwingMode.SWING_ENABLED) {
+        if (value === this.Characteristic.SwingMode.SWING_ENABLED) {
             swingState = airstage.constants.TOGGLE_ON;
-        } else if (value === this.platform.Characteristic.SwingMode.SWING_DISABLED) {
+        } else if (value === this.Characteristic.SwingMode.SWING_DISABLED) {
             swingState = airstage.constants.TOGGLE_OFF;
         }
 

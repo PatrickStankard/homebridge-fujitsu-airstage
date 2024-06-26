@@ -9,13 +9,16 @@ class Accessory {
         this.accessory = accessory;
         this.dynamicServiceCharacteristics = [];
 
+        this.Service = this.platform.Service;
+        this.Characteristic = this.platform.Characteristic;
+
         this.deviceId = this.accessory.context.deviceId;
         this.airstageClient = this.accessory.context.airstageClient;
 
-        this.accessory.getService(this.platform.Service.AccessoryInformation)
-            .setCharacteristic(this.platform.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
-            .setCharacteristic(this.platform.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.platform.Characteristic.SerialNumber, this.accessory.context.deviceId);
+        this.accessory.getService(this.Service.AccessoryInformation)
+            .setCharacteristic(this.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
+            .setCharacteristic(this.Characteristic.Model, this.accessory.context.model)
+            .setCharacteristic(this.Characteristic.SerialNumber, this.accessory.context.deviceId);
     }
 
     _refreshDynamicServiceCharacteristics() {
