@@ -283,7 +283,7 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with succe
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 1);
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.getTemperatureScale((error, result) => {
         assert.strictEqual(error, null);
@@ -308,7 +308,7 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 1);
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.getTemperatureScale((error, result) => {
         assert.strictEqual(error, expectedError);
@@ -337,7 +337,7 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with succe
         assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.setTemperatureScale('F', (error, result) => {
         assert.strictEqual(error, null);
@@ -367,7 +367,7 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error
         assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.setTemperatureScale('F', (error, result) => {
         assert.strictEqual(error, expectedError);

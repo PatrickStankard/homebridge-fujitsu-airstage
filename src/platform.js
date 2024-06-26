@@ -253,7 +253,7 @@ class Platform {
     _refreshAirstageClientCache() {
         const limit = 100;
 
-        this.airstageClient.resetUserCache();
+        this.airstageClient.resetUserMetadataCache();
         this.airstageClient.getUserMetadata(
             (function(error) {
                 if (error) {

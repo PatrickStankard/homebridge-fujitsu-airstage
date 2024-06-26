@@ -31,7 +31,7 @@ class Client {
             refreshToken || null
         );
 
-        this.resetUserCache();
+        this.resetUserMetadataCache();
         this.resetDeviceCache();
     }
 
@@ -936,7 +936,7 @@ class Client {
         }).bind(this));
     }
 
-    resetUserCache() {
+    resetUserMetadataCache() {
         this._userMetadataCache = {};
     }
 
