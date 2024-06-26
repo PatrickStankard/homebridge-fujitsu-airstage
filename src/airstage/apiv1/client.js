@@ -232,7 +232,7 @@ class Client {
         }
 
         requestOptions = {
-            'hostname': this._getHostname(),
+            'hostname': null,
             'path': path,
             'method': constants.REQUEST_METHOD_GET,
             'headers': requestHeaders
@@ -260,7 +260,7 @@ class Client {
         }
 
         requestOptions = {
-            'hostname': this._getHostname(),
+            'hostname': null,
             'path': path,
             'method': method,
             'headers': requestHeaders
@@ -270,7 +270,16 @@ class Client {
     }
 
     _makeHttpsRequest(requestOptions, requestBodyJson, callback) {
+        const hostname = this._getHostname();
         let result = structuredClone(constants.REQUEST_RESULT);
+
+        if (hostname === null) {
+            result.error = 'Could not determine hostname for region: ' + this.region;
+
+            return callback(result);
+        }
+
+        requestOptions.hostname = hostname;
 
         const request = https.request(requestOptions, (response) => {
             result.statusCode = response.statusCode;

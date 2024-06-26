@@ -14,9 +14,13 @@ const clientWithAccessToken = new airstage.apiv1.Client(
     '2099-01-01',
     'existingRefreshToken'
 );
+const clientWithoutAccessToken = new airstage.apiv1.Client(
+    'us',
+    'United States',
+    'en'
+);
 
 test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with success', (context, done) => {
-    const clientWithoutAccessToken = new airstage.apiv1.Client('us', 'United States', 'en');
     const expectedResponse = {
         'accessToken': 'testAccessToken',
         'expiresIn': 3600,
@@ -50,12 +54,15 @@ test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with success
         assert.strictEqual(result.error, null);
         assert.strictEqual(result.response, expectedResponse);
 
+        clientWithoutAccessToken.accessToken = null;
+        clientWithoutAccessToken.accessTokenExpiry = null;
+        clientWithoutAccessToken.refreshToken = null;
+
         done();
     });
 });
 
 test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with error', (context, done) => {
-    const clientWithoutAccessToken = new airstage.apiv1.Client('us', 'United States', 'en');
     const expectedError = 'Error';
     context.mock.method(
         clientWithoutAccessToken,
@@ -742,6 +749,35 @@ test('airstage.apiv1.Client#getGroups calls _makeHttpsRequest with error', (cont
 
     clientWithAccessToken.getGroups((result) => {
         assert.strictEqual(result.error, expectedError);
+        assert.strictEqual(result.response, '');
+
+        done();
+    });
+});
+
+test('airstage.apiv1.Client#getGroups with "Could not determine hostname" error', (context, done) => {
+    const clientWithInvalidRegion = new airstage.apiv1.Client(
+        'cn',
+        'China',
+        'en',
+        null,
+        null,
+        'existingAccessToken',
+        '2099-01-01',
+        'existingRefreshToken'
+    );
+
+    clientWithInvalidRegion.getGroups((result) => {
+        assert.strictEqual(result.error, 'Could not determine hostname for region: cn');
+        assert.strictEqual(result.response, '');
+
+        done();
+    });
+});
+
+test('airstage.apiv1.Client#getGroups with "Access token not set" error', (context, done) => {
+    clientWithoutAccessToken.getGroups((result) => {
+        assert.strictEqual(result.error, 'Access token not set');
         assert.strictEqual(result.response, '');
 
         done();

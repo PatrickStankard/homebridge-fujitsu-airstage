@@ -2178,3 +2178,34 @@ test('airstage.Client#getParameter calls _apiClient.getDevice with "Parameter no
         done();
     });
 });
+
+test('airstage.Client#getParameter with "Could not determine hostname" error', (context, done) => {
+    const clientWithInvalidRegion = new airstage.Client(
+        'cn',
+        'China',
+        'en',
+        null,
+        null,
+        null,
+        null,
+        'existingAccessToken',
+        '2099-01-01',
+        'existingRefreshToken'
+    );
+
+    clientWithInvalidRegion.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
+        assert.strictEqual(error, 'Could not determine hostname for region: cn');
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
+test('airstage.Client#getParameter with "Access token not set" error', (context, done) => {
+    clientWithoutAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
+        assert.strictEqual(error, 'Access token not set');
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
