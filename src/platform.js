@@ -61,39 +61,11 @@ class Platform {
     discoverDevices() {
         this.airstageClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
-                return this.log.error('Error when attempting to authenticate with Airbridge:', error);
+                return this.log.error('Error when attempting to authenticate with Airstage:', error);
             }
 
             this._updateConfigWithAccessToken();
-
-            this.airstageClient.getUserMetadata((function(error) {
-                if (error) {
-                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
-                }
-
-                this.airstageClient.getDevices(null, (function(error, devices) {
-                    if (error) {
-                        return this.log.error('Error when attempting to communicate with Airbridge:', error);
-                    }
-
-                    const deviceIds = Object.keys(devices.metadata);
-
-                    deviceIds.forEach(function(deviceId) {
-                        const deviceMetadata = devices.metadata[deviceId];
-                        const deviceParameters = devices.parameters[deviceId];
-                        const deviceName = deviceMetadata.deviceName;
-                        const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL];
-
-                        this._configureAirstageDevice(
-                            deviceId,
-                            deviceMetadata,
-                            deviceParameters,
-                            deviceName,
-                            model
-                        );
-                    }, this);
-                }).bind(this));
-            }).bind(this));
+            this._configureAirstageDevices();
         }).bind(this));
     }
 
@@ -113,13 +85,43 @@ class Platform {
         }
     }
 
+    _configureAirstageDevices() {
+        this.airstageClient.getUserMetadata((function(error) {
+            if (error) {
+                return this.log.error('Error when attempting to communicate with Airstage:', error);
+            }
+
+            this.airstageClient.getDevices(null, (function(error, devices) {
+                if (error) {
+                    return this.log.error('Error when attempting to communicate with Airstage:', error);
+                }
+
+                const deviceIds = Object.keys(devices.metadata);
+
+                deviceIds.forEach(function(deviceId) {
+                    const deviceMetadata = devices.metadata[deviceId];
+                    const deviceParameters = devices.parameters[deviceId];
+                    const deviceName = deviceMetadata.deviceName;
+                    const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL];
+
+                    this._configureAirstageDevice(
+                        deviceId,
+                        deviceParameters,
+                        deviceName,
+                        model
+                    );
+                }, this);
+            }).bind(this));
+        }).bind(this));
+    }
+
     _configureAirstageDevice(
         deviceId,
-        deviceMetadata,
         deviceParameters,
         deviceName,
         model
     ) {
+        // Thermostat
         if (this.config.enableThermostat) {
             this.accessoryManager.registerThermostatAccessory(
                 deviceId,
@@ -133,6 +135,7 @@ class Platform {
             );
         }
 
+        // Fan
         if (this.config.enableFan) {
             this.accessoryManager.registerFanAccessory(
                 deviceId,
@@ -146,6 +149,7 @@ class Platform {
             );
         }
 
+        // Vertical slats
         if (this.config.enableVerticalSlats) {
             this.accessoryManager.registerVerticalSlatsAccessory(
                 deviceId,
@@ -159,6 +163,7 @@ class Platform {
             );
         }
 
+        // "Dry Mode" switch
         if (this.config.enableDryModeSwitch) {
             this.accessoryManager.registerDryModeSwitchAccessory(
                 deviceId,
@@ -172,6 +177,7 @@ class Platform {
             );
         }
 
+        // "Economy" switch
         if (this.config.enableEconomySwitch) {
             this.accessoryManager.registerEconomySwitchAccessory(
                 deviceId,
@@ -185,6 +191,7 @@ class Platform {
             );
         }
 
+        // "Energy Saving Fan" switch
         if (this.config.enableEnergySavingFanSwitch) {
             this.accessoryManager.registerEnergySavingFanSwitchAccessory(
                 deviceId,
@@ -198,6 +205,7 @@ class Platform {
             );
         }
 
+        // "Fan Mode" switch
         if (this.config.enableFanModeSwitch) {
             this.accessoryManager.registerFanModeSwitchAccessory(
                 deviceId,
@@ -211,6 +219,7 @@ class Platform {
             );
         }
 
+        // "Minimum Heat Mode" switch
         if (this.config.enableMinimumHeatModeSwitch) {
             this.accessoryManager.registerMinimumHeatModeSwitchAccessory(
                 deviceId,
@@ -224,6 +233,7 @@ class Platform {
             );
         }
 
+        // "Powerful" switch
         if (this.config.enablePowerfulSwitch) {
             this.accessoryManager.registerPowerfulSwitchAccessory(
                 deviceId,
@@ -241,7 +251,7 @@ class Platform {
     _refreshAirstageClientToken() {
         this.airstageClient.refreshToken((function(error) {
             if (error) {
-                return this.log.error('Error when attempting to refresh Airbridge access token:', error);
+                return this.log.error('Error when attempting to refresh Airstage access token:', error);
             }
 
             this._updateConfigWithAccessToken();
@@ -257,7 +267,7 @@ class Platform {
         this.airstageClient.getUserMetadata(
             (function(error) {
                 if (error) {
-                    return this.log.error('Error when attempting to communicate with Airbridge:', error);
+                    return this.log.error('Error when attempting to communicate with Airstage:', error);
                 }
 
                 this.log.debug('Refreshed Airstage client user metadata cache');
@@ -267,7 +277,7 @@ class Platform {
                     limit,
                     (function(error, devices) {
                         if (error) {
-                            return this.log.error('Error when attempting to communicate with Airbridge:', error);
+                            return this.log.error('Error when attempting to communicate with Airstage:', error);
                         }
 
                         this.log.debug('Refreshed Airstage client device cache');

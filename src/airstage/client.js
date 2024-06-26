@@ -261,9 +261,10 @@ class Client {
                 }
 
                 if (operationMode === constants.OPERATION_MODE_DRY) {
-                    // The fan speed is automatically set to "AUTO" on the
-                    // Airstage side, so let's reflect that in the local
-                    // device cache
+                    // These things automatically happen on the Airstage side
+                    // when turning on dry mode, so let's update
+                    // them in the local device cache:
+                    // - The fan speed is set to "AUTO"
                     this._setDeviceParameterCache(
                         deviceId,
                         {
@@ -687,11 +688,13 @@ class Client {
                 }
 
                 if (toggle === constants.TOGGLE_ON) {
-                    // The power state is automatically set to "ON", the fan
-                    // speed is automatically set to "AUTO", the operation
-                    // mode is automatically set to "HEAT", and the temperature
-                    // is automatically set to 50 degrees (F) on the Airstage
-                    // side, so let's reflect that in the local device cache
+                    // These things automatically happen on the Airstage side
+                    // when turning on minimum heat, so let's update
+                    // them in the local device cache:
+                    // - The power state is set to "ON"
+                    // - The fan speed is set to "AUTO"
+                    // - The operation mode is set to "HEAT"
+                    // - The temperature is set to 10 degrees (C)
                     this._setDeviceParameterCache(
                         deviceId,
                         {
@@ -716,8 +719,10 @@ class Client {
                         }
                     );
                 } else if (toggle === constants.TOGGLE_OFF) {
-                    // The power state is automatically set to "OFF" on the
-                    // Airstage side, so let's reflect that in the local device cache
+                    // These things automatically happen on the Airstage side
+                    // when turning off minimum heat, so let's update
+                    // them in the local device cache:
+                    // - The power state is set to "OFF"
                     this._setDeviceParameterCache(
                         deviceId,
                         {
