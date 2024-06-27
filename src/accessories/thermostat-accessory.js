@@ -9,33 +9,33 @@ class ThermostatAccessory extends Accessory {
         super(platform, accessory);
 
         this.service = (
-            this.accessory.getService(this.platform.Service.Thermostat) ||
-            this.accessory.addService(this.platform.Service.Thermostat)
+            this.accessory.getService(this.Service.Thermostat) ||
+            this.accessory.addService(this.Service.Thermostat)
         );
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.CurrentHeatingCoolingState);
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentHeatingCoolingState)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.CurrentHeatingCoolingState);
+        this.service.getCharacteristic(this.Characteristic.CurrentHeatingCoolingState)
             .on('get', this.getCurrentHeatingCoolingState.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.TargetHeatingCoolingState);
-        this.service.getCharacteristic(this.platform.Characteristic.TargetHeatingCoolingState)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.TargetHeatingCoolingState);
+        this.service.getCharacteristic(this.Characteristic.TargetHeatingCoolingState)
             .on('get', this.getTargetHeatingCoolingState.bind(this))
             .on('set', this.setTargetHeatingCoolingState.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.CurrentTemperature);
-        this.service.getCharacteristic(this.platform.Characteristic.CurrentTemperature)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.CurrentTemperature);
+        this.service.getCharacteristic(this.Characteristic.CurrentTemperature)
             .on('get', this.getCurrentTemperature.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.platform.Characteristic.TargetTemperature);
-        this.service.getCharacteristic(this.platform.Characteristic.TargetTemperature)
+        this.dynamicServiceCharacteristics.push(this.Characteristic.TargetTemperature);
+        this.service.getCharacteristic(this.Characteristic.TargetTemperature)
             .on('get', this.getTargetTemperature.bind(this))
             .on('set', this.setTargetTemperature.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.TemperatureDisplayUnits)
+        this.service.getCharacteristic(this.Characteristic.TemperatureDisplayUnits)
             .on('get', this.getTemperatureDisplayUnits.bind(this))
             .on('set', this.setTemperatureDisplayUnits.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.Name)
+        this.service.getCharacteristic(this.Characteristic.Name)
             .on('get', this.getName.bind(this));
     }
 
@@ -56,7 +56,7 @@ class ThermostatAccessory extends Accessory {
                 if (powerState === airstage.constants.TOGGLE_OFF) {
                     return callback(
                         null,
-                        this.platform.Characteristic.CurrentHeatingCoolingState.OFF
+                        this.Characteristic.CurrentHeatingCoolingState.OFF
                     );
                 }
 
@@ -83,11 +83,11 @@ class ThermostatAccessory extends Accessory {
                                     }
 
                                     if (temperatureDelta > 0) {
-                                        currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+                                        currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.COOL;
                                     } else if (temperatureDelta < 0) {
-                                        currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+                                        currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.HEAT;
                                     } else {
-                                        currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
+                                        currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.OFF;
                                     }
 
                                     this._logMethodCallResult(methodName, null, currentHeatingCoolingState);
@@ -98,13 +98,13 @@ class ThermostatAccessory extends Accessory {
                         }
 
                         if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
-                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+                            currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.COOL;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
-                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.COOL;
+                            currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.COOL;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
-                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.OFF;
+                            currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.OFF;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
-                            currentHeatingCoolingState = this.platform.Characteristic.CurrentHeatingCoolingState.HEAT;
+                            currentHeatingCoolingState = this.Characteristic.CurrentHeatingCoolingState.HEAT;
                         }
 
                         this._logMethodCallResult(methodName, null, currentHeatingCoolingState);
@@ -133,7 +133,7 @@ class ThermostatAccessory extends Accessory {
                 if (powerState === airstage.constants.TOGGLE_OFF) {
                     return callback(
                         null,
-                        this.platform.Characteristic.TargetHeatingCoolingState.OFF
+                        this.Characteristic.TargetHeatingCoolingState.OFF
                     );
                 }
 
@@ -149,15 +149,15 @@ class ThermostatAccessory extends Accessory {
                         }
 
                         if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
-                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.COOL;
+                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.COOL;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
-                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.COOL;
+                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.COOL;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
-                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.OFF;
+                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.OFF;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
-                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.HEAT;
+                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.HEAT;
                         } else if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
-                            targetHeatingCoolingState = this.platform.Characteristic.TargetHeatingCoolingState.AUTO;
+                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.AUTO;
                         }
 
                         this._logMethodCallResult(methodName, null, targetHeatingCoolingState);
@@ -176,7 +176,7 @@ class ThermostatAccessory extends Accessory {
 
         let operationMode = null;
 
-        if (value === this.platform.Characteristic.TargetHeatingCoolingState.OFF) {
+        if (value === this.Characteristic.TargetHeatingCoolingState.OFF) {
             return this.airstageClient.setPowerState(
                 this.deviceId,
                 airstage.constants.TOGGLE_OFF,
@@ -207,11 +207,11 @@ class ThermostatAccessory extends Accessory {
                     return callback(error);
                 }
 
-                if (value === this.platform.Characteristic.TargetHeatingCoolingState.COOL) {
+                if (value === this.Characteristic.TargetHeatingCoolingState.COOL) {
                     operationMode = airstage.constants.OPERATION_MODE_COOL;
-                } else if (value === this.platform.Characteristic.TargetHeatingCoolingState.HEAT) {
+                } else if (value === this.Characteristic.TargetHeatingCoolingState.HEAT) {
                     operationMode = airstage.constants.OPERATION_MODE_HEAT;
-                } else if (value === this.platform.Characteristic.TargetHeatingCoolingState.AUTO) {
+                } else if (value === this.Characteristic.TargetHeatingCoolingState.AUTO) {
                     operationMode = airstage.constants.OPERATION_MODE_AUTO;
                 }
 
@@ -322,9 +322,9 @@ class ThermostatAccessory extends Accessory {
                 }
 
                 if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_CELSIUS) {
-                    temperatureDisplayUnits = this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS;
+                    temperatureDisplayUnits = this.Characteristic.TemperatureDisplayUnits.CELSIUS;
                 } else if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
-                    temperatureDisplayUnits = this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT;
+                    temperatureDisplayUnits = this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT;
                 }
 
                 this._logMethodCallResult(methodName, null, temperatureDisplayUnits);
@@ -341,9 +341,9 @@ class ThermostatAccessory extends Accessory {
 
         let scale = null;
 
-        if (value === this.platform.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
+        if (value === this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
             temperatureScale = airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT;
-        } else if (value === this.platform.Characteristic.TemperatureDisplayUnits.CELSIUS) {
+        } else if (value === this.Characteristic.TemperatureDisplayUnits.CELSIUS) {
             temperatureScale = airstage.constants.TEMPERATURE_SCALE_CELSIUS;
         }
 

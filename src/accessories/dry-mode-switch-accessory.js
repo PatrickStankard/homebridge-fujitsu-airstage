@@ -11,15 +11,15 @@ class DryModeSwitchAccessory extends Accessory {
         this.lastKnownOperationMode = null;
 
         this.service = (
-            this.accessory.getService(this.platform.Service.Switch) ||
-            this.accessory.addService(this.platform.Service.Switch)
+            this.accessory.getService(this.Service.Switch) ||
+            this.accessory.addService(this.Service.Switch)
         );
 
-        this.service.getCharacteristic(this.platform.Characteristic.On)
+        this.service.getCharacteristic(this.Characteristic.On)
             .on('get', this.getOn.bind(this))
             .on('set', this.setOn.bind(this));
 
-        this.service.getCharacteristic(this.platform.Characteristic.Name)
+        this.service.getCharacteristic(this.Characteristic.Name)
             .on('get', this.getName.bind(this));
     }
 

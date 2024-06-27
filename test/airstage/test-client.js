@@ -283,7 +283,7 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with succe
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 1);
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.getTemperatureScale((error, result) => {
         assert.strictEqual(error, null);
@@ -308,7 +308,7 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 1);
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.getTemperatureScale((error, result) => {
         assert.strictEqual(error, expectedError);
@@ -337,7 +337,7 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with succe
         assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.setTemperatureScale('F', (error, result) => {
         assert.strictEqual(error, null);
@@ -367,7 +367,7 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error
         assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
     });
-    clientWithAccessToken.resetUserCache();
+    clientWithAccessToken.resetUserMetadataCache();
 
     clientWithAccessToken.setTemperatureScale('F', (error, result) => {
         assert.strictEqual(error, expectedError);
@@ -2173,6 +2173,37 @@ test('airstage.Client#getParameter calls _apiClient.getDevice with "Parameter no
 
     clientWithAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
         assert.strictEqual(error, 'Parameter not available: iu_indoor_tmp');
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
+test('airstage.Client#getParameter with "Could not determine hostname" error', (context, done) => {
+    const clientWithInvalidRegion = new airstage.Client(
+        'cn',
+        'China',
+        'en',
+        null,
+        null,
+        null,
+        null,
+        'existingAccessToken',
+        '2099-01-01',
+        'existingRefreshToken'
+    );
+
+    clientWithInvalidRegion.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
+        assert.strictEqual(error, 'Could not determine hostname for region: cn');
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
+test('airstage.Client#getParameter with "Access token not set" error', (context, done) => {
+    clientWithoutAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
+        assert.strictEqual(error, 'Access token not set');
         assert.strictEqual(result, null);
 
         done();

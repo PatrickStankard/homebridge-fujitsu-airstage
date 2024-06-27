@@ -8,6 +8,9 @@ class PlatformAccessoryManager {
 
     constructor(platform) {
         this.platform = platform;
+
+        this.Service = this.platform.Service;
+        this.Characteristic = this.platform.Characteristic;
     }
 
     registerThermostatAccessory(deviceId, deviceName, model) {
@@ -285,11 +288,11 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.CurrentHeatingCoolingState,
-                this.platform.Characteristic.TargetHeatingCoolingState,
-                this.platform.Characteristic.CurrentTemperature,
-                this.platform.Characteristic.TargetTemperature,
-                this.platform.Characteristic.TemperatureDisplayUnits
+                this.Characteristic.CurrentHeatingCoolingState,
+                this.Characteristic.TargetHeatingCoolingState,
+                this.Characteristic.CurrentTemperature,
+                this.Characteristic.TargetTemperature,
+                this.Characteristic.TemperatureDisplayUnits
             ]
         );
     }
@@ -305,11 +308,11 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.Active,
-                this.platform.Characteristic.CurrentFanState,
-                this.platform.Characteristic.TargetFanState,
-                this.platform.Characteristic.RotationSpeed,
-                this.platform.Characteristic.SwingMode
+                this.Characteristic.Active,
+                this.Characteristic.CurrentFanState,
+                this.Characteristic.TargetFanState,
+                this.Characteristic.RotationSpeed,
+                this.Characteristic.SwingMode
             ]
         );
     }
@@ -325,10 +328,10 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.CurrentSlatState,
-                this.platform.Characteristic.SwingMode,
-                this.platform.Characteristic.CurrentTiltAngle,
-                this.platform.Characteristic.TargetTiltAngle
+                this.Characteristic.CurrentSlatState,
+                this.Characteristic.SwingMode,
+                this.Characteristic.CurrentTiltAngle,
+                this.Characteristic.TargetTiltAngle
             ]
         );
     }
@@ -344,7 +347,7 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.On
+                this.Characteristic.On
             ]
         );
     }
@@ -360,7 +363,7 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.On
+                this.Characteristic.On
             ]
         );
     }
@@ -376,7 +379,7 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.On
+                this.Characteristic.On
             ]
         );
     }
@@ -392,7 +395,7 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.On
+                this.Characteristic.On
             ]
         );
     }
@@ -408,7 +411,7 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.On
+                this.Characteristic.On
             ]
         );
     }
@@ -424,7 +427,7 @@ class PlatformAccessoryManager {
         return this._refreshAccessoryCharacteristics(
             accessory,
             [
-                this.platform.Characteristic.On
+                this.Characteristic.On
             ]
         );
     }
@@ -524,7 +527,7 @@ class PlatformAccessoryManager {
 
     _refreshAccessoryCharacteristics(accessory, characteristicClasses) {
         const service = accessory.services.find(
-            service => (service instanceof this.platform.Service.AccessoryInformation) === false
+            service => (service instanceof this.Service.AccessoryInformation) === false
         ) || null;
 
         if (service === null) {
