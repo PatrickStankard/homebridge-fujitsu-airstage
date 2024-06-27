@@ -18,7 +18,7 @@ A Homebridge plugin to control devices that use the Fujitsu Airstage API.
     "refreshToken": null,
     "enableThermostat": true,
     "enableFan": true,
-    "enableVerticalSlats": false,
+    "enableVerticalAirflowDirection": false,
     "enableDryModeSwitch": false,
     "enableEconomySwitch": false,
     "enableEnergySavingFanSwitch": false,
