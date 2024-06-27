@@ -85,6 +85,11 @@
                 "type": "boolean",
                 "default": false
             },
+            "enableVerticalAirflowDirection": {
+                "title": "Enable vertical airflow direction control",
+                "type": "boolean",
+                "default": false
+            },
             "enableDryModeSwitch": {
                 "title": "Enable 'Dry Mode' switch",
                 "type": "boolean",

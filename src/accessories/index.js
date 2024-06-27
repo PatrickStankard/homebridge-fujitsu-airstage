@@ -3,6 +3,7 @@
 const ThermostatAccessory = require('./thermostat-accessory');
 const FanAccessory = require('./fan-accessory');
 const VerticalSlatsAccessory = require('./vertical-slats-accessory');
+const VerticalAirflowDirectionAccessory = require('./vertical-airflow-direction-accessory');
 const DryModeSwitchAccessory = require('./dry-mode-switch-accessory');
 const EconomySwitchAccessory = require('./economy-switch-accessory');
 const EnergySavingFanSwitchAccessory = require('./energy-saving-fan-switch-accessory');
@@ -14,6 +15,7 @@ module.exports = {
     ThermostatAccessory,
     FanAccessory,
     VerticalSlatsAccessory,
+    VerticalAirflowDirectionAccessory,
     DryModeSwitchAccessory,
     EconomySwitchAccessory,
     EnergySavingFanSwitchAccessory,

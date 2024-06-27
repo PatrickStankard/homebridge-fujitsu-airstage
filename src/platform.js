@@ -163,6 +163,20 @@ class Platform {
             );
         }
 
+        // Vertical airflow direction
+        if (this.config.enableVerticalAirflowDirection) {
+            this.accessoryManager.registerVerticalAirflowDirectionAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterVerticalAirflowDirectionAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
         // "Dry Mode" switch
         if (this.config.enableDryModeSwitch) {
             this.accessoryManager.registerDryModeSwitchAccessory(

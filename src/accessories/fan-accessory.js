@@ -334,6 +334,8 @@ class FanAccessory extends Accessory {
 
                 this._logMethodCallResult(methodName, null, null);
 
+                this._refreshRelatedAccessoryCharacteristics();
+
                 callback(null);
             }).bind(this)
         );
@@ -363,6 +365,7 @@ class FanAccessory extends Accessory {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
     }
 }
 

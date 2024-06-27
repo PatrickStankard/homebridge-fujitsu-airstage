@@ -79,6 +79,28 @@ class PlatformAccessoryManager {
         }
     }
 
+    registerVerticalAirflowDirectionAccessory(deviceId, deviceName, model) {
+        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_AIRFLOW_DIRECTION;
+        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (existingAccessory) {
+            this._updateExistingAccessory(existingAccessory, deviceId, model);
+
+            new accessories.VerticalAirflowDirectionAccessory(this.platform, existingAccessory);
+        } else {
+            const newAccessory = this._instantiateNewAccessory(
+                deviceId,
+                deviceName,
+                model,
+                suffix
+            );
+
+            new accessories.VerticalAirflowDirectionAccessory(this.platform, newAccessory);
+
+            this._registerNewAccessory(newAccessory, deviceId, model);
+        }
+    }
+
     registerDryModeSwitchAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_DRY_MODE_SWITCH;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -229,6 +251,12 @@ class PlatformAccessoryManager {
         this._unregisterAccessory(deviceId, deviceName, suffix);
     }
 
+    unregisterVerticalAirflowDirectionAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_AIRFLOW_DIRECTION;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
     unregisterDryModeSwitchAccessory(deviceId, deviceName) {
         const suffix = constants.ACCESSORY_SUFFIX_DRY_MODE_SWITCH;
 
@@ -269,6 +297,7 @@ class PlatformAccessoryManager {
         this.refreshThermostatAccessoryCharacteristics(deviceId);
         this.refreshFanAccessoryCharacteristics(deviceId);
         this.refreshVerticalSlatsAccessoryCharacteristics(deviceId);
+        this.refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId);
         this.refreshDryModeSwitchAccessoryCharacteristics(deviceId);
         this.refreshEconomySwitchAccessoryCharacteristics(deviceId);
         this.refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId);
@@ -332,6 +361,24 @@ class PlatformAccessoryManager {
                 this.Characteristic.SwingMode,
                 this.Characteristic.CurrentTiltAngle,
                 this.Characteristic.TargetTiltAngle
+            ]
+        );
+    }
+
+    refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_AIRFLOW_DIRECTION;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.Characteristic.Active,
+                this.Characteristic.CurrentFanState,
+                this.Characteristic.RotationSpeed
             ]
         );
     }
