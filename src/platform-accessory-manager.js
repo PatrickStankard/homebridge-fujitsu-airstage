@@ -486,14 +486,17 @@ class PlatformAccessoryManager {
 
             this.platform.log.debug(logMessage);
 
-            characteristic.emit('get', function(error, value) {
-                if (error === null) {
-                    characteristic.sendEventNotification(value);
-                } else {
-                    logMessage = logMessage + ' failed with error: ' + error;
-                    this.platform.log.error(logMessage);
-                }
-            });
+            characteristic.emit(
+                'get',
+                (function(error, value) {
+                    if (error === null) {
+                        characteristic.sendEventNotification(value);
+                    } else {
+                        logMessage = logMessage + ' failed with error: ' + error;
+                        this.platform.log.error(logMessage);
+                    }
+                }).bind(this)
+            );
         }, this);
 
         return true;
