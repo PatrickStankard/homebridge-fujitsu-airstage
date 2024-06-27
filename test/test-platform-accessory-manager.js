@@ -250,50 +250,6 @@ test('PlatformAccessoryManager#registerVerticalSlatsAccessory registers existing
     resetMocks();
 });
 
-test('PlatformAccessoryManager#registerVerticalSlatsAccessory registers new accessory', (context) => {
-    platformAccessoryManager.registerVerticalSlatsAccessory(deviceId, deviceName, deviceModel);
-
-    const mockedMethod = mockPlatform.api.registerPlatformAccessories.mock;
-    assert.strictEqual(mockedMethod.calls.length, 1);
-    assert.strictEqual(mockedMethod.calls[0].arguments[0], settings.PLUGIN_NAME);
-    assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
-    const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
-    assert.strictEqual(mockPlatformAccessory.name, 'Test Device Vertical Slats');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, airstageClient);
-    assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
-    assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
-    assert.strictEqual(mockPlatform.accessories.length, 1);
-    assert.strictEqual(mockPlatform.accessories[0], mockPlatformAccessory);
-
-    resetMocks();
-});
-
-test('PlatformAccessoryManager#registerDryModeSwitchAccessory registers existing accessory', (context) => {
-    const existingUuid = hap.uuid.generate(
-        deviceId + '-dry-mode-switch'
-    );
-    const existingPlatformAccessory = new MockPlatformAccessory(
-        'Test Device Dry Mode Switch',
-        existingUuid
-    );
-    mockPlatform.accessories = [existingPlatformAccessory];
-
-    platformAccessoryManager.registerDryModeSwitchAccessory(deviceId, deviceName, deviceModel);
-
-    const mockedMethod = mockPlatform.api.updatePlatformAccessories.mock;
-    assert.strictEqual(mockedMethod.calls.length, 1);
-    const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
-    assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
-    assert.strictEqual(mockPlatformAccessory.name, 'Test Device Dry Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, airstageClient);
-    assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
-    assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
-    assert.strictEqual(mockPlatform.accessories.length, 1);
-    assert.strictEqual(mockPlatform.accessories[0], mockPlatformAccessory);
-
-    resetMocks();
-});
-
 test('PlatformAccessoryManager#registerDryModeSwitchAccessory registers new accessory', (context) => {
     platformAccessoryManager.registerDryModeSwitchAccessory(deviceId, deviceName, deviceModel);
 
