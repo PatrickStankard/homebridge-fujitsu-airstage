@@ -3,6 +3,11 @@
 const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
+/**
+ * The Slats service isn't supported by Apple Home currently, so this Accessory
+ * class isn't used. The VerticalAirflowDirectionAccessory is used to control
+ * the vertical tilt angle, using the Lightbulb service.
+ */
 class VerticalSlatsAccessory extends Accessory {
 
     constructor(platform, accessory) {

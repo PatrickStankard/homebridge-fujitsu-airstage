@@ -80,11 +80,6 @@
                 "type": "boolean",
                 "default": true
             },
-            "enableVerticalSlats": {
-                "title": "Enable vertical slats control",
-                "type": "boolean",
-                "default": false
-            },
             "enableVerticalAirflowDirection": {
                 "title": "Enable vertical airflow direction control",
                 "type": "boolean",

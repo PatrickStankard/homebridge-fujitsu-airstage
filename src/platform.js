@@ -150,18 +150,11 @@ class Platform {
         }
 
         // Vertical slats
-        if (this.config.enableVerticalSlats) {
-            this.accessoryManager.registerVerticalSlatsAccessory(
-                deviceId,
-                deviceName,
-                model
-            );
-        } else {
-            this.accessoryManager.unregisterVerticalSlatsAccessory(
-                deviceId,
-                deviceName
-            );
-        }
+        // Currently disabled since Apple Home doesn't support Slats service
+        this.accessoryManager.unregisterVerticalSlatsAccessory(
+            deviceId,
+            deviceName
+        );
 
         // Vertical airflow direction
         if (this.config.enableVerticalAirflowDirection) {
