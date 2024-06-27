@@ -31,5 +31,11 @@
   "devDependencies": {
     "@types/node": "^20.12.13",
     "homebridge": "^1.7.0"
-  }
+  },
+  "maintainers": [
+    {
+      "name": "patrickstankard",
+      "email": "me@patrickstankard.com"
+    }
+  ]
 }
