@@ -839,39 +839,7 @@ class Client {
             });
         }
 
-        this._apiClient.getDevicesAll(
-            limit,
-            (function(result) {
-                if (this._isInvalidTokenResult(result)) {
-                    return callback('Invalid access token', null);
-                }
-
-                if (result.error) {
-                    return callback(result.error, null);
-                }
-
-                if (result.response) {
-                    result.response.devices.forEach(function(device) {
-                        this._setDeviceMetadataCache(
-                            device.deviceId,
-                            device
-                        );
-                        this._setDeviceParameterCache(
-                            device.deviceId,
-                            device
-                        );
-                    }, this);
-                }
-
-                deviceMetadata = this._getDeviceMetadataCache(null);
-                deviceParameters = this._getDeviceParameterCache(null);
-
-                callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
-                });
-            }).bind(this)
-        );
+        this._getDevices(limit, callback);
     }
 
     getDevice(deviceId, callback) {
@@ -922,23 +890,7 @@ class Client {
             return callback(null, userMetadata);
         }
 
-        this._apiClient.getUsersMe((function(result) {
-            if (this._isInvalidTokenResult(result)) {
-                return callback('Invalid access token', null);
-            }
-
-            if (result.error) {
-                return callback(result.error, null);
-            }
-
-            if (result.response) {
-                userMetadata = result.response;
-
-                this._setUserMetadataCache(userMetadata);
-            }
-
-            callback(null, userMetadata);
-        }).bind(this));
+        this._getUserMetadata(callback);
     }
 
     resetUserMetadataCache() {
@@ -958,6 +910,31 @@ class Client {
                 delete this._deviceParameterCache[deviceId];
             }
         }
+    }
+
+    refreshUserMetadataCache(callback) {
+        this._getUserMetadata(
+            (function(error, result) {
+                if (error) {
+                    return callback(error);
+                }
+
+                callback(null, result);
+            }).bind(this)
+        );
+    }
+
+    refreshDeviceCache(callback) {
+        this._getDevices(
+            null,
+            (function(error, result) {
+                if (error) {
+                    return callback(error);
+                }
+
+                callback(null, result);
+            }).bind(this)
+        );
     }
 
     getAccessToken() {
@@ -1069,6 +1046,64 @@ class Client {
         }
 
         return this._getDeviceParameterCache(deviceId);
+    }
+
+    _getDevices(limit, callback) {
+        this._apiClient.getDevicesAll(
+            limit,
+            (function(result) {
+                if (this._isInvalidTokenResult(result)) {
+                    return callback('Invalid access token', null);
+                }
+
+                if (result.error) {
+                    return callback(result.error, null);
+                }
+
+                if (result.response) {
+                    result.response.devices.forEach(function(device) {
+                        this._setDeviceMetadataCache(
+                            device.deviceId,
+                            device
+                        );
+                        this._setDeviceParameterCache(
+                            device.deviceId,
+                            device
+                        );
+                    }, this);
+                }
+
+                const deviceMetadata = this._getDeviceMetadataCache(null);
+                const deviceParameters = this._getDeviceParameterCache(null);
+
+                callback(null, {
+                    'metadata': deviceMetadata,
+                    'parameters': deviceParameters
+                });
+            }).bind(this)
+        );
+    }
+
+    _getUserMetadata(callback) {
+        let userMetadata = this._getUserMetadataCache();
+
+        this._apiClient.getUsersMe((function(result) {
+            if (this._isInvalidTokenResult(result)) {
+                return callback('Invalid access token', null);
+            }
+
+            if (result.error) {
+                return callback(result.error, null);
+            }
+
+            if (result.response) {
+                userMetadata = result.response;
+
+                this._setUserMetadataCache(userMetadata);
+            }
+
+            callback(null, userMetadata);
+        }).bind(this));
     }
 
     _pollRequestStatus(deviceId, requestId, callback) {
