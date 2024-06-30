@@ -3,6 +3,8 @@
 // Accessory suffixes
 module.exports.ACCESSORY_SUFFIX_THERMOSTAT = 'thermostat';
 module.exports.ACCESSORY_SUFFIX_FAN = 'fan';
+// Deprecated: the VerticalSlatsAccessory was replaced by the
+// VerticalAirflowDirectionAccessory
 module.exports.ACCESSORY_SUFFIX_VERTICAL_SLATS = 'vertical-slats';
 module.exports.ACCESSORY_SUFFIX_VERTICAL_AIRFLOW_DIRECTION = 'vertical-airflow-direction';
 module.exports.ACCESSORY_SUFFIX_DRY_MODE_SWITCH = 'dry-mode-switch';

@@ -57,28 +57,6 @@ class PlatformAccessoryManager {
         }
     }
 
-    registerVerticalSlatsAccessory(deviceId, deviceName, model) {
-        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_SLATS;
-        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
-
-        if (existingAccessory) {
-            this._updateExistingAccessory(existingAccessory, deviceId, model);
-
-            new accessories.VerticalSlatsAccessory(this.platform, existingAccessory);
-        } else {
-            const newAccessory = this._instantiateNewAccessory(
-                deviceId,
-                deviceName,
-                model,
-                suffix
-            );
-
-            new accessories.VerticalSlatsAccessory(this.platform, newAccessory);
-
-            this._registerNewAccessory(newAccessory, deviceId, model);
-        }
-    }
-
     registerVerticalAirflowDirectionAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_AIRFLOW_DIRECTION;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -245,6 +223,8 @@ class PlatformAccessoryManager {
         this._unregisterAccessory(deviceId, deviceName, suffix);
     }
 
+    // Deprecated: the VerticalSlatsAccessory was replaced by the
+    // VerticalAirflowDirectionAccessory
     unregisterVerticalSlatsAccessory(deviceId, deviceName) {
         const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_SLATS;
 
@@ -296,7 +276,6 @@ class PlatformAccessoryManager {
     refreshAllAccessoryCharacteristics(deviceId) {
         this.refreshThermostatAccessoryCharacteristics(deviceId);
         this.refreshFanAccessoryCharacteristics(deviceId);
-        this.refreshVerticalSlatsAccessoryCharacteristics(deviceId);
         this.refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId);
         this.refreshDryModeSwitchAccessoryCharacteristics(deviceId);
         this.refreshEconomySwitchAccessoryCharacteristics(deviceId);
@@ -342,25 +321,6 @@ class PlatformAccessoryManager {
                 this.Characteristic.TargetFanState,
                 this.Characteristic.RotationSpeed,
                 this.Characteristic.SwingMode
-            ]
-        );
-    }
-
-    refreshVerticalSlatsAccessoryCharacteristics(deviceId) {
-        const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_SLATS;
-        const accessory = this._getExistingAccessory(deviceId, suffix);
-
-        if (accessory === null) {
-            return false;
-        }
-
-        return this._refreshAccessoryCharacteristics(
-            accessory,
-            [
-                this.Characteristic.CurrentSlatState,
-                this.Characteristic.SwingMode,
-                this.Characteristic.CurrentTiltAngle,
-                this.Characteristic.TargetTiltAngle
             ]
         );
     }

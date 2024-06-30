@@ -149,8 +149,8 @@ class Platform {
             );
         }
 
-        // Vertical slats
-        // Currently disabled since Apple Home doesn't support Slats service
+        // Deprecated: the VerticalSlatsAccessory was replaced by the
+        // VerticalAirflowDirectionAccessory
         this.accessoryManager.unregisterVerticalSlatsAccessory(
             deviceId,
             deviceName
