@@ -29,9 +29,9 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
-        this.airstageClient.getMinimumHeatState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, minimumHeatState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -40,15 +40,36 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                if (minimumHeatState === airstage.constants.TOGGLE_ON) {
-                    value = true;
-                } else if (minimumHeatState === airstage.constants.TOGGLE_OFF) {
-                    value = false;
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    value = this.Characteristic.Active.INACTIVE;
+
+                    this._logMethodCallResult(methodName, null, value);
+
+                    return callback(null, value);
                 }
 
-                this._logMethodCallResult(methodName, null, value);
+                this.airstageClient.getMinimumHeatState(
+                    this.deviceId,
+                    (function(error, minimumHeatState) {
+                        let value = null;
 
-                callback(null, value);
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (minimumHeatState === airstage.constants.TOGGLE_ON) {
+                            value = true;
+                        } else if (minimumHeatState === airstage.constants.TOGGLE_OFF) {
+                            value = false;
+                        }
+
+                        this._logMethodCallResult(methodName, null, value);
+
+                        callback(null, value);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
@@ -66,107 +87,44 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
             minimumHeatState = airstage.constants.TOGGLE_OFF;
         }
 
-        if (minimumHeatState === airstage.constants.TOGGLE_ON) {
-            this.airstageClient.getOperationMode(
-                this.deviceId,
-                (function(error, operationMode) {
-                    if (error) {
-                        this._logMethodCallResult(methodName, error);
+        this.airstageClient.getPowerState(
+            this.deviceId,
+            (function(error, powerState) {
+                let value = null;
 
-                        return callback(error);
-                    }
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
 
-                    this.lastKnownOperationMode = operationMode;
+                    return callback(error, null);
+                }
 
-                    this.airstageClient.getTargetTemperature(
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this.airstageClient.setPowerState(
                         this.deviceId,
-                        airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-                        (function(error, targetTemperature) {
+                        airstage.constants.TOGGLE_ON,
+                        (function(error) {
                             if (error) {
                                 this._logMethodCallResult(methodName, error);
 
                                 return callback(error);
                             }
 
-                            this.lastKnownTargetTemperature = targetTemperature;
-
-                            this.airstageClient.setMinimumHeatState(
-                                this.deviceId,
+                            this._setMinimumHeatState(
+                                methodName,
                                 minimumHeatState,
-                                (function(error) {
-                                    if (error) {
-                                        this._logMethodCallResult(methodName, error);
-
-                                        return callback(error);
-                                    }
-
-                                    this._logMethodCallResult(methodName, null, null);
-
-                                    this._refreshRelatedAccessoryCharacteristics();
-
-                                    callback(null);
-                                }).bind(this)
+                                callback
                             );
                         }).bind(this)
                     );
-                }).bind(this)
-            );
-        } else {
-            this.airstageClient.setMinimumHeatState(
-                this.deviceId,
-                minimumHeatState,
-                (function(error) {
-                    if (error) {
-                        this._logMethodCallResult(methodName, error);
-
-                        return callback(error);
-                    }
-
-                    this._logMethodCallResult(methodName, null, null);
-
-                    this._refreshRelatedAccessoryCharacteristics();
-
-                    callback(null);
-
-                    if (this.lastKnownOperationMode !== null) {
-                        this.airstageClient.setOperationMode(
-                            this.deviceId,
-                            this.lastKnownOperationMode,
-                            (function(error) {
-                                if (error) {
-                                    this._logMethodCallResult(methodName, error);
-
-                                    return callback(error);
-                                }
-
-                                this.lastKnownOperationMode = null;
-
-                                this._refreshRelatedAccessoryCharacteristics();
-                            }).bind(this)
-                        );
-                    }
-
-                    if (this.lastKnownTargetTemperature !== null) {
-                        this.airstageClient.setTargetTemperature(
-                            this.deviceId,
-                            this.lastKnownTargetTemperature,
-                            airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-                            (function(error) {
-                                if (error) {
-                                    this._logMethodCallResult(methodName, error);
-
-                                    return callback(error);
-                                }
-
-                                this.lastKnownTargetTemperature = null;
-
-                                this._refreshRelatedAccessoryCharacteristics();
-                            }).bind(this)
-                        );
-                    }
-                }).bind(this)
-            );
-        }
+                } else {
+                    this._setMinimumHeatState(
+                        methodName,
+                        minimumHeatState,
+                        callback
+                    );
+                }
+            }).bind(this)
+        );
     }
 
     getName(callback) {
@@ -192,13 +150,125 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
         );
     }
 
+    _setMinimumHeatState(methodName, minimumHeatState, callback) {
+        if (minimumHeatState === airstage.constants.TOGGLE_ON) {
+            this._enableMinimumHeat(methodName, callback);
+        } else if (minimumHeatState === airstage.constants.TOGGLE_OFF) {
+            this._disableMinimumHeat(methodName, callback);
+        }
+    }
+
+    _enableMinimumHeat(methodName, callback) {
+        this.airstageClient.getOperationMode(
+            this.deviceId,
+            (function(error, operationMode) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this.lastKnownOperationMode = operationMode;
+
+                this.airstageClient.getTargetTemperature(
+                    this.deviceId,
+                    airstage.constants.TEMPERATURE_SCALE_CELSIUS,
+                    (function(error, targetTemperature) {
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error);
+                        }
+
+                        this.lastKnownTargetTemperature = targetTemperature;
+
+                        this.airstageClient.setMinimumHeatState(
+                            this.deviceId,
+                            airstage.constants.TOGGLE_ON,
+                            (function(error) {
+                                if (error) {
+                                    this._logMethodCallResult(methodName, error);
+
+                                    return callback(error);
+                                }
+
+                                this._logMethodCallResult(methodName, null, null);
+
+                                this._refreshRelatedAccessoryCharacteristics();
+
+                                callback(null);
+                            }).bind(this)
+                        );
+                    }).bind(this)
+                );
+            }).bind(this)
+        );
+    }
+
+    _disableMinimumHeat(methodName, callback) {
+        this.airstageClient.setMinimumHeatState(
+            this.deviceId,
+            airstage.constants.TOGGLE_OFF,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                if (this.lastKnownOperationMode !== null) {
+                    this.airstageClient.setOperationMode(
+                        this.deviceId,
+                        this.lastKnownOperationMode,
+                        (function(error) {
+                            if (error) {
+                                this._logMethodCallResult(methodName, error);
+                            }
+
+                            this.lastKnownOperationMode = null;
+
+                            this._refreshRelatedAccessoryCharacteristics();
+                        }).bind(this)
+                    );
+                }
+
+                if (this.lastKnownTargetTemperature !== null) {
+                    this.airstageClient.setTargetTemperature(
+                        this.deviceId,
+                        this.lastKnownTargetTemperature,
+                        airstage.constants.TEMPERATURE_SCALE_CELSIUS,
+                        (function(error) {
+                            if (error) {
+                                this._logMethodCallResult(methodName, error);
+                            }
+
+                            this.lastKnownTargetTemperature = null;
+
+                            this._refreshRelatedAccessoryCharacteristics();
+                        }).bind(this)
+                    );
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshRelatedAccessoryCharacteristics();
+
+                callback(null);
+            }).bind(this)
+        );
+    }
+
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

@@ -26,9 +26,9 @@ class EnergySavingFanSwitchAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
-        this.airstageClient.getEnergySavingFanState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, energySavingFanState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -37,15 +37,36 @@ class EnergySavingFanSwitchAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                if (energySavingFanState === airstage.constants.TOGGLE_ON) {
-                    value = true;
-                } else if (energySavingFanState === airstage.constants.TOGGLE_OFF) {
+                if (powerState === airstage.constants.TOGGLE_OFF) {
                     value = false;
+
+                    this._logMethodCallResult(methodName, null, value);
+
+                    return callback(null, value);
                 }
 
-                this._logMethodCallResult(methodName, null, value);
+                this.airstageClient.getEnergySavingFanState(
+                    this.deviceId,
+                    (function(error, energySavingFanState) {
+                        let value = null;
 
-                callback(null, value);
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (energySavingFanState === airstage.constants.TOGGLE_ON) {
+                            value = true;
+                        } else if (energySavingFanState === airstage.constants.TOGGLE_OFF) {
+                            value = false;
+                        }
+
+                        this._logMethodCallResult(methodName, null, value);
+
+                        callback(null, value);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
@@ -63,19 +84,42 @@ class EnergySavingFanSwitchAccessory extends Accessory {
             energySavingFanState = airstage.constants.TOGGLE_OFF;
         }
 
-        this.airstageClient.setEnergySavingFanState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            energySavingFanState,
-            (function(error) {
+            (function(error, powerState) {
+                let value = null;
+
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
-                    return callback(error);
+                    return callback(error, null);
                 }
 
-                this._logMethodCallResult(methodName, null, null);
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this.airstageClient.setPowerState(
+                        this.deviceId,
+                        airstage.constants.TOGGLE_ON,
+                        (function(error) {
+                            if (error) {
+                                this._logMethodCallResult(methodName, error);
 
-                callback(null);
+                                return callback(error);
+                            }
+
+                            this._setEnergySavingFanState(
+                                methodName,
+                                energySavingFanState,
+                                callback
+                            );
+                        }).bind(this)
+                    );
+                } else {
+                    this._setEnergySavingFanState(
+                        methodName,
+                        energySavingFanState,
+                        callback
+                    );
+                }
             }).bind(this)
         );
     }
@@ -101,6 +145,39 @@ class EnergySavingFanSwitchAccessory extends Accessory {
                 callback(null, value);
             }).bind(this)
         );
+    }
+
+    _setEnergySavingFanState(methodName, energySavingFanState, callback) {
+        this.airstageClient.setEnergySavingFanState(
+            this.deviceId,
+            energySavingFanState,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshRelatedAccessoryCharacteristics();
+
+                callback(null);
+            }).bind(this)
+        );
+    }
+
+    _refreshRelatedAccessoryCharacteristics() {
+        const accessoryManager = this.platform.accessoryManager;
+
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 
