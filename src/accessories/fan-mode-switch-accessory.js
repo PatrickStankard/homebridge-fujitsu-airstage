@@ -28,9 +28,9 @@ class FanModeSwitchAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
-        this.airstageClient.getOperationMode(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, operationMode) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -39,11 +39,32 @@ class FanModeSwitchAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                value = (operationMode === airstage.constants.OPERATION_MODE_FAN);
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    value = false;
 
-                this._logMethodCallResult(methodName, null, value);
+                    this._logMethodCallResult(methodName, null, value);
 
-                callback(null, value);
+                    return callback(null, value);
+                }
+
+                this.airstageClient.getOperationMode(
+                    this.deviceId,
+                    (function(error, operationMode) {
+                        let value = null;
+
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        value = (operationMode === airstage.constants.OPERATION_MODE_FAN);
+
+                        this._logMethodCallResult(methodName, null, value);
+
+                        callback(null, value);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
@@ -65,28 +86,42 @@ class FanModeSwitchAccessory extends Accessory {
             }
         }
 
-        this.airstageClient.getOperationMode(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, currentOperationMode) {
-                this.lastKnownOperationMode = currentOperationMode;
+            (function(error, powerState) {
+                let value = null;
 
-                this.airstageClient.setOperationMode(
-                    this.deviceId,
-                    operationMode,
-                    (function(error) {
-                        if (error) {
-                            this._logMethodCallResult(methodName, error);
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
 
-                            return callback(error);
-                        }
+                    return callback(error, null);
+                }
 
-                        this._logMethodCallResult(methodName, null, null);
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this.airstageClient.setPowerState(
+                        this.deviceId,
+                        airstage.constants.TOGGLE_ON,
+                        (function(error) {
+                            if (error) {
+                                this._logMethodCallResult(methodName, error);
 
-                        this._refreshRelatedAccessoryCharacteristics();
+                                return callback(error);
+                            }
 
-                        callback(null);
-                    }).bind(this)
-                );
+                            this._setOperationMode(
+                                methodName,
+                                operationMode,
+                                callback
+                            );
+                        }).bind(this)
+                    );
+                } else {
+                    this._setOperationMode(
+                        methodName,
+                        operationMode,
+                        callback
+                    );
+                }
             }).bind(this)
         );
     }
@@ -114,12 +149,50 @@ class FanModeSwitchAccessory extends Accessory {
         );
     }
 
+    _setOperationMode(methodName, operationMode, callback) {
+        this.airstageClient.getOperationMode(
+            this.deviceId,
+            (function(error, currentOperationMode) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error, null);
+                }
+
+                this.lastKnownOperationMode = currentOperationMode;
+
+                this.airstageClient.setOperationMode(
+                    this.deviceId,
+                    operationMode,
+                    (function(error) {
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error);
+                        }
+
+                        this._logMethodCallResult(methodName, null, null);
+
+                        this._refreshRelatedAccessoryCharacteristics();
+
+                        callback(null);
+                    }).bind(this)
+                );
+            }).bind(this)
+        );
+    }
+
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

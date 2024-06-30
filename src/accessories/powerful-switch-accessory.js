@@ -26,9 +26,9 @@ class PowerfulSwitchAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
-        this.airstageClient.getPowerfulState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, powerfulState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -37,15 +37,36 @@ class PowerfulSwitchAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                if (powerfulState === airstage.constants.TOGGLE_ON) {
-                    value = true;
-                } else if (powerfulState === airstage.constants.TOGGLE_OFF) {
+                if (powerState === airstage.constants.TOGGLE_OFF) {
                     value = false;
+
+                    this._logMethodCallResult(methodName, null, value);
+
+                    return callback(null, value);
                 }
 
-                this._logMethodCallResult(methodName, null, value);
+                this.airstageClient.getPowerfulState(
+                    this.deviceId,
+                    (function(error, powerfulState) {
+                        let value = null;
 
-                callback(null, value);
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (powerfulState === airstage.constants.TOGGLE_ON) {
+                            value = true;
+                        } else if (powerfulState === airstage.constants.TOGGLE_OFF) {
+                            value = false;
+                        }
+
+                        this._logMethodCallResult(methodName, null, value);
+
+                        callback(null, value);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
@@ -63,19 +84,42 @@ class PowerfulSwitchAccessory extends Accessory {
             powerfulState = airstage.constants.TOGGLE_OFF;
         }
 
-        this.airstageClient.setPowerfulState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            powerfulState,
-            (function(error) {
+            (function(error, powerState) {
+                let value = null;
+
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
-                    return callback(error);
+                    return callback(error, null);
                 }
 
-                this._logMethodCallResult(methodName, null, null);
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this.airstageClient.setPowerState(
+                        this.deviceId,
+                        airstage.constants.TOGGLE_ON,
+                        (function(error) {
+                            if (error) {
+                                this._logMethodCallResult(methodName, error);
 
-                callback(null);
+                                return callback(error);
+                            }
+
+                            this._setPowerfulState(
+                                methodName,
+                                powerfulState,
+                                callback
+                            );
+                        }).bind(this)
+                    );
+                } else {
+                    this._setPowerfulState(
+                        methodName,
+                        powerfulState,
+                        callback
+                    );
+                }
             }).bind(this)
         );
     }
@@ -101,6 +145,39 @@ class PowerfulSwitchAccessory extends Accessory {
                 callback(null, value);
             }).bind(this)
         );
+    }
+
+    _setPowerfulState(methodName, powerfulState, callback) {
+        this.airstageClient.setPowerfulState(
+            this.deviceId,
+            powerfulState,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshRelatedAccessoryCharacteristics();
+
+                callback(null);
+            }).bind(this)
+        );
+    }
+
+    _refreshRelatedAccessoryCharacteristics() {
+        const accessoryManager = this.platform.accessoryManager;
+
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

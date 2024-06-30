@@ -390,9 +390,13 @@ class ThermostatAccessory extends Accessory {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

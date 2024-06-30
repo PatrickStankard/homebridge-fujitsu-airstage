@@ -40,9 +40,9 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
-        this.airstageClient.getAirflowVerticalSwingState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, swingState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -51,15 +51,36 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                if (swingState === airstage.constants.TOGGLE_ON) {
+                if (powerState === airstage.constants.TOGGLE_OFF) {
                     value = this.Characteristic.Active.INACTIVE;
-                } else if (swingState === airstage.constants.TOGGLE_OFF) {
-                    value = this.Characteristic.Active.ACTIVE;
+
+                    this._logMethodCallResult(methodName, null, value);
+
+                    return callback(null, value);
                 }
 
-                this._logMethodCallResult(methodName, null, value);
+                this.airstageClient.getAirflowVerticalSwingState(
+                    this.deviceId,
+                    (function(error, swingState) {
+                        let value = null;
 
-                callback(null, value);
+                        if (error) {
+                            this._logMethodCallResult(methodName, error);
+
+                            return callback(error, null);
+                        }
+
+                        if (swingState === airstage.constants.TOGGLE_ON) {
+                            value = this.Characteristic.Active.INACTIVE;
+                        } else if (swingState === airstage.constants.TOGGLE_OFF) {
+                            value = this.Characteristic.Active.ACTIVE;
+                        }
+
+                        this._logMethodCallResult(methodName, null, value);
+
+                        callback(null, value);
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
@@ -77,22 +98,42 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             swingState = airstage.constants.TOGGLE_ON;
         }
 
-        this.airstageClient.setAirflowVerticalSwingState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            swingState,
-            (function(error) {
+            (function(error, powerState) {
+                let value = null;
+
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
-                    return callback(error);
+                    return callback(error, null);
                 }
 
-                this._logMethodCallResult(methodName, null, null);
+                if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this.airstageClient.setPowerState(
+                        this.deviceId,
+                        airstage.constants.TOGGLE_ON,
+                        (function(error) {
+                            if (error) {
+                                this._logMethodCallResult(methodName, error);
 
-                this._refreshDynamicServiceCharacteristics();
-                this._refreshRelatedAccessoryCharacteristics();
+                                return callback(error);
+                            }
 
-                callback(null);
+                            this._setAirflowVerticalSwingState(
+                                methodName,
+                                swingState,
+                                callback
+                            );
+                        }).bind(this)
+                    );
+                } else {
+                    this._setAirflowVerticalSwingState(
+                        methodName,
+                        swingState,
+                        callback
+                    );
+                }
             }).bind(this)
         );
     }
@@ -255,6 +296,27 @@ class VerticalAirflowDirectionAccessory extends Accessory {
         callback(null);
     }
 
+    _setAirflowVerticalSwingState(methodName, swingState, callback) {
+        this.airstageClient.setAirflowVerticalSwingState(
+            this.deviceId,
+            swingState,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshDynamicServiceCharacteristics();
+                this._refreshRelatedAccessoryCharacteristics();
+
+                callback(null);
+            }).bind(this)
+        );
+    }
+
     _setAirflowVerticalDirection(methodName, airflowVerticalDirection) {
         this.airstageClient.setAirflowVerticalDirection(
             this.deviceId,
@@ -278,7 +340,14 @@ class VerticalAirflowDirectionAccessory extends Accessory {
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 
