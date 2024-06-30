@@ -268,10 +268,7 @@ class Platform {
     }
 
     _refreshAirstageClientCache() {
-        const limit = 100;
-
-        this.airstageClient.resetUserMetadataCache();
-        this.airstageClient.getUserMetadata(
+        this.airstageClient.refreshUserMetadataCache(
             (function(error) {
                 if (error) {
                     return this.log.error('Error when attempting to communicate with Airstage:', error);
@@ -279,9 +276,7 @@ class Platform {
 
                 this.log.debug('Refreshed Airstage client user metadata cache');
 
-                this.airstageClient.resetDeviceCache();
-                this.airstageClient.getDevices(
-                    limit,
+                this.airstageClient.refreshDeviceCache(
                     (function(error, devices) {
                         if (error) {
                             return this.log.error('Error when attempting to communicate with Airstage:', error);
