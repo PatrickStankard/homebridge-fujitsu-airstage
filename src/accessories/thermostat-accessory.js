@@ -176,63 +176,73 @@ class ThermostatAccessory extends Accessory {
 
         let operationMode = null;
 
-        if (value === this.Characteristic.TargetHeatingCoolingState.OFF) {
-            return this.airstageClient.setPowerState(
-                this.deviceId,
-                airstage.constants.TOGGLE_OFF,
-                (function(error) {
-                    if (error) {
-                        this._logMethodCallResult(methodName, error);
-
-                        return callback(error);
-                    }
-
-                    this._logMethodCallResult(methodName, null, null);
-
-                    this._refreshDynamicServiceCharacteristics();
-                    this._refreshRelatedAccessoryCharacteristics();
-
-                    callback(null);
-                }).bind(this)
-            );
+        if (value === this.Characteristic.TargetHeatingCoolingState.COOL) {
+            operationMode = airstage.constants.OPERATION_MODE_COOL;
+        } else if (value === this.Characteristic.TargetHeatingCoolingState.HEAT) {
+            operationMode = airstage.constants.OPERATION_MODE_HEAT;
+        } else if (value === this.Characteristic.TargetHeatingCoolingState.AUTO) {
+            operationMode = airstage.constants.OPERATION_MODE_AUTO;
         }
 
-        this.airstageClient.setPowerState(
+        this.airstageClient.getPowerState(
             this.deviceId,
-            airstage.constants.TOGGLE_ON,
-            (function(error) {
+            (function(error, powerState) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
-                    return callback(error);
+                    return callback(error, null);
                 }
 
-                if (value === this.Characteristic.TargetHeatingCoolingState.COOL) {
-                    operationMode = airstage.constants.OPERATION_MODE_COOL;
-                } else if (value === this.Characteristic.TargetHeatingCoolingState.HEAT) {
-                    operationMode = airstage.constants.OPERATION_MODE_HEAT;
-                } else if (value === this.Characteristic.TargetHeatingCoolingState.AUTO) {
-                    operationMode = airstage.constants.OPERATION_MODE_AUTO;
-                }
+                if (value === this.Characteristic.TargetHeatingCoolingState.OFF) {
+                    if (powerState === airstage.constants.TOGGLE_ON) {
+                        this.airstageClient.setPowerState(
+                            this.deviceId,
+                            airstage.constants.TOGGLE_OFF,
+                            (function(error) {
+                                if (error) {
+                                    this._logMethodCallResult(methodName, error);
 
-                this.airstageClient.setOperationMode(
-                    this.deviceId,
-                    operationMode,
-                    (function(error) {
-                        if (error) {
-                            this._logMethodCallResult(methodName, error);
+                                    return callback(error);
+                                }
 
-                            return callback(error);
-                        }
+                                this._logMethodCallResult(methodName, null, null);
 
-                        this._logMethodCallResult(methodName, null, null);
+                                this._refreshDynamicServiceCharacteristics();
+                                this._refreshRelatedAccessoryCharacteristics();
 
-                        this._refreshDynamicServiceCharacteristics();
-                        this._refreshRelatedAccessoryCharacteristics();
-
+                                callback(null);
+                            }).bind(this)
+                        );
+                    } else if (powerState === airstage.constants.TOGGLE_OFF) {
                         callback(null);
-                    }).bind(this)
-                );
+                    }
+                } else {
+                    if (powerState === airstage.constants.TOGGLE_OFF) {
+                        this.airstageClient.setPowerState(
+                            this.deviceId,
+                            airstage.constants.TOGGLE_ON,
+                            (function(error) {
+                                if (error) {
+                                    this._logMethodCallResult(methodName, error);
+
+                                    return callback(error);
+                                }
+
+                                this._setOperationMode(
+                                    methodName,
+                                    operationMode,
+                                    callback
+                                );
+                            }).bind(this)
+                        );
+                    } else if (powerState === airstage.constants.TOGGLE_ON) {
+                        this._setOperationMode(
+                            methodName,
+                            operationMode,
+                            callback
+                        );
+                    }
+                }
             }).bind(this)
         );
     }
@@ -382,6 +392,27 @@ class ThermostatAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
+            }).bind(this)
+        );
+    }
+
+    _setOperationMode(methodName, operationMode, callback) {
+        this.airstageClient.setOperationMode(
+            this.deviceId,
+            operationMode,
+            (function(error) {
+                if (error) {
+                    this._logMethodCallResult(methodName, error);
+
+                    return callback(error);
+                }
+
+                this._logMethodCallResult(methodName, null, null);
+
+                this._refreshDynamicServiceCharacteristics();
+                this._refreshRelatedAccessoryCharacteristics();
+
+                callback(null);
             }).bind(this)
         );
     }
