@@ -565,7 +565,39 @@ test('ThermostatAccessory#getTargetHeatingCoolingState when getPowerState return
     });
 });
 
+test('ThermostatAccessory#setTargetHeatingCoolingState when called with OFF and getPowerState returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback('getPowerState error', null);
+        }
+    );
+    const thermostatAccessory = new ThermostatAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    thermostatAccessory.setTargetHeatingCoolingState(
+        thermostatAccessory.Characteristic.TargetHeatingCoolingState.OFF,
+        function(error) {
+            assert.strictEqual(error, 'getPowerState error');
+
+            mockHomebridge.resetMocks();
+
+            done();
+        }
+    );
+});
+
 test('ThermostatAccessory#setTargetHeatingCoolingState when called with OFF and setPowerState returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_ON);
+        }
+    );
     context.mock.method(
         platformAccessory.context.airstageClient,
         'setPowerState',
@@ -593,6 +625,13 @@ test('ThermostatAccessory#setTargetHeatingCoolingState when called with OFF and 
 test('ThermostatAccessory#setTargetHeatingCoolingState when called with OFF', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_ON);
+        }
+    );
+    context.mock.method(
+        platformAccessory.context.airstageClient,
         'setPowerState',
         (deviceId, powerState, callback) => {
             assert.strictEqual(powerState, airstage.constants.TOGGLE_OFF);
@@ -618,6 +657,13 @@ test('ThermostatAccessory#setTargetHeatingCoolingState when called with OFF', (c
 });
 
 test('ThermostatAccessory#setTargetHeatingCoolingState when setOperationMode returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_OFF);
+        }
+    );
     context.mock.method(
         platformAccessory.context.airstageClient,
         'setPowerState',
@@ -652,6 +698,13 @@ test('ThermostatAccessory#setTargetHeatingCoolingState when setOperationMode ret
 });
 
 test('ThermostatAccessory#setTargetHeatingCoolingState when called with COOL', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_OFF);
+        }
+    );
     context.mock.method(
         platformAccessory.context.airstageClient,
         'setPowerState',
@@ -689,6 +742,13 @@ test('ThermostatAccessory#setTargetHeatingCoolingState when called with COOL', (
 test('ThermostatAccessory#setTargetHeatingCoolingState when called with HEAT', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_OFF);
+        }
+    );
+    context.mock.method(
+        platformAccessory.context.airstageClient,
         'setPowerState',
         (deviceId, powerState, callback) => {
             assert.strictEqual(powerState, airstage.constants.TOGGLE_ON);
@@ -724,11 +784,51 @@ test('ThermostatAccessory#setTargetHeatingCoolingState when called with HEAT', (
 test('ThermostatAccessory#setTargetHeatingCoolingState when called with AUTO', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_OFF);
+        }
+    );
+    context.mock.method(
+        platformAccessory.context.airstageClient,
         'setPowerState',
         (deviceId, powerState, callback) => {
             assert.strictEqual(powerState, airstage.constants.TOGGLE_ON);
 
             callback(null);
+        }
+    );
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'setOperationMode',
+        (deviceId, operationMode, callback) => {
+            assert.strictEqual(operationMode, airstage.constants.OPERATION_MODE_AUTO);
+            callback(null);
+        }
+    );
+    const thermostatAccessory = new ThermostatAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    thermostatAccessory.setTargetHeatingCoolingState(
+        thermostatAccessory.Characteristic.TargetHeatingCoolingState.AUTO,
+        function(error) {
+            assert.strictEqual(error, null);
+
+            mockHomebridge.resetMocks();
+
+            done();
+        }
+    );
+});
+
+test('ThermostatAccessory#setTargetHeatingCoolingState does not call setPowerState if device is already on', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            callback(null, airstage.constants.TOGGLE_ON);
         }
     );
     context.mock.method(
