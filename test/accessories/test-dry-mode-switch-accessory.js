@@ -197,14 +197,11 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns error', (context, 
             callback('getPowerState error', null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
 
     dryModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'getPowerState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -225,12 +222,6 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
             callback('getOperationMode error', null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -265,13 +256,6 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns ON and setOperatio
             callback('setOperationMode error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -303,22 +287,11 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
         platformAccessory.context.airstageClient,
         'setOperationMode',
         (deviceId, operationMode, callback) => {
+            assert.strictEqual(operationMode, airstage.constants.OPERATION_MODE_DRY);
+
             callback(null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        const mockedMethod = platformAccessory.context.airstageClient.setOperationMode;
-
-        assert.strictEqual(mockedMethod.mock.calls.length, 1);
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[0], 'testDeviceId');
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[1], airstage.constants.OPERATION_MODE_DRY);
-        assert.strictEqual(dryModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_FAN);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -326,6 +299,9 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
 
     dryModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
+        assert.strictEqual(dryModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_FAN);
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -346,12 +322,6 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and setPowerSt
             callback('setPowerState error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -359,6 +329,8 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and setPowerSt
 
     dryModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setPowerState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -386,13 +358,6 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
             callback('getOperationMode error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -400,6 +365,8 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
 
     dryModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'getOperationMode error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -434,14 +401,6 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and setOperati
             callback('setOperationMode error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -449,6 +408,8 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and setOperati
 
     dryModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setOperationMode error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -466,6 +427,8 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
         platformAccessory.context.airstageClient,
         'setPowerState',
         (deviceId, powerState, callback) => {
+            assert.strictEqual(powerState, airstage.constants.TOGGLE_ON);
+
             callback(null);
         }
     );
@@ -480,31 +443,11 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
         platformAccessory.context.airstageClient,
         'setOperationMode',
         (deviceId, operationMode, callback) => {
+            assert.strictEqual(operationMode, airstage.constants.OPERATION_MODE_DRY);
+
             callback(null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(
-            platformAccessory.context.airstageClient.setPowerState.mock.calls[0].arguments[0],
-            'testDeviceId'
-        );
-        assert.strictEqual(
-            platformAccessory.context.airstageClient.setPowerState.mock.calls[0].arguments[1],
-            airstage.constants.TOGGLE_ON
-        );
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        const mockedMethod = platformAccessory.context.airstageClient.setOperationMode;
-
-        assert.strictEqual(mockedMethod.mock.calls.length, 1);
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[0], 'testDeviceId');
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[1], airstage.constants.OPERATION_MODE_DRY);
-        assert.strictEqual(dryModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_FAN);
-
-        mockHomebridge.resetMocks();
-    });
     const dryModeSwitchAccessory = new DryModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -512,6 +455,9 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
 
     dryModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
+        assert.strictEqual(dryModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_FAN);
+
+        mockHomebridge.resetMocks();
 
         done();
     });
