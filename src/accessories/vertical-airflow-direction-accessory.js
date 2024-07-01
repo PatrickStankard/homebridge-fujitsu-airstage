@@ -261,7 +261,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
         );
     }
 
-    setRotationSpeed(value, callback) {
+    setRotationSpeed(value, callback, withSetTimeout = true) {
         const methodName = this.setRotationSpeed.name;
 
         this._logMethodCall(methodName, value);
@@ -278,22 +278,30 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             airflowVerticalDirection = 4;
         }
 
-        if (this._setAirflowVerticalDirectionHandle !== null) {
-            clearTimeout(this._setAirflowVerticalDirectionHandle);
-            this._setAirflowVerticalDirectionHandle = null;
+        if (withSetTimeout) {
+            if (this._setAirflowVerticalDirectionHandle !== null) {
+                clearTimeout(this._setAirflowVerticalDirectionHandle);
+                this._setAirflowVerticalDirectionHandle = null;
+            }
+
+            this._setAirflowVerticalDirectionHandle = setTimeout(
+                (function() {
+                    this._setAirflowVerticalDirection(
+                        methodName,
+                        airflowVerticalDirection
+                    );
+                }).bind(this),
+                500
+            );
+
+            callback(null);
+        } else {
+            this._setAirflowVerticalDirection(
+                methodName,
+                airflowVerticalDirection,
+                callback
+            );
         }
-
-        this._setAirflowVerticalDirectionHandle = setTimeout(
-            (function() {
-                this._setAirflowVerticalDirection(
-                    methodName,
-                    airflowVerticalDirection
-                );
-            }).bind(this),
-            500
-        );
-
-        callback(null);
     }
 
     _setAirflowVerticalSwingState(methodName, swingState, callback) {
@@ -317,13 +325,17 @@ class VerticalAirflowDirectionAccessory extends Accessory {
         );
     }
 
-    _setAirflowVerticalDirection(methodName, airflowVerticalDirection) {
+    _setAirflowVerticalDirection(methodName, airflowVerticalDirection, callback = null) {
         this.airstageClient.setAirflowVerticalDirection(
             this.deviceId,
             airflowVerticalDirection,
             (function(error) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
+
+                    if (callback !== null) {
+                        callback(error);
+                    }
 
                     return;
                 }
@@ -333,6 +345,10 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 this._refreshDynamicServiceCharacteristics();
 
                 this._setAirflowVerticalDirectionHandle = null;
+
+                if (callback !== null) {
+                    callback(null);
+                }
             }).bind(this)
         );
     }

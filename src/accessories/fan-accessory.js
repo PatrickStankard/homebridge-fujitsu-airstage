@@ -141,7 +141,7 @@ class FanAccessory extends Accessory {
         this.airstageClient.getFanSpeed(
             this.deviceId,
             (function(error, fanSpeed) {
-                let value = this.Characteristic.TargetFanState.MANUAL;
+                let value = null;
 
                 if (error) {
                     this._logMethodCallResult(methodName, error);
@@ -151,6 +151,8 @@ class FanAccessory extends Accessory {
 
                 if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
                     value = this.Characteristic.TargetFanState.AUTO;
+                } else {
+                    value = this.Characteristic.TargetFanState.MANUAL;
                 }
 
                 this._logMethodCallResult(methodName, null, value);
@@ -248,7 +250,7 @@ class FanAccessory extends Accessory {
         );
     }
 
-    setRotationSpeed(value, callback) {
+    setRotationSpeed(value, callback, withSetTimeout = true) {
         const methodName = this.setRotationSpeed.name;
 
         this._logMethodCall(methodName, value);
@@ -265,19 +267,23 @@ class FanAccessory extends Accessory {
             fanSpeed = airstage.constants.FAN_SPEED_HIGH;
         }
 
-        if (this._setFanSpeedHandle !== null) {
-            clearTimeout(this._setFanSpeedHandle);
-            this._setFanSpeedHandle = null;
+        if (withSetTimeout) {
+            if (this._setFanSpeedHandle !== null) {
+                clearTimeout(this._setFanSpeedHandle);
+                this._setFanSpeedHandle = null;
+            }
+
+            this._setFanSpeedHandle = setTimeout(
+                (function() {
+                    this._setFanSpeed(methodName, fanSpeed);
+                }).bind(this),
+                500
+            );
+
+            callback(null);
+        } else {
+            this._setFanSpeed(methodName, fanSpeed, callback);
         }
-
-        this._setFanSpeedHandle = setTimeout(
-            (function() {
-                this._setFanSpeed(methodName, fanSpeed);
-            }).bind(this),
-            500
-        );
-
-        callback(null);
     }
 
     getSwingMode(callback) {
@@ -341,13 +347,17 @@ class FanAccessory extends Accessory {
         );
     }
 
-    _setFanSpeed(methodName, fanSpeed) {
+    _setFanSpeed(methodName, fanSpeed, callback = null) {
         this.airstageClient.setFanSpeed(
             this.deviceId,
             fanSpeed,
             (function(error) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
+
+                    if (callback !== null) {
+                        callback(error);
+                    }
 
                     return;
                 }
@@ -357,6 +367,10 @@ class FanAccessory extends Accessory {
                 this._refreshDynamicServiceCharacteristics();
 
                 this._setFanSpeedHandle = null;
+
+                if (callback !== null) {
+                    callback(null);
+                }
             }).bind(this)
         );
     }

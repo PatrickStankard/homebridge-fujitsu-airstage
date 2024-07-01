@@ -73,6 +73,9 @@ const mockPlatform = {
         'unregisterPlatformAccessories': mock.fn(
             (pluginName, platformName, accessories) => {}
         ),
+        'on': mock.fn((event, listener) => {
+            return mockPlatform.api;
+        })
     },
     'log': {
         'debug': mock.fn(() => {}),
@@ -90,11 +93,13 @@ class MockHomebridge {
 
     resetMocks() {
         mockCharacteristic.on.mock.resetCalls();
-        mockService.getCharacteristic.mock.resetCalls();
+        mockCharacteristic.emit.mock.resetCalls();
         mockService.setCharacteristic.mock.resetCalls();
+        mockService.getCharacteristic.mock.resetCalls();
         mockPlatform.api.updatePlatformAccessories.mock.resetCalls();
         mockPlatform.api.registerPlatformAccessories.mock.resetCalls();
         mockPlatform.api.unregisterPlatformAccessories.mock.resetCalls();
+        mockPlatform.api.on.mock.resetCalls();
         mockPlatform.log.debug.mock.resetCalls();
         mockPlatform.log.error.mock.resetCalls();
         mockPlatform.log.info.mock.resetCalls();

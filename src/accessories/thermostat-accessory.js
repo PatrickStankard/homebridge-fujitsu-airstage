@@ -339,7 +339,7 @@ class ThermostatAccessory extends Accessory {
 
         this._logMethodCall(methodName, value);
 
-        let scale = null;
+        let temperatureScale = null;
 
         if (value === this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
             temperatureScale = airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT;
@@ -348,7 +348,7 @@ class ThermostatAccessory extends Accessory {
         }
 
         this.airstageClient.setTemperatureScale(
-            scale,
+            temperatureScale,
             (function(error) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);

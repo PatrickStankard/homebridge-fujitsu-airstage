@@ -824,33 +824,30 @@ class Client {
     }
 
     getDevices(limit, callback) {
-        let deviceMetadata = this._getDeviceMetadataCache(null);
-        let deviceParameters = this._getDeviceParameterCache(null);
+        const devicesFromCache = this._getDevicesFromCache();
+        const isCacheHit = (
+            devicesFromCache.metadata &&
+            Object.keys(devicesFromCache.metadata).length > 0 &&
+            devicesFromCache.parameters &&
+            Object.keys(devicesFromCache.parameters).length > 0
+        );
 
-        if (
-            deviceMetadata &&
-            Object.keys(deviceMetadata).length > 0 &&
-            deviceParameters &&
-            Object.keys(deviceParameters).length > 0
-        ) {
-            return callback(null, {
-                'metadata': deviceMetadata,
-                'parameters': deviceParameters
-            });
+        if (isCacheHit) {
+            return callback(null, devicesFromCache);
         }
 
-        this._getDevices(limit, callback);
+        this._getDevicesFromApi(limit, callback);
     }
 
     getDevice(deviceId, callback) {
-        let deviceMetadata = this._getDeviceMetadataCache(deviceId);
-        let deviceParameters = this._getDeviceParameterCache(deviceId);
+        const deviceFromCache = this._getDeviceFromCache(deviceId);
+        const isCacheHit = (
+            deviceFromCache.metadata !== null &&
+            deviceFromCache.parameters !== null
+        );
 
-        if (deviceMetadata && deviceParameters) {
-            return callback(null, {
-                'metadata': deviceMetadata,
-                'parameters': deviceParameters
-            });
+        if (isCacheHit) {
+            return callback(null, deviceFromCache);
         }
 
         this._apiClient.getDevice(
@@ -863,6 +860,9 @@ class Client {
                 if (result.error) {
                     return callback(result.error, null);
                 }
+
+                let deviceMetadata = null;
+                let deviceParameters = null;
 
                 if (result.response) {
                     deviceMetadata = this._setDeviceMetadataCache(
@@ -925,7 +925,7 @@ class Client {
     }
 
     refreshDeviceCache(callback) {
-        this._getDevices(
+        this._getDevicesFromApi(
             null,
             (function(error, result) {
                 if (error) {
@@ -1048,7 +1048,11 @@ class Client {
         return this._getDeviceParameterCache(deviceId);
     }
 
-    _getDevices(limit, callback) {
+    _getDevicesFromCache() {
+        return this._getDeviceFromCache(null);
+    }
+
+    _getDevicesFromApi(limit, callback) {
         this._apiClient.getDevicesAll(
             limit,
             (function(result) {
@@ -1082,6 +1086,13 @@ class Client {
                 });
             }).bind(this)
         );
+    }
+
+    _getDeviceFromCache(deviceId) {
+        return {
+            'metadata': this._getDeviceMetadataCache(deviceId),
+            'parameters' : this._getDeviceParameterCache(deviceId)
+        };
     }
 
     _getUserMetadata(callback) {
