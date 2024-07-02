@@ -10,7 +10,7 @@ class Platform {
 
     accessories = [];
 
-    constructor(log, config, api) {
+    constructor(log, config, api, withSetInterval = true) {
         this.log = log;
         this.config = config;
         this.api = api;
@@ -39,33 +39,37 @@ class Platform {
         this.configManager = new ConfigManager(this.config, this.api);
         this.accessoryManager = new PlatformAccessoryManager(this);
 
-        setInterval(
-            this._refreshAirstageClientCache.bind(this),
-            (5 * 60 * 1000) // 5 minutes
-        );
+        if (withSetInterval) {
+            setInterval(
+                this._refreshAirstageClientCache.bind(this),
+                (5 * 60 * 1000) // 5 minutes
+            );
 
-        setInterval(
-            this._refreshAirstageClientToken.bind(this),
-            (58 * 60 * 1000) // 58 minutes
-        );
+            setInterval(
+                this._refreshAirstageClientToken.bind(this),
+                (58 * 60 * 1000) // 58 minutes
+            );
+        }
 
-        this.api.on('didFinishLaunching', (function() {
-            this.discoverDevices();
-        }).bind(this));
+        this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
     }
 
     configureAccessory(accessory) {
         this.accessories.push(accessory);
     }
 
-    discoverDevices() {
+    discoverDevices(callback = null) {
         this.airstageClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
+                if (callback !== null) {
+                    callback(error);
+                }
+
                 return this.log.error('Error when attempting to authenticate with Airstage:', error);
             }
 
             this._updateConfigWithAccessToken();
-            this._configureAirstageDevices();
+            this._configureAirstageDevices(callback);
         }).bind(this));
     }
 
@@ -85,14 +89,22 @@ class Platform {
         }
     }
 
-    _configureAirstageDevices() {
+    _configureAirstageDevices(callback) {
         this.airstageClient.getUserMetadata((function(error) {
             if (error) {
+                if (callback !== null) {
+                    callback(error);
+                }
+
                 return this.log.error('Error when attempting to communicate with Airstage:', error);
             }
 
             this.airstageClient.getDevices(null, (function(error, devices) {
                 if (error) {
+                    if (callback !== null) {
+                        callback(error);
+                    }
+
                     return this.log.error('Error when attempting to communicate with Airstage:', error);
                 }
 
@@ -106,18 +118,20 @@ class Platform {
 
                     this._configureAirstageDevice(
                         deviceId,
-                        deviceParameters,
                         deviceName,
                         model
                     );
                 }, this);
+
+                if (callback !== null) {
+                    callback(null);
+                }
             }).bind(this));
         }).bind(this));
     }
 
     _configureAirstageDevice(
         deviceId,
-        deviceParameters,
         deviceName,
         model
     ) {
