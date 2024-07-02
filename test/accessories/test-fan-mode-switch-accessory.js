@@ -466,3 +466,49 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
         done();
     });
 });
+
+test('FanModeSwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const fanModeSwitchAccessory = new FanModeSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanModeSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('FanModeSwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const fanModeSwitchAccessory = new FanModeSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanModeSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Fan Mode Switch');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

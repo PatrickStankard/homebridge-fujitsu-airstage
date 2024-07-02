@@ -962,3 +962,49 @@ test('VerticalAirflowDirectionAccessory#setRotationSpeed when called with 99.999
         false
     );
 });
+
+test('VerticalAirflowDirectionAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const verticalAirflowDirectionAccessory = new VerticalAirflowDirectionAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    verticalAirflowDirectionAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('VerticalAirflowDirectionAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const verticalAirflowDirectionAccessory = new VerticalAirflowDirectionAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    verticalAirflowDirectionAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Vertical Airflow Direction');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

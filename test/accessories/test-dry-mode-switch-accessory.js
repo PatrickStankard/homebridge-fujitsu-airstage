@@ -462,3 +462,49 @@ test('DryModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
         done();
     });
 });
+
+test('DryModeSwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const dryModeSwitchAccessory = new DryModeSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    dryModeSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('DryModeSwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const dryModeSwitchAccessory = new DryModeSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    dryModeSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Dry Mode Switch');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

@@ -401,3 +401,49 @@ test('PowerfulSwitchAccessory#setOn when getPowerState returns OFF', (context, d
         done();
     });
 });
+
+test('PowerfulSwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const powerfulSwitchAccessory = new PowerfulSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    powerfulSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('PowerfulSwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const powerfulSwitchAccessory = new PowerfulSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    powerfulSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Powerful Switch');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

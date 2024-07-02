@@ -401,3 +401,49 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF', (con
         done();
     });
 });
+
+test('EnergySavingFanSwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    energySavingFanSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('EnergySavingFanSwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    energySavingFanSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Energy Saving Fan Switch');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

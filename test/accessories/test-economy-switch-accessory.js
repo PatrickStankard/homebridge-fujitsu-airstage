@@ -401,3 +401,49 @@ test('EconomySwitchAccessory#setOn when getPowerState returns OFF', (context, do
         done();
     });
 });
+
+test('EconomySwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const economySwitchAccessory = new EconomySwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    economySwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('EconomySwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const economySwitchAccessory = new EconomySwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    economySwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Economy Switch');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

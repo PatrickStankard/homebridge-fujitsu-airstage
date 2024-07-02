@@ -1046,3 +1046,49 @@ test('ThermostatAccessory#setTemperatureDisplayUnits when called with CELSIUS', 
         }
     );
 });
+
+test('ThermostatAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const thermostatAccessory = new ThermostatAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    thermostatAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('ThermostatAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const thermostatAccessory = new ThermostatAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    thermostatAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Thermostat');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});

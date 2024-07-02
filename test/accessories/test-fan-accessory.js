@@ -910,3 +910,49 @@ test('FanAccessory#setSwingMode called with SWING_DISABLED', (context, done) => 
         done();
     });
 });
+
+test('FanAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('FanAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Fan');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
