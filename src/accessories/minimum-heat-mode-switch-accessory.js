@@ -41,7 +41,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
-                    value = this.Characteristic.Active.INACTIVE;
+                    value = false;
 
                     this._logMethodCallResult(methodName, null, value);
 
