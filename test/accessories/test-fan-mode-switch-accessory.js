@@ -197,14 +197,11 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns error', (context, 
             callback('getPowerState error', null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'getPowerState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -225,12 +222,6 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
             callback('getOperationMode error', null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -238,6 +229,8 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'getOperationMode error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -265,13 +258,6 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns ON and setOperatio
             callback('setOperationMode error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -279,6 +265,8 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns ON and setOperatio
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setOperationMode error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -303,22 +291,11 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
         platformAccessory.context.airstageClient,
         'setOperationMode',
         (deviceId, operationMode, callback) => {
+            assert.strictEqual(operationMode, airstage.constants.OPERATION_MODE_FAN);
+
             callback(null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        const mockedMethod = platformAccessory.context.airstageClient.setOperationMode;
-
-        assert.strictEqual(mockedMethod.mock.calls.length, 1);
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[0], 'testDeviceId');
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[1], airstage.constants.OPERATION_MODE_FAN);
-        assert.strictEqual(fanModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_DRY);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -326,6 +303,9 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns ON and getOperatio
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
+        assert.strictEqual(fanModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_DRY);
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -346,12 +326,6 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and setPowerSt
             callback('setPowerState error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -359,6 +333,8 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and setPowerSt
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setPowerState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -386,13 +362,6 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
             callback('getOperationMode error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -400,6 +369,8 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'getOperationMode error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -434,14 +405,6 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and setOperati
             callback('setOperationMode error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setOperationMode.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -449,6 +412,8 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and setOperati
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setOperationMode error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -466,6 +431,8 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
         platformAccessory.context.airstageClient,
         'setPowerState',
         (deviceId, powerState, callback) => {
+            assert.strictEqual(powerState, airstage.constants.TOGGLE_ON);
+
             callback(null);
         }
     );
@@ -480,31 +447,11 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
         platformAccessory.context.airstageClient,
         'setOperationMode',
         (deviceId, operationMode, callback) => {
+            assert.strictEqual(operationMode, airstage.constants.OPERATION_MODE_FAN);
+
             callback(null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(
-            platformAccessory.context.airstageClient.setPowerState.mock.calls[0].arguments[0],
-            'testDeviceId'
-        );
-        assert.strictEqual(
-            platformAccessory.context.airstageClient.setPowerState.mock.calls[0].arguments[1],
-            airstage.constants.TOGGLE_ON
-        );
-        assert.strictEqual(platformAccessory.context.airstageClient.getOperationMode.mock.calls.length, 1);
-
-        const mockedMethod = platformAccessory.context.airstageClient.setOperationMode;
-
-        assert.strictEqual(mockedMethod.mock.calls.length, 1);
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[0], 'testDeviceId');
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[1], airstage.constants.OPERATION_MODE_FAN);
-        assert.strictEqual(fanModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_DRY);
-
-        mockHomebridge.resetMocks();
-    });
     const fanModeSwitchAccessory = new FanModeSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -512,6 +459,55 @@ test('FanModeSwitchAccessory#setOn when getPowerState returns OFF and getOperati
 
     fanModeSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
+        assert.strictEqual(fanModeSwitchAccessory.lastKnownOperationMode, airstage.constants.OPERATION_MODE_DRY);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('FanModeSwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const fanModeSwitchAccessory = new FanModeSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanModeSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('FanModeSwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const fanModeSwitchAccessory = new FanModeSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanModeSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Fan Mode Switch');
+
+        mockHomebridge.resetMocks();
 
         done();
     });

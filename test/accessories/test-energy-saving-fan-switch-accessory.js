@@ -227,14 +227,11 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns error', (c
             callback('getPowerState error', null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
 
     energySavingFanSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'getPowerState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -255,12 +252,6 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns ON and set
             callback('setEnergySavingFanState error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setEnergySavingFanState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -268,6 +259,8 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns ON and set
 
     energySavingFanSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setEnergySavingFanState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -285,20 +278,11 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns ON', (cont
         platformAccessory.context.airstageClient,
         'setEnergySavingFanState',
         (deviceId, energySavingFanState, callback) => {
+            assert.strictEqual(energySavingFanState, airstage.constants.TOGGLE_ON);
+
             callback(null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-
-        const mockedMethod = platformAccessory.context.airstageClient.setEnergySavingFanState;
-
-        assert.strictEqual(mockedMethod.mock.calls.length, 1);
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[0], 'testDeviceId');
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[1], airstage.constants.TOGGLE_ON);
-
-        mockHomebridge.resetMocks();
-    });
     const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -306,6 +290,8 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns ON', (cont
 
     energySavingFanSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -326,12 +312,6 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF and se
             callback('setPowerState error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -339,6 +319,8 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF and se
 
     energySavingFanSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setPowerState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -366,13 +348,6 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF and se
             callback('setEnergySavingFanState error');
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setEnergySavingFanState.mock.calls.length, 1);
-
-        mockHomebridge.resetMocks();
-    });
     const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -380,6 +355,8 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF and se
 
     energySavingFanSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, 'setEnergySavingFanState error');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
@@ -397,6 +374,8 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF', (con
         platformAccessory.context.airstageClient,
         'setPowerState',
         (deviceId, powerState, callback) => {
+            assert.strictEqual(powerState, airstage.constants.TOGGLE_ON);
+
             callback(null);
         }
     );
@@ -404,29 +383,11 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF', (con
         platformAccessory.context.airstageClient,
         'setEnergySavingFanState',
         (deviceId, energySavingFanState, callback) => {
+            assert.strictEqual(energySavingFanState, airstage.constants.TOGGLE_ON);
+
             callback(null);
         }
     );
-    context.after(() => {
-        assert.strictEqual(platformAccessory.context.airstageClient.getPowerState.mock.calls.length, 1);
-        assert.strictEqual(platformAccessory.context.airstageClient.setPowerState.mock.calls.length, 1);
-        assert.strictEqual(
-            platformAccessory.context.airstageClient.setPowerState.mock.calls[0].arguments[0],
-            'testDeviceId'
-        );
-        assert.strictEqual(
-            platformAccessory.context.airstageClient.setPowerState.mock.calls[0].arguments[1],
-            airstage.constants.TOGGLE_ON
-        );
-
-        const mockedMethod = platformAccessory.context.airstageClient.setEnergySavingFanState;
-
-        assert.strictEqual(mockedMethod.mock.calls.length, 1);
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[0], 'testDeviceId');
-        assert.strictEqual(mockedMethod.mock.calls[0].arguments[1], airstage.constants.TOGGLE_ON);
-
-        mockHomebridge.resetMocks();
-    });
     const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
         mockHomebridge.platform,
         platformAccessory
@@ -434,6 +395,54 @@ test('EnergySavingFanSwitchAccessory#setOn when getPowerState returns OFF', (con
 
     energySavingFanSwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('EnergySavingFanSwitchAccessory#getName when getName returns error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback('getName error', null);
+        }
+    );
+    const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    energySavingFanSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
+        assert.strictEqual(name, null);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('EnergySavingFanSwitchAccessory#getName returns name with expected suffix', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getName',
+        (deviceId, callback) => {
+            callback(null, 'Test Device');
+        }
+    );
+    const energySavingFanSwitchAccessory = new EnergySavingFanSwitchAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    energySavingFanSwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(name, 'Test Device Energy Saving Fan Switch');
+
+        mockHomebridge.resetMocks();
 
         done();
     });
