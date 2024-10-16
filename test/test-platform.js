@@ -181,6 +181,67 @@ test('Platform#discoverDevices updates platform config with access token', (cont
     });
 });
 
+test('Platform#discoverDevices unsets access token in platform config on "Invalid access token" error', (context, done) => {
+    const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'region': 'us',
+        'country': 'United States',
+        'language': 'en',
+        'email': null,
+        'password': null,
+        'accessToken': 'testAccessToken',
+        'accessTokenExpiry': new Date('2022-01-01'),
+        'refreshToken': 'testRefreshToken'
+    };
+    const platform = new Platform(
+        mockHomebridge.platform.log,
+        platformConfig,
+        mockHomebridge.platform.api,
+        false
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'refreshTokenOrAuthenticate',
+        (callback) => {
+            callback('Invalid access token');
+        }
+    );
+    context.mock.method(
+        platform.configManager,
+        '_readFileSync',
+        (path) => {
+            return JSON.stringify({
+                'platforms': [platformConfig]
+            });
+        }
+    );
+    context.mock.method(
+        platform.configManager,
+        '_writeFileSync',
+        (path, configString) => {
+            const config = JSON.parse(configString);
+            assert.strictEqual(config.platforms.length, 1);
+            const updatedPlatformConfig = config.platforms[0];
+            Object.keys(platformConfig).forEach(function(key) {
+                assert.strictEqual(platformConfig[key], updatedPlatformConfig[key]);
+            });
+            assert.strictEqual(updatedPlatformConfig.accessToken, null);
+            assert.strictEqual(updatedPlatformConfig.accessTokenExpiry, null);
+            assert.strictEqual(updatedPlatformConfig.refreshToken, null);
+
+            return true;
+        }
+    );
+
+    platform.discoverDevices(function(error) {
+        assert.strictEqual(error, 'Invalid access token');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
 test('Platform#discoverDevices registers accessory when enableThermostat is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',

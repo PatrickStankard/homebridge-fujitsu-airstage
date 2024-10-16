@@ -13,12 +13,17 @@ class ConfigManager {
         const homebridgeConfigPath = this.api.user.configPath();
         const homebridgeConfigString = this._readFileSync(homebridgeConfigPath);
         let homebridgeConfig = JSON.parse(homebridgeConfigString);
+        let accessTokenExpiryISO = null;
+
+        if (accessTokenExpiry !== null) {
+            accessTokenExpiryISO = accessTokenExpiry.toISOString();
+        }
 
         this.config.email = null;
         this.config.password = null;
 
         this.config.accessToken = accessToken;
-        this.config.accessTokenExpiry = accessTokenExpiry.toISOString();
+        this.config.accessTokenExpiry = accessTokenExpiryISO;
         this.config.refreshToken = refreshToken;
 
         homebridgeConfig.platforms.some(function(platformConfig, idx, platforms) {

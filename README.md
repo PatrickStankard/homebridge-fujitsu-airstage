@@ -52,6 +52,10 @@ point, they will be set to `null`, and the `accessToken`, `accessTokenExpiry`,
 and `refreshToken` values will be set. These values will be used to authenticate
 with the Airstage API going forward.
 
+If the access token can't be refreshed for whatever reason, you will have to
+re-authenticate with the Airstage API by setting `email` and `password` in the
+config, and restarting Homebridge.
+
 ## Accessories
 
 For each device in your Airstage account, this plugin offers several

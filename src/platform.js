@@ -47,7 +47,7 @@ class Platform {
 
             setInterval(
                 this._refreshAirstageClientToken.bind(this),
-                (58 * 60 * 1000) // 58 minutes
+                (50 * 60 * 1000) // 50 minutes
             );
         }
 
@@ -63,6 +63,10 @@ class Platform {
             if (error) {
                 if (callback !== null) {
                     callback(error);
+                }
+
+                if (error === 'Invalid access token') {
+                    this._unsetAccessTokenInConfig();
                 }
 
                 return this.log.error('Error when attempting to authenticate with Airstage:', error);
@@ -87,6 +91,10 @@ class Platform {
 
             this.log.debug('Updated config with Airstage client token');
         }
+    }
+
+    _unsetAccessTokenInConfig() {
+        this.configManager.updateConfigWithAccessToken(null, null, null);
     }
 
     _configureAirstageDevices(callback) {
