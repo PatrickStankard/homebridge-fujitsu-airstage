@@ -47,7 +47,7 @@ class Platform {
 
             setInterval(
                 this._refreshAirstageClientToken.bind(this),
-                (58 * 60 * 1000) // 58 minutes
+                (50 * 60 * 1000) // 50 minutes
             );
         }
 
