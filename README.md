@@ -1,5 +1,8 @@
 # homebridge-fujitsu-airstage
 
+[![verified-by-homebridge](https://badgen.net/badge/homebridge/verified/purple)](https://github.com/homebridge/homebridge/wiki/Verified-Plugins)
+[![npm version](https://img.shields.io/npm/v/homebridge-fujitsu-airstage?style=flat-square)](https://www.npmjs.com/package/homebridge-fujitsu-airstage)
+
 A [Homebridge](https://github.com/homebridge/homebridge) plugin to control
 devices that use the
 [Fujitsu Airstage API](https://www.fujitsugeneral.com/us/airstage-mobile/index.html).
