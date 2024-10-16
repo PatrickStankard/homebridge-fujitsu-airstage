@@ -65,6 +65,10 @@ class Platform {
                     callback(error);
                 }
 
+                if (error === 'Invalid access token') {
+                    this._unsetAccessTokenInConfig();
+                }
+
                 return this.log.error('Error when attempting to authenticate with Airstage:', error);
             }
 
@@ -87,6 +91,10 @@ class Platform {
 
             this.log.debug('Updated config with Airstage client token');
         }
+    }
+
+    _unsetAccessTokenInConfig() {
+        this.configManager.updateConfigWithAccessToken(null, null, null);
     }
 
     _configureAirstageDevices(callback) {
