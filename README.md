@@ -32,6 +32,7 @@ installed and configured this plugin:
             "language": "en",
             "email": "test@example.com",
             "password": "test1234",
+            "rememberEmailAndPassword": false,
             "accessToken": null,
             "accessTokenExpiry": null,
             "refreshToken": null,
@@ -49,15 +50,21 @@ installed and configured this plugin:
 }
 ```
 
-The `email` and `password` values should only be set until the initial
-authentication with the Airstage API has been completed successfully. At that
-point, they will be set to `null`, and the `accessToken`, `accessTokenExpiry`,
-and `refreshToken` values will be set. These values will be used to authenticate
-with the Airstage API going forward.
+If the `rememberEmailAndPassword` option is disabled, the `email` and `password`
+values will only be set until authentication with the Airstage API has been
+completed successfully. At that point, they will be set to `null`. This is the
+default behavior, in order to prevent your Airstage credentials from being
+stored in plaintext in the Homebridge config.
 
-If the access token can't be refreshed for whatever reason, you will have to
-re-authenticate with the Airstage API by setting `email` and `password` in the
-config, and restarting Homebridge.
+If the `rememberEmailAndPassword` option is enabled, the `email` and `password`
+values will continue to be set after authentication with the Airstage API has
+been completed successfully. This is useful for when the access token can't be
+refreshed for whatever reason, and you need to re-authenticate with the
+Airstage API.
+
+Once authentication with the Airstage API has been completed successfully,
+the `accessToken`, `accessTokenExpiry`, and `refreshToken` values will be set.
+These values will be used to authenticate with the Airstage API going forward.
 
 ## Accessories
 
