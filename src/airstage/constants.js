@@ -86,15 +86,14 @@ module.exports.MAX_AIRFLOW_VERTICAL_DIRECTION = 4;
 
 // Temperatures
 module.exports.TEMPERATURE_SCALE_FAHRENHEIT = apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT;
-module.exports.MIN_FAHRENHEIT = 64;
-module.exports.MAX_FAHRENHEIT = 88;
-
 module.exports.TEMPERATURE_SCALE_CELSIUS = apiv1.constants.TEMPERATURE_SCALE_CELSIUS;
-module.exports.MIN_CELSIUS = 18.0;
-module.exports.MAX_CELSIUS = 30.0;
 
 module.exports.FAHRENHEIT_TO_CELSIUS_MAP = {
     50: 10.0,
+    60: 16.0,
+    61: 16.5,
+    62: 17.0,
+    63: 17.5,
     64: 18.0,
     65: 18.5,
     66: 19.0,
@@ -124,6 +123,10 @@ module.exports.FAHRENHEIT_TO_CELSIUS_MAP = {
 
 module.exports.CELSIUS_TO_FAHRENHEIT_MAP = {
     10.0: 50,
+    16.0: 60,
+    16.5: 61,
+    17.0: 62,
+    17.5: 63,
     18.0: 64,
     18.5: 65,
     19.0: 66,
