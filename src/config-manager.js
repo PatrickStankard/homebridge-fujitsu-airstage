@@ -12,6 +12,7 @@ class ConfigManager {
     updateConfigWithAccessToken(accessToken, accessTokenExpiry, refreshToken) {
         const homebridgeConfigPath = this.api.user.configPath();
         const homebridgeConfigString = this._readFileSync(homebridgeConfigPath);
+
         let homebridgeConfig = JSON.parse(homebridgeConfigString);
         let accessTokenExpiryISO = null;
 
@@ -19,8 +20,10 @@ class ConfigManager {
             accessTokenExpiryISO = accessTokenExpiry.toISOString();
         }
 
-        this.config.email = null;
-        this.config.password = null;
+        if (this.config.rememberEmailAndPassword === false) {
+            this.config.email = null;
+            this.config.password = null;
+        }
 
         this.config.accessToken = accessToken;
         this.config.accessTokenExpiry = accessTokenExpiryISO;

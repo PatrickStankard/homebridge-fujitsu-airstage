@@ -43,32 +43,36 @@
                 "title": "Airstage Email",
                 "type": "string",
                 "format": "email",
-                "default": "",
-                "description": "This will be automatically removed after the initial authentication with the Airstage API, and an access token will be used instead."
+                "default": ""
             },
             "password": {
                 "title": "Airstage Password",
                 "type": "string",
-                "default": "",
-                "description": "This will be automatically removed after the initial authentication with the Airstage API, and an access token will be used instead."
+                "default": ""
+            },
+            "rememberEmailAndPassword": {
+                "title": "Remember Airstage Email and Password",
+                "type": "boolean",
+                "default": false,
+                "description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
             },
             "accessToken": {
                 "title": "Airstage Access Token",
                 "type": "string",
                 "default": "",
-                "description": "This will be automatically be set after the initial authentication with the Airstage API."
+                "description": "This will be automatically be set after a successful authentication with the Airstage API."
             },
             "accessTokenExpiry": {
                 "title": "Airstage Access Token Expiry",
                 "type": "string",
                 "default": "",
-                "description": "This will be automatically be set after the initial authentication with the Airstage API."
+                "description": "This will be automatically be set after a successful authentication with the Airstage API."
             },
             "refreshToken": {
                 "title": "Airstage Refresh Token",
                 "type": "string",
                 "default": "",
-                "description": "This will be automatically be set after the initial authentication with the Airstage API."
+                "description": "This will be automatically be set after a successful authentication with the Airstage API."
             },
             "enableThermostat": {
                 "title": "Enable thermostat control",
