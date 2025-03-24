@@ -13,8 +13,8 @@
     "url": "https://github.com/PatrickStankard/homebridge-fujitsu-airstage/issues"
   },
   "engines": {
-    "node": "^18.17.0 || ^20.9.0",
-    "homebridge": "^1.7.0"
+    "node": "^18.20.4 || ^20.15.1 || ^22",
+    "homebridge": "^1.6.0 || ^2.0.0-beta.0"
   },
   "main": "src/index.js",
   "scripts": {
@@ -26,7 +26,10 @@
   },
   "keywords": [
     "homebridge",
-    "homebridge-plugin"
+    "homebridge-plugin",
+    "fujitsu",
+    "airstage",
+    "thermostat"
   ],
   "devDependencies": {
     "@types/node": "^20.12.13",
