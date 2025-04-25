@@ -27,7 +27,7 @@ class Platform {
         // Synchronous initialization for tests and legacy Homebridge v1
         let tokens = { accessToken: null, accessTokenExpiry: null, refreshToken: null };
         let canSyncInit = true;
-        if (this.api.storage && typeof this.api.storage.getItem === 'function') {
+        if (this.api?.storage?.getItem) {
             // Homebridge v2+ with storage API: cannot synchronously load tokens
             canSyncInit = false;
         }
@@ -124,22 +124,18 @@ class Platform {
         // Only persist password if rememberEmailAndPassword is true
         const password = (this.config.rememberEmailAndPassword ? (this.config.password || null) : null);
         if (accessToken && accessTokenExpiry && refreshToken) {
-            if (typeof this.configManager.saveTokens === 'function') {
-                this.configManager.saveTokens(
-                    accessToken,
-                    accessTokenExpiry,
-                    refreshToken,
-                    password
-                );
-            }
+            this.configManager.saveTokens(
+                accessToken,
+                accessTokenExpiry,
+                refreshToken,
+                password
+            );
             this.log.debug('Updated tokens using Homebridge persistPath');
         }
     }
 
     _unsetAccessTokenInConfig() {
-        if (typeof this.configManager.saveTokens === 'function') {
-            this.configManager.saveTokens(null, null, null, null);
-        }
+        this.configManager.saveTokens(null, null, null, null);
         this.log.debug('Unset tokens using Homebridge persistPath');
     }
 

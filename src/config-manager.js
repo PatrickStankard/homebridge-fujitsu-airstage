@@ -8,11 +8,11 @@ const settings = require('./settings');
 // Helper: get Homebridge setup ID (returns string or empty if not available)
 function getSetupID(api) {
     try {
-        if (api && api.user && typeof api.user.getSetupId === 'function') {
+        if (api?.user?.getSetupId) {
             return api.user.getSetupId() || '';
         }
         // Homebridge v1 fallback: try configPath file
-        if (api && api.user && typeof api.user.configPath === 'function') {
+        if (api?.user?.configPath) {
             const configPath = api.user.configPath();
             if (fs.existsSync(configPath)) {
                 const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
