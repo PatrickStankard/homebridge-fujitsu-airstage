@@ -32,8 +32,8 @@
     "thermostat"
   ],
   "devDependencies": {
-    "@types/node": "^20.12.13",
-    "homebridge": "^1.7.0"
+    "@types/node": "^22",
+    "homebridge": "^1.9.0"
   },
   "maintainers": [
     {
