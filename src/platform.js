@@ -32,23 +32,31 @@ class Platform {
             canSyncInit = false;
         }
         if (canSyncInit) {
-            // v1 or test: load tokens synchronously from config
-            tokens.accessToken = this.config.accessToken || null;
-            tokens.accessTokenExpiry = this.config.accessTokenExpiry ? new Date(this.config.accessTokenExpiry) : null;
-            tokens.refreshToken = this.config.refreshToken || null;
+            // v1 or test: load tokens synchronously from persistPath or config
+            tokens = this.configManager.getTokensFromPersistPath();
+            if ((!tokens.accessToken && this.config.accessToken) || (!tokens.refreshToken && this.config.refreshToken)) {
+                // Migrate from config if present
+                tokens.accessToken = this.config.accessToken || null;
+                tokens.accessTokenExpiry = this.config.accessTokenExpiry ? new Date(this.config.accessTokenExpiry) : null;
+                tokens.refreshToken = this.config.refreshToken || null;
+                if (this.config.rememberEmailAndPassword && this.config.password) {
+                    tokens.password = this.config.password;
+                }
+                this.configManager.saveTokensToPersistPath(tokens.accessToken, tokens.accessTokenExpiry, tokens.refreshToken, tokens.password);
+            }
             this.airstageClient = new airstage.Client(
                 this.config.region,
                 this.config.country,
                 this.config.language,
                 this.config.email || null,
-                this.config.password || null,
+                // Use password from persistPath if allowed, else null
+                (this.config.rememberEmailAndPassword ? (tokens.password || this.config.password || null) : null),
                 null,
                 null,
                 tokens.accessToken || null,
                 tokens.accessTokenExpiry || null,
                 tokens.refreshToken || null
             );
-            // Async init for v2 still needed for real plugin, but not for tests
             this._init(withSetInterval, false); // false = skip airstageClient re-init
         } else {
             // v2+ Homebridge: must load tokens async, then init airstageClient
@@ -59,19 +67,13 @@ class Platform {
     async _init(withSetInterval, doAirstageClientInit = true) {
         if (doAirstageClientInit) {
             // Only run this if airstageClient not already set (v2+)
-            let tokens = await this.configManager.getTokensFromStorage();
-            // Fallback to config if not found in storage (for migration)
-            if (!tokens.accessToken && this.config.accessToken) {
-                tokens.accessToken = this.config.accessToken;
-                tokens.accessTokenExpiry = this.config.accessTokenExpiry ? new Date(this.config.accessTokenExpiry) : null;
-                tokens.refreshToken = this.config.refreshToken;
-            }
+            let tokens = await this.configManager.getTokens();
             this.airstageClient = new airstage.Client(
                 this.config.region,
                 this.config.country,
                 this.config.language,
                 this.config.email || null,
-                this.config.password || null,
+                (this.config.rememberEmailAndPassword ? (tokens.password || this.config.password || null) : null),
                 null,
                 null,
                 tokens.accessToken || null,
@@ -119,24 +121,26 @@ class Platform {
         const accessToken = this.airstageClient.getAccessToken();
         const accessTokenExpiry = this.airstageClient.getAccessTokenExpiry();
         const refreshToken = this.airstageClient.getRefreshToken();
-
+        // Only persist password if rememberEmailAndPassword is true
+        const password = (this.config.rememberEmailAndPassword ? (this.config.password || null) : null);
         if (accessToken && accessTokenExpiry && refreshToken) {
-            if (typeof this.configManager.saveTokensToStorage === 'function') {
-                this.configManager.saveTokensToStorage(
+            if (typeof this.configManager.saveTokens === 'function') {
+                this.configManager.saveTokens(
                     accessToken,
                     accessTokenExpiry,
-                    refreshToken
+                    refreshToken,
+                    password
                 );
             }
-            this.log.debug('Updated tokens using Homebridge v2 storage API');
+            this.log.debug('Updated tokens using Homebridge persistPath');
         }
     }
 
     _unsetAccessTokenInConfig() {
-        if (typeof this.configManager.saveTokensToStorage === 'function') {
-            this.configManager.saveTokensToStorage(null, null, null);
+        if (typeof this.configManager.saveTokens === 'function') {
+            this.configManager.saveTokens(null, null, null, null);
         }
-        this.log.debug('Unset tokens using Homebridge v2 storage API');
+        this.log.debug('Unset tokens using Homebridge persistPath');
     }
 
     _configureAirstageDevices(callback) {
