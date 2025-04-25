@@ -2,14 +2,20 @@
 
 const { mock } = require('node:test');
 const hap = require('hap-nodejs');
-const PlatformAccessoryManager = require('../platform-accessory-manager');
 const airstage = require('../airstage');
+const PlatformAccessoryManager = require('../platform-accessory-manager');
 
-const airstageClient = new airstage.Client(
-    'us',
-    'United States',
-    'en'
-);
+const airstageClient = new airstage.Client('us', 'United States', 'en');
+
+const mockCharacteristic = {
+    'on': mock.fn((event, listener) => mockCharacteristic),
+    'emit': mock.fn((event, listener) => mockCharacteristic)
+};
+
+const mockService = {
+    'setCharacteristic': mock.fn((name, value) => mockService),
+    'getCharacteristic': mock.fn((name, value) => mockCharacteristic)
+};
 
 class MockPlatformAccessory {
     context = {
@@ -17,39 +23,14 @@ class MockPlatformAccessory {
         'model': 'Test Model',
         'airstageClient': airstageClient
     };
-
     constructor(name, uuid) {
         this.name = name;
         this.uuid = uuid;
         this.UUID = uuid;
     }
-
-    getService(name) {
-        return mockService;
-    }
-
-    addService(name) {
-        return mockService;
-    }
+    getService(name) { return mockService; }
+    addService(name) { return mockService; }
 }
-
-const mockCharacteristic = {
-    'on': mock.fn((event, listener) => {
-        return mockCharacteristic;
-    }),
-    'emit': mock.fn((event, listener) => {
-        return mockCharacteristic;
-    })
-};
-
-const mockService = {
-    'setCharacteristic': mock.fn((name, value) => {
-        return mockService;
-    }),
-    'getCharacteristic': mock.fn((name, value) => {
-        return mockCharacteristic;
-    })
-};
 
 const mockPlatform = {
     'Characteristic': hap.Characteristic,
@@ -60,22 +41,13 @@ const mockPlatform = {
         'hap': hap,
         'platformAccessory': MockPlatformAccessory,
         'user': {
-            'configPath': mock.fn(() => {
-                return '/test/path';
-            })
+            'configPath': mock.fn(() => '/test/path'),
+            'persistPath': mock.fn(() => '/tmp')
         },
-        'updatePlatformAccessories': mock.fn(
-            (accessories) => {}
-        ),
-        'registerPlatformAccessories': mock.fn(
-            (pluginName, platformName, accessories) => {}
-        ),
-        'unregisterPlatformAccessories': mock.fn(
-            (pluginName, platformName, accessories) => {}
-        ),
-        'on': mock.fn((event, listener) => {
-            return mockPlatform.api;
-        })
+        'updatePlatformAccessories': mock.fn(() => {}),
+        'registerPlatformAccessories': mock.fn(() => {}),
+        'unregisterPlatformAccessories': mock.fn(() => {}),
+        'on': mock.fn((event, listener) => mockPlatform.api)
     },
     'log': {
         'debug': mock.fn(() => {}),
@@ -90,7 +62,6 @@ class MockHomebridge {
     characteristic = mockCharacteristic;
     service = mockService;
     platform = mockPlatform;
-
     resetMocks() {
         mockCharacteristic.on.mock.resetCalls();
         mockCharacteristic.emit.mock.resetCalls();

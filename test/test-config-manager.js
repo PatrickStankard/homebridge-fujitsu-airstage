@@ -8,6 +8,10 @@ const mockApi = {
     'user': {
         'configPath': mock.fn(() => {
             return '/test/path';
+        }),
+        'persistPath': mock.fn(() => {
+            // Use a temp directory for persistPath in tests
+            return '/tmp';
         })
     }
 };

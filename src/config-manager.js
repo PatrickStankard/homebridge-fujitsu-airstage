@@ -2,6 +2,65 @@
 
 const fs = require('node:fs');
 const path = require('node:path');
+const crypto = require('node:crypto');
+const settings = require('./settings');
+
+// Helper: get Homebridge setup ID (returns string or empty if not available)
+function getSetupID(api) {
+    try {
+        if (api && api.user && typeof api.user.getSetupId === 'function') {
+            return api.user.getSetupId() || '';
+        }
+        // Homebridge v1 fallback: try configPath file
+        if (api && api.user && typeof api.user.configPath === 'function') {
+            const configPath = api.user.configPath();
+            if (fs.existsSync(configPath)) {
+                const config = JSON.parse(fs.readFileSync(configPath, 'utf8'));
+                if (config.bridge && config.bridge.setupID) {
+                    return config.bridge.setupID;
+                }
+            }
+        }
+    } catch (e) {}
+    return '';
+}
+
+// Helper: derive encryption key from persistPath, plugin name, and setup ID
+function getEncryptionKey(persistPath, api) {
+    const setupId = getSetupID(api);
+    const hash = crypto.createHash('sha256');
+    hash.update(settings.PLUGIN_NAME);
+    hash.update(persistPath);
+    hash.update(setupId);
+    const salt = hash.digest();
+    const persistPathBuf = Buffer.from(persistPath, 'utf8');
+    // PBKDF2: 100,000 iterations, 32 bytes, SHA-512
+    return crypto.pbkdf2Sync(persistPathBuf, salt, 100000, 32, 'sha512');
+}
+
+// Helper: encrypt Buffer using AES-256-GCM
+function encrypt(data, persistPath, api) {
+    const key = getEncryptionKey(persistPath, api);
+    const iv = crypto.randomBytes(12); // 12 bytes for GCM
+    const cipher = crypto.createCipheriv('aes-256-gcm', key, iv);
+    const ciphertext = Buffer.concat([cipher.update(data), cipher.final()]);
+    const authTag = cipher.getAuthTag();
+    // Store: IV (12) + AuthTag (16) + Ciphertext
+    return Buffer.concat([iv, authTag, ciphertext]);
+}
+
+// Helper: decrypt Buffer using AES-256-GCM
+function decrypt(encData, persistPath, api) {
+    if (!Buffer.isBuffer(encData)) encData = Buffer.from(encData);
+    if (encData.length < 12 + 16) throw new Error('Encrypted data too short');
+    const key = getEncryptionKey(persistPath, api);
+    const iv = encData.slice(0, 12);
+    const authTag = encData.slice(12, 28);
+    const ciphertext = encData.slice(28);
+    const decipher = crypto.createDecipheriv('aes-256-gcm', key, iv);
+    decipher.setAuthTag(authTag);
+    return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
+}
 
 class ConfigManager {
     constructor(config, api) {
@@ -17,12 +76,14 @@ class ConfigManager {
             accessTokenExpiry: accessTokenExpiry ? accessTokenExpiry.toISOString() : null,
             refreshToken
         };
-        // Only persist password if rememberEmailAndPassword is true
         if (this.config.rememberEmailAndPassword && password) {
             tokens.password = password;
         }
         try {
-            fs.writeFileSync(this.persistFile, JSON.stringify(tokens, null, 2), { mode: 0o600 });
+            const persistPath = this.api.user.persistPath();
+            const data = Buffer.from(JSON.stringify(tokens), 'utf8');
+            const encrypted = encrypt(data, persistPath, this.api);
+            fs.writeFileSync(this.persistFile, encrypted, { mode: 0o600 });
         } catch (err) {
             if (this.api && this.api.logger) {
                 this.api.logger.error('Failed to write Airstage tokens to persistPath:', err.message);
@@ -34,8 +95,18 @@ class ConfigManager {
     getTokensFromPersistPath() {
         try {
             if (fs.existsSync(this.persistFile)) {
-                const data = fs.readFileSync(this.persistFile, 'utf8');
-                const tokens = JSON.parse(data);
+                const persistPath = this.api.user.persistPath();
+                const encData = fs.readFileSync(this.persistFile);
+                let tokens = {};
+                try {
+                    const decrypted = decrypt(encData, persistPath, this.api);
+                    tokens = JSON.parse(decrypted.toString('utf8'));
+                } catch (err) {
+                    if (this.api && this.api.logger) {
+                        this.api.logger.error('Failed to decrypt Airstage tokens:', err.message);
+                    }
+                    return { accessToken: null, accessTokenExpiry: null, refreshToken: null, password: null };
+                }
                 return {
                     accessToken: tokens.accessToken || null,
                     accessTokenExpiry: tokens.accessTokenExpiry ? new Date(tokens.accessTokenExpiry) : null,

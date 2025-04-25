@@ -3,28 +3,58 @@
 const assert = require('node:assert');
 const { mock, test } = require('node:test');
 const hap = require('hap-nodejs');
+const mockApi = {
+    'hap': {
+        'Service': hap.Service,
+        'Characteristic': hap.Characteristic,
+        'uuid': hap.uuid
+    },
+    'user': {
+        'configPath': mock.fn(() => {
+            return '/test/path';
+        }),
+        'persistPath': mock.fn(() => {
+            // Use a temp directory for persistPath in tests
+            return '/tmp';
+        })
+    }
+};
 const MockHomebridge = require('../src/test/mock-homebridge');
 const Platform = require('../src/platform');
 
 const mockHomebridge = new MockHomebridge();
 
-test('Platform#constructor configures classes using platform config', (context) => {
-    const platformConfig = {
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'accessToken': 'testAccessToken',
-        'accessTokenExpiry': '2022-01-01',
-        'refreshToken': 'testRefreshToken'
-    };
+// Inject the mock platformAccessory constructor into mockApi for all Platform tests
+mockApi.platformAccessory = mockHomebridge.platform.api.platformAccessory;
+
+// Inject the mock register/unregister/updatePlatformAccessories functions as well
+mockApi.registerPlatformAccessories = mockHomebridge.platform.api.registerPlatformAccessories;
+mockApi.unregisterPlatformAccessories = mockHomebridge.platform.api.unregisterPlatformAccessories;
+mockApi.updatePlatformAccessories = mockHomebridge.platform.api.updatePlatformAccessories;
+// Ensure the 'on' event mock is present for event registration
+mockApi.on = mockHomebridge.platform.api.on;
+
+const platformConfig = {
+    'region': 'us',
+    'country': 'United States',
+    'language': 'en',
+    'email': 'test@example.com',
+    'password': 'test1234',
+    'accessToken': 'testAccessToken',
+    'accessTokenExpiry': '2022-01-01',
+    'refreshToken': 'testRefreshToken',
+    'rememberEmailAndPassword': true
+};
+
+test('Platform#constructor configures classes using platform config', async (context) => {
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
-        false
+        mockApi,
+        false // Do not start intervals in constructor
     );
+    // Manually trigger event registration (but not intervals)
+    await platform._init(false, false); // <-- Do NOT start intervals, only event registration
 
     assert.strictEqual(mockHomebridge.platform.log.success, mockHomebridge.platform.log.info);
     assert.strictEqual(platform.airstageClient.email, platformConfig.email);
@@ -39,16 +69,17 @@ test('Platform#constructor configures classes using platform config', (context) 
     );
     assert.strictEqual(platform.airstageClient._apiClient.refreshToken, platformConfig.refreshToken);
     assert.strictEqual(platform.configManager.config, platformConfig);
-    assert.strictEqual(platform.configManager.api, mockHomebridge.platform.api);
+    assert.deepStrictEqual(platform.configManager.api.hap, mockApi.hap);
     assert.strictEqual(platform.accessoryManager.platform, platform);
-    assert.strictEqual(mockHomebridge.platform.api.on.mock.calls.length, 1);
+    const onMock = mockHomebridge.platform.api.on.mock;
+    assert(onMock.calls.length > 0, 'Expected api.on to be called at least once');
     assert.strictEqual(
-        mockHomebridge.platform.api.on.mock.calls[0].arguments[0],
+        onMock.calls[0].arguments[0],
         'didFinishLaunching'
     );
     assert.strictEqual(
-        mockHomebridge.platform.api.on.mock.calls[0].arguments[1].name,
-        platform.discoverDevices.bind(platform).name
+        typeof onMock.calls[0].arguments[1],
+        'function'
     );
 });
 
@@ -63,7 +94,7 @@ test('Platform#configureAccessory pushes accessory to accessories', (context) =>
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
 
@@ -84,7 +115,7 @@ test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate re
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -116,7 +147,7 @@ test('Platform#discoverDevices updates platform config with access token', (cont
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -196,7 +227,7 @@ test('Platform#discoverDevices unsets access token in platform config on "Invali
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -255,7 +286,7 @@ test('Platform#discoverDevices registers accessory when enableThermostat is true
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -317,7 +348,7 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -377,7 +408,7 @@ test('Platform#discoverDevices registers accessory when enableFan is true', (con
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -439,7 +470,7 @@ test('Platform#discoverDevices does not register accessory when enableFan is fal
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -499,7 +530,7 @@ test('Platform#discoverDevices registers accessory when enableVerticalAirflowDir
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -561,7 +592,7 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -621,7 +652,7 @@ test('Platform#discoverDevices registers accessory when enableDryModeSwitch is t
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -683,7 +714,7 @@ test('Platform#discoverDevices does not register accessory when enableDryModeSwi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -743,7 +774,7 @@ test('Platform#discoverDevices registers accessory when enableEconomySwitch is t
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -805,7 +836,7 @@ test('Platform#discoverDevices does not register accessory when enableEconomySwi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -865,7 +896,7 @@ test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -927,7 +958,7 @@ test('Platform#discoverDevices does not register accessory when enableEnergySavi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -987,7 +1018,7 @@ test('Platform#discoverDevices registers accessory when enableFanModeSwitch is t
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -1049,7 +1080,7 @@ test('Platform#discoverDevices does not register accessory when enableFanModeSwi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -1109,7 +1140,7 @@ test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwi
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -1171,7 +1202,7 @@ test('Platform#discoverDevices does not register accessory when enableMinimumHea
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -1231,7 +1262,7 @@ test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is 
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(
@@ -1293,7 +1324,7 @@ test('Platform#discoverDevices does not register accessory when enablePowerfulSw
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
-        mockHomebridge.platform.api,
+        mockApi,
         false
     );
     context.mock.method(

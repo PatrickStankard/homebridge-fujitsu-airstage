@@ -69,6 +69,18 @@ Airstage API.
 **Note:**
 - You do **not** need to set or manage `accessToken`, `accessTokenExpiry`, or `refreshToken` in your config. These are handled automatically by the plugin and are no longer shown in the Homebridge UI.
 
+## Secure Secret Storage
+
+This plugin securely stores all tokens and sensitive credentials using strong encryption. Secrets are never stored in plaintext.
+
+Encryption uses AES-256-GCM with a key derived via PBKDF2 (100,000 iterations, SHA-512) and a salt based on a SHA-256 hash of unique values. The encrypted file is stored with strict permissions (0600) and is not exposed in the Homebridge UI or config.
+
+**You do not need to manage or back up tokens or passwords manually.**
+
+If you move your Homebridge instance to a new machine or change the setup ID, you will need to re-authenticate, as the encrypted secrets are only accessible on the original installation.
+
+---
+
 ## Accessories
 
 For each device in your Airstage account, this plugin offers several
