@@ -13,6 +13,13 @@ Before using this, you should have already installed the
 [Airstage app](https://www.fujitsugeneral.com/us/airstage-mobile/setup.html) on
 your iOS or Android device, signed up for an account, and configured your devices.
 
+## Homebridge Compatibility
+
+- Supports Homebridge v1 and v2 (including child bridge mode)
+- Tokens and authentication data are managed automatically using the Homebridge v2 storage API when available
+- No manual editing of tokens is required or supported
+- Homebridge UI configuration is improved and user-friendly
+
 ## Configuration
 
 The easiest way to configure this plugin is to use
@@ -33,9 +40,6 @@ installed and configured this plugin:
             "email": "test@example.com",
             "password": "test1234",
             "rememberEmailAndPassword": false,
-            "accessToken": null,
-            "accessTokenExpiry": null,
-            "refreshToken": null,
             "enableThermostat": true,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,
@@ -62,9 +66,8 @@ been completed successfully. This is useful for when the access token can't be
 refreshed for whatever reason, and you need to re-authenticate with the
 Airstage API.
 
-Once authentication with the Airstage API has been completed successfully,
-the `accessToken`, `accessTokenExpiry`, and `refreshToken` values will be set.
-These values will be used to authenticate with the Airstage API going forward.
+**Note:**
+- You do **not** need to set or manage `accessToken`, `accessTokenExpiry`, or `refreshToken` in your config. These are handled automatically by the plugin and are no longer shown in the Homebridge UI.
 
 ## Accessories
 

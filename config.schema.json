@@ -9,7 +9,8 @@
                 "title": "Name",
                 "type": "string",
                 "default": "Airstage Platform",
-                "required": true
+                "required": true,
+                "description": "The display name for this platform instance."
             },
             "region": {
                 "title": "Region",
@@ -25,30 +26,35 @@
                         "title": "Europe",
                         "const": "eu"
                     }
-                ]
+                ],
+                "description": "The region for your Airstage account (us or eu)."
             },
             "country": {
                 "title": "Country",
                 "type": "string",
                 "required": true,
-                "default": "United States"
+                "default": "United States",
+                "description": "The country associated with your Airstage account."
             },
             "language": {
                 "title": "Language",
                 "type": "string",
                 "required": true,
-                "default": "en"
+                "default": "en",
+                "description": "The language code for your Airstage account (e.g., 'en')."
             },
             "email": {
                 "title": "Airstage Email",
                 "type": "string",
                 "format": "email",
-                "default": ""
+                "default": "",
+                "description": "The email address for your Airstage account."
             },
             "password": {
                 "title": "Airstage Password",
                 "type": "string",
-                "default": ""
+                "default": "",
+                "description": "The password for your Airstage account."
             },
             "rememberEmailAndPassword": {
                 "title": "Remember Airstage Email and Password",
@@ -56,68 +62,59 @@
                 "default": false,
                 "description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
             },
-            "accessToken": {
-                "title": "Airstage Access Token",
-                "type": "string",
-                "default": "",
-                "description": "This will be automatically be set after a successful authentication with the Airstage API."
-            },
-            "accessTokenExpiry": {
-                "title": "Airstage Access Token Expiry",
-                "type": "string",
-                "default": "",
-                "description": "This will be automatically be set after a successful authentication with the Airstage API."
-            },
-            "refreshToken": {
-                "title": "Airstage Refresh Token",
-                "type": "string",
-                "default": "",
-                "description": "This will be automatically be set after a successful authentication with the Airstage API."
-            },
             "enableThermostat": {
                 "title": "Enable thermostat control",
                 "type": "boolean",
-                "default": true
+                "default": true,
+                "description": "Enable or disable the thermostat accessory for your devices."
             },
             "enableFan": {
                 "title": "Enable fan control",
                 "type": "boolean",
-                "default": true
+                "default": true,
+                "description": "Enable or disable the fan accessory for your devices."
             },
             "enableVerticalAirflowDirection": {
                 "title": "Enable vertical airflow direction control",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the vertical airflow direction accessory."
             },
             "enableDryModeSwitch": {
                 "title": "Enable 'Dry Mode' switch",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the 'Dry Mode' switch accessory."
             },
             "enableEconomySwitch": {
                 "title": "Enable 'Economy' switch",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the 'Economy' switch accessory."
             },
             "enableEnergySavingFanSwitch": {
                 "title": "Enable 'Energy Saving Fan' switch",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the 'Energy Saving Fan' switch accessory."
             },
             "enableFanModeSwitch": {
                 "title": "Enable 'Fan Mode' switch",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the 'Fan Mode' switch accessory."
             },
             "enableMinimumHeatModeSwitch": {
                 "title": "Enable 'Minimum Heat Mode' switch",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the 'Minimum Heat Mode' switch accessory."
             },
             "enablePowerfulSwitch": {
                 "title": "Enable 'Powerful' switch",
                 "type": "boolean",
-                "default": false
+                "default": false,
+                "description": "Enable or disable the 'Powerful' switch accessory."
             }
         }
     }
