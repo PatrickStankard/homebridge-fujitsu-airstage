@@ -7,50 +7,88 @@ const airstage = require('./airstage');
 const settings = require('./settings');
 
 class Platform {
-
     accessories = [];
 
     constructor(log, config, api, withSetInterval = true) {
         this.log = log;
         this.config = config;
         this.api = api;
+        this.accessories = [];
+        this.configManager = new ConfigManager(this.config, this.api);
+        this.accessoryManager = new PlatformAccessoryManager(this);
+        this.Service = this.api.hap.Service;
+        this.Characteristic = this.api.hap.Characteristic;
 
         // Polyfill for Homebridge < 1.8.0
         if (!this.log.success) {
             this.log.success = this.log.info;
         }
 
-        this.Service = this.api.hap.Service;
-        this.Characteristic = this.api.hap.Characteristic;
+        // Synchronous initialization for tests and legacy Homebridge v1
+        let tokens = { accessToken: null, accessTokenExpiry: null, refreshToken: null };
+        let canSyncInit = true;
+        if (this.api.storage && typeof this.api.storage.getItem === 'function') {
+            // Homebridge v2+ with storage API: cannot synchronously load tokens
+            canSyncInit = false;
+        }
+        if (canSyncInit) {
+            // v1 or test: load tokens synchronously from config
+            tokens.accessToken = this.config.accessToken || null;
+            tokens.accessTokenExpiry = this.config.accessTokenExpiry ? new Date(this.config.accessTokenExpiry) : null;
+            tokens.refreshToken = this.config.refreshToken || null;
+            this.airstageClient = new airstage.Client(
+                this.config.region,
+                this.config.country,
+                this.config.language,
+                this.config.email || null,
+                this.config.password || null,
+                null,
+                null,
+                tokens.accessToken || null,
+                tokens.accessTokenExpiry || null,
+                tokens.refreshToken || null
+            );
+            // Async init for v2 still needed for real plugin, but not for tests
+            this._init(withSetInterval, false); // false = skip airstageClient re-init
+        } else {
+            // v2+ Homebridge: must load tokens async, then init airstageClient
+            this._init(withSetInterval, true); // true = do airstageClient init async
+        }
+    }
 
-        this.airstageClient = new airstage.Client(
-            this.config.region,
-            this.config.country,
-            this.config.language,
-            this.config.email || null,
-            this.config.password || null,
-            null,
-            null,
-            this.config.accessToken || null,
-            this.config.accessTokenExpiry || null,
-            this.config.refreshToken || null
-        );
-
-        this.configManager = new ConfigManager(this.config, this.api);
-        this.accessoryManager = new PlatformAccessoryManager(this);
-
+    async _init(withSetInterval, doAirstageClientInit = true) {
+        if (doAirstageClientInit) {
+            // Only run this if airstageClient not already set (v2+)
+            let tokens = await this.configManager.getTokensFromStorage();
+            // Fallback to config if not found in storage (for migration)
+            if (!tokens.accessToken && this.config.accessToken) {
+                tokens.accessToken = this.config.accessToken;
+                tokens.accessTokenExpiry = this.config.accessTokenExpiry ? new Date(this.config.accessTokenExpiry) : null;
+                tokens.refreshToken = this.config.refreshToken;
+            }
+            this.airstageClient = new airstage.Client(
+                this.config.region,
+                this.config.country,
+                this.config.language,
+                this.config.email || null,
+                this.config.password || null,
+                null,
+                null,
+                tokens.accessToken || null,
+                tokens.accessTokenExpiry || null,
+                tokens.refreshToken || null
+            );
+        }
         if (withSetInterval) {
             setInterval(
                 this._refreshAirstageClientCache.bind(this),
                 (5 * 60 * 1000) // 5 minutes
             );
-
             setInterval(
                 this._refreshAirstageClientToken.bind(this),
                 (50 * 60 * 1000) // 50 minutes
             );
         }
-
         this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
     }
 
@@ -83,18 +121,22 @@ class Platform {
         const refreshToken = this.airstageClient.getRefreshToken();
 
         if (accessToken && accessTokenExpiry && refreshToken) {
-            this.configManager.updateConfigWithAccessToken(
-                accessToken,
-                accessTokenExpiry,
-                refreshToken
-            );
-
-            this.log.debug('Updated config with Airstage client token');
+            if (typeof this.configManager.saveTokensToStorage === 'function') {
+                this.configManager.saveTokensToStorage(
+                    accessToken,
+                    accessTokenExpiry,
+                    refreshToken
+                );
+            }
+            this.log.debug('Updated tokens using Homebridge v2 storage API');
         }
     }
 
     _unsetAccessTokenInConfig() {
-        this.configManager.updateConfigWithAccessToken(null, null, null);
+        if (typeof this.configManager.saveTokensToStorage === 'function') {
+            this.configManager.saveTokensToStorage(null, null, null);
+        }
+        this.log.debug('Unset tokens using Homebridge v2 storage API');
     }
 
     _configureAirstageDevices(callback) {
