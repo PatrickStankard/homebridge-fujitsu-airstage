@@ -60,7 +60,7 @@
                 "title": "Remember Airstage Email and Password",
                 "type": "boolean",
                 "default": false,
-                "description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
+                "description": "If enabled, the Airstage email and password will be stored securely after a successful authentication with the Airstage API."
             },
             "enableThermostat": {
                 "title": "Enable thermostat control",

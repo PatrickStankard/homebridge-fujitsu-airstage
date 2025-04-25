@@ -14,10 +14,10 @@ class Platform {
         this.config = config;
         this.api = api;
         this.accessories = [];
-        this.configManager = new ConfigManager(this.config, this.api);
-        this.accessoryManager = new PlatformAccessoryManager(this);
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
+        this.configManager = new ConfigManager(this.config, this.api);
+        this.accessoryManager = new PlatformAccessoryManager(this);
 
         // Polyfill for Homebridge < 1.8.0
         if (!this.log.success) {
