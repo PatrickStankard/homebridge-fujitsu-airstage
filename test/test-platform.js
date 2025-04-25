@@ -1370,3 +1370,85 @@ test('Platform#discoverDevices does not register accessory when enablePowerfulSw
         done();
     });
 });
+
+test('Platform#_refreshAirstageClientToken logs error', (context) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.refreshToken = (cb) => cb('fail');
+    let errorLogged = false;
+    platform.log.error = () => { errorLogged = true; };
+    platform._refreshAirstageClientToken();
+    assert.strictEqual(errorLogged, true);
+});
+
+test('Platform#_refreshAirstageClientToken logs debug on success', (context) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.refreshToken = (cb) => cb(null);
+    let debugLogged = false;
+    platform.log.debug = () => { debugLogged = true; };
+    platform._refreshAirstageClientToken();
+    assert.strictEqual(debugLogged, true);
+});
+
+test('Platform#_refreshAirstageClientCache logs error on user metadata', (context) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.refreshUserMetadataCache = (cb) => cb('fail');
+    let errorLogged = false;
+    platform.log.error = () => { errorLogged = true; };
+    platform._refreshAirstageClientCache();
+    assert.strictEqual(errorLogged, true);
+});
+
+test('Platform#_refreshAirstageClientCache logs error on device cache', (context) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.refreshUserMetadataCache = (cb) => cb(null);
+    platform.airstageClient.refreshDeviceCache = (cb) => cb('fail');
+    let errorLogged = false;
+    platform.log.error = () => { errorLogged = true; };
+    platform._refreshAirstageClientCache();
+    assert.strictEqual(errorLogged, true);
+});
+
+test('Platform#_refreshAirstageClientCache logs debug on success', (context) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.refreshUserMetadataCache = (cb) => cb(null);
+    platform.airstageClient.refreshDeviceCache = (cb) => cb(null, { metadata: {} });
+    let debugLogged = false;
+    platform.log.debug = () => { debugLogged = true; };
+    platform._refreshAirstageClientCache();
+    assert.strictEqual(debugLogged, true);
+});
+
+test('Platform#constructor uses async path if storage API present', async () => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const api = { ...mockApi, storage: { getItem: () => null }, hap: mockApi.hap };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, api, false);
+    // Should not throw, and airstageClient should be set after _init
+    await platform._init(false, true);
+    assert(platform.airstageClient);
+});
+
+test('Platform#_configureAirstageDevices calls callback on error', (context, done) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.getUserMetadata = (cb) => cb('fail');
+    platform._configureAirstageDevices((err) => {
+        assert.strictEqual(err, 'fail');
+        done();
+    });
+});
+
+test('Platform#_configureAirstageDevices calls callback on getDevices error', (context, done) => {
+    const platformConfig = { region: 'us', country: 'US', language: 'en', email: 'a', password: 'b' };
+    const platform = new Platform(mockHomebridge.platform.log, platformConfig, mockApi, false);
+    platform.airstageClient.getUserMetadata = (cb) => cb(null);
+    platform.airstageClient.getDevices = (limit, cb) => cb('fail');
+    platform._configureAirstageDevices((err) => {
+        assert.strictEqual(err, 'fail');
+        done();
+    });
+});

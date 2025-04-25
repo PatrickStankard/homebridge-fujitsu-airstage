@@ -632,3 +632,161 @@ test('PlatformAccessoryManager#unregisterPowerfulSwitchAccessory unregisters exi
 
     mockHomebridge.resetMocks();
 });
+
+test('PlatformAccessoryManager#unregisterVerticalSlatsAccessory with log=false', () => {
+    const deviceId = 'id';
+    const deviceName = 'Name';
+    // Should not throw or log
+    platformAccessoryManager._unregisterAccessory = mock.fn();
+    platformAccessoryManager.unregisterVerticalSlatsAccessory(deviceId, deviceName);
+    // log=false disables log, so _unregisterAccessory should be called with log=false
+    assert.strictEqual(platformAccessoryManager._unregisterAccessory.mock.calls[0].arguments[3], false);
+});
+
+test('PlatformAccessoryManager#_refreshAccessoryCharacteristics returns false if no service', () => {
+    const accessory = { services: [] };
+    const result = platformAccessoryManager._refreshAccessoryCharacteristics(accessory, [123]);
+    assert.strictEqual(result, false);
+});
+
+test('PlatformAccessoryManager#_getExistingAccessory returns null if not found', () => {
+    const result = platformAccessoryManager._getExistingAccessory('notfound', 'suffix');
+    assert.strictEqual(result, null);
+});
+
+test('PlatformAccessoryManager#_getAccessoryName handles unusual suffix', () => {
+    const name = platformAccessoryManager._getAccessoryName('Device', 'foo-bar-baz');
+    assert.strictEqual(name, 'Device Foo Bar Baz');
+});
+
+test('PlatformAccessoryManager#refreshAllAccessoryCharacteristics returns false if no accessories', () => {
+    // Remove all accessories
+    mockHomebridge.platform.accessories = [];
+    // All refresh methods should return false
+    assert.strictEqual(platformAccessoryManager.refreshThermostatAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshFanAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshDryModeSwitchAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshEconomySwitchAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshFanModeSwitchAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics('none'), false);
+    assert.strictEqual(platformAccessoryManager.refreshPowerfulSwitchAccessoryCharacteristics('none'), false);
+});
+
+test('PlatformAccessoryManager#refreshServiceCharacteristics covers success and error branches', () => {
+    let debugCalled = false;
+    let errorCalled = false;
+    let sendEventCalled = false;
+    const fakeService = {
+        constructor: { name: 'FakeService' },
+        getCharacteristic: function(cls) {
+            return {
+                constructor: { name: 'FakeChar' },
+                emit: (event, cb) => {
+                    // Simulate both success and error
+                    cb(null, 42); // success
+                    cb('fail', null); // error
+                },
+                sendEventNotification: (val) => {
+                    sendEventCalled = true;
+                }
+            };
+        }
+    };
+    const fakePlatform = {
+        log: {
+            debug: () => { debugCalled = true; },
+            error: () => { errorCalled = true; }
+        },
+        api: {},
+        accessories: []
+    };
+    const mgr = new PlatformAccessoryManager(fakePlatform);
+    const result = mgr.refreshServiceCharacteristics(fakeService, [123]);
+    assert.strictEqual(result, true);
+    assert(debugCalled, 'debug log called');
+    assert(errorCalled, 'error log called');
+    assert(sendEventCalled, 'sendEventNotification called');
+});
+
+test('PlatformAccessoryManager#_unregisterAccessory with no existing accessory and log true/false', () => {
+    let infoCalled = 0;
+    const fakePlatform = {
+        log: { info: () => { infoCalled++; } },
+        api: {
+            hap: { uuid: { generate: () => 'uuid' } }
+        },
+        accessories: [],
+    };
+    const mgr = new PlatformAccessoryManager(fakePlatform);
+    // Should log if log=true
+    mgr._unregisterAccessory('id', 'Name', 'suffix', true);
+    assert.strictEqual(infoCalled, 1);
+    // Should not log if log=false
+    mgr._unregisterAccessory('id', 'Name', 'suffix', false);
+    assert.strictEqual(infoCalled, 1);
+});
+
+test('PlatformAccessoryManager#_unregisterExistingAccessory logs and calls api', () => {
+    let infoCalled = false;
+    let apiCalled = false;
+    const fakePlatform = {
+        log: { info: () => { infoCalled = true; } },
+        api: {
+            unregisterPlatformAccessories: () => { apiCalled = true; }
+        },
+        accessories: []
+    };
+    const mgr = new PlatformAccessoryManager(fakePlatform);
+    const fakeAccessory = { displayName: 'X' };
+    mgr._unregisterExistingAccessory(fakeAccessory, true);
+    assert(infoCalled, 'info log called');
+    assert(apiCalled, 'api called');
+    // log=false skips log
+    infoCalled = false;
+    mgr._unregisterExistingAccessory(fakeAccessory, false);
+    assert(!infoCalled, 'info log not called');
+});
+
+test('PlatformAccessoryManager#_registerNewAccessory sets context and pushes accessory', () => {
+    let infoCalled = false;
+    let apiCalled = false;
+    const fakePlatform = {
+        log: { info: () => { infoCalled = true; } },
+        api: {
+            registerPlatformAccessories: () => { apiCalled = true; }
+        },
+        airstageClient: 123,
+        accessories: []
+    };
+    const mgr = new PlatformAccessoryManager(fakePlatform);
+    const fakeAccessory = { context: {}, displayName: 'Y' };
+    mgr._registerNewAccessory(fakeAccessory, 'id', 'model');
+    assert(infoCalled, 'info log called');
+    assert(apiCalled, 'api called');
+    assert.strictEqual(fakeAccessory.context.airstageClient, 123);
+    assert.strictEqual(fakeAccessory.context.deviceId, 'id');
+    assert.strictEqual(fakeAccessory.context.model, 'model');
+    assert.strictEqual(fakePlatform.accessories[0], fakeAccessory);
+});
+
+test('PlatformAccessoryManager#_updateExistingAccessory sets context and calls updatePlatformAccessories', () => {
+    let infoCalled = false;
+    let apiCalled = false;
+    const fakePlatform = {
+        log: { info: () => { infoCalled = true; } },
+        api: {
+            updatePlatformAccessories: () => { apiCalled = true; }
+        },
+        airstageClient: 456
+    };
+    const mgr = new PlatformAccessoryManager(fakePlatform);
+    const fakeAccessory = { context: {}, displayName: 'Z' };
+    mgr._updateExistingAccessory(fakeAccessory, 'id', 'model');
+    assert(infoCalled, 'info log called');
+    assert(apiCalled, 'api called');
+    assert.strictEqual(fakeAccessory.context.airstageClient, 456);
+    assert.strictEqual(fakeAccessory.context.deviceId, 'id');
+    assert.strictEqual(fakeAccessory.context.model, 'model');
+});

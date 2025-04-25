@@ -197,3 +197,8 @@ class ConfigManager {
 }
 
 module.exports = ConfigManager;
+// Export helpers for testing/coverage only
+module.exports.getSetupID = getSetupID;
+module.exports.getEncryptionKey = getEncryptionKey;
+module.exports.encrypt = encrypt;
+module.exports.decrypt = decrypt;
