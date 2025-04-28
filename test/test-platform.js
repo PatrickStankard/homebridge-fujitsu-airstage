@@ -101,10 +101,6 @@ test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate re
     });
 });
 
-// The following tests are obsolete and reference a removed method. Remove them entirely.
-// test('Platform#discoverDevices updates platform config with access token', ...)
-// test('Platform#discoverDevices unsets access token in platform config on "Invalid access token" error', ...)
-
 test('Platform#discoverDevices registers accessory when enableThermostat is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
