@@ -16,9 +16,7 @@ your iOS or Android device, signed up for an account, and configured your device
 ## Homebridge Compatibility
 
 - Supports Homebridge v1 and v2 (including child bridge mode)
-- Tokens and authentication data are managed automatically using the Homebridge v2 storage API when available
 - No manual editing of tokens is required or supported
-- Homebridge UI configuration is improved and user-friendly
 
 ## Configuration
 
