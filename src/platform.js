@@ -13,11 +13,6 @@ class Platform {
         this.log = log;
         this.config = config;
         this.api = api;
-        this.accessories = [];
-        this.configManager = new ConfigManager(this.config, this.api);
-        this.accessoryManager = new PlatformAccessoryManager(this);
-        this.Service = this.api.hap.Service;
-        this.Characteristic = this.api.hap.Characteristic;
 
         // Polyfill for Homebridge < 1.8.0
         if (!this.log.success) {
@@ -29,6 +24,12 @@ class Platform {
     }
 
     _init(withSetInterval) {
+        this.Service = this.api.hap.Service;
+        this.Characteristic = this.api.hap.Characteristic;
+
+        this.configManager = new ConfigManager(this.config, this.api);
+        this.accessoryManager = new PlatformAccessoryManager(this);
+
         let tokens = this.configManager.getTokens();
         
         this.airstageClient = new airstage.Client(
