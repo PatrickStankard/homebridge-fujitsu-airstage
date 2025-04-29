@@ -65,56 +65,47 @@
             "enableThermostat": {
                 "title": "Enable thermostat control",
                 "type": "boolean",
-                "default": true,
-                "description": "Enable or disable the thermostat accessory for your devices."
+                "default": true
             },
             "enableFan": {
                 "title": "Enable fan control",
                 "type": "boolean",
-                "default": true,
-                "description": "Enable or disable the fan accessory for your devices."
+                "default": true
             },
             "enableVerticalAirflowDirection": {
                 "title": "Enable vertical airflow direction control",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the vertical airflow direction accessory."
+                "default": false
             },
             "enableDryModeSwitch": {
                 "title": "Enable 'Dry Mode' switch",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the 'Dry Mode' switch accessory."
+                "default": false
             },
             "enableEconomySwitch": {
                 "title": "Enable 'Economy' switch",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the 'Economy' switch accessory."
+                "default": false
             },
             "enableEnergySavingFanSwitch": {
                 "title": "Enable 'Energy Saving Fan' switch",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the 'Energy Saving Fan' switch accessory."
+                "default": false
             },
             "enableFanModeSwitch": {
                 "title": "Enable 'Fan Mode' switch",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the 'Fan Mode' switch accessory."
+                "default": false
             },
             "enableMinimumHeatModeSwitch": {
                 "title": "Enable 'Minimum Heat Mode' switch",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the 'Minimum Heat Mode' switch accessory."
+                "default": false
             },
             "enablePowerfulSwitch": {
                 "title": "Enable 'Powerful' switch",
                 "type": "boolean",
-                "default": false,
-                "description": "Enable or disable the 'Powerful' switch accessory."
+                "default": false
             }
         }
     }
