@@ -33,6 +33,9 @@ installed and configured this plugin:
             "email": "test@example.com",
             "password": "test1234",
             "rememberEmailAndPassword": false,
+            "accessToken": null,
+            "accessTokenExpiry": null,
+            "refreshToken": null,
             "enableThermostat": true,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,
@@ -58,6 +61,10 @@ values will continue to be set after authentication with the Airstage API has
 been completed successfully. This is useful for when the access token can't be
 refreshed for whatever reason, and you need to re-authenticate with the
 Airstage API.
+
+Once authentication with the Airstage API has been completed successfully,
+the `accessToken`, `accessTokenExpiry`, and `refreshToken` values will be set.
+These values will be used to authenticate with the Airstage API going forward.
 
 ## Accessories
 
