@@ -9,8 +9,7 @@
                 "title": "Name",
                 "type": "string",
                 "default": "Airstage Platform",
-                "required": true,
-                "description": "The display name for this platform instance."
+                "required": true
             },
             "region": {
                 "title": "Region",
@@ -26,41 +25,54 @@
                         "title": "Europe",
                         "const": "eu"
                     }
-                ],
-                "description": "The region for your Airstage account (us or eu)."
+                ]
             },
             "country": {
                 "title": "Country",
                 "type": "string",
                 "required": true,
-                "default": "United States",
-                "description": "The country associated with your Airstage account."
+                "default": "United States"
             },
             "language": {
                 "title": "Language",
                 "type": "string",
                 "required": true,
-                "default": "en",
-                "description": "The language code for your Airstage account (e.g., 'en')."
+                "default": "en"
             },
             "email": {
                 "title": "Airstage Email",
                 "type": "string",
                 "format": "email",
-                "default": "",
-                "description": "The email address for your Airstage account."
+                "default": ""
             },
             "password": {
                 "title": "Airstage Password",
                 "type": "string",
-                "default": "",
-                "description": "The password for your Airstage account."
+                "default": ""
             },
             "rememberEmailAndPassword": {
                 "title": "Remember Airstage Email and Password",
                 "type": "boolean",
                 "default": false,
                 "description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
+            },
+            "accessToken": {
+                "title": "Airstage Access Token",
+                "type": "string",
+                "default": "",
+                "description": "This will be automatically be set after a successful authentication with the Airstage API."
+            },
+            "accessTokenExpiry": {
+                "title": "Airstage Access Token Expiry",
+                "type": "string",
+                "default": "",
+                "description": "This will be automatically be set after a successful authentication with the Airstage API."
+            },
+            "refreshToken": {
+                "title": "Airstage Refresh Token",
+                "type": "string",
+                "default": "",
+                "description": "This will be automatically be set after a successful authentication with the Airstage API."
             },
             "enableThermostat": {
                 "title": "Enable thermostat control",
