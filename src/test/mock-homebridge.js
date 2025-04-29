@@ -62,6 +62,9 @@ const mockPlatform = {
         'user': {
             'configPath': mock.fn(() => {
                 return '/test/path';
+            }),
+            'persistPath': mock.fn(() => {
+                return '/test/path';
             })
         },
         'updatePlatformAccessories': mock.fn(
