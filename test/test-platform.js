@@ -101,6 +101,77 @@ test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate re
     });
 });
 
+test('Platform#discoverDevices updates platform config with access token', (context, done) => {
+    const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'region': 'us',
+        'country': 'United States',
+        'language': 'en',
+        'email': 'test@example.com',
+        'password': 'test1234'
+    };
+    const platform = new Platform(
+        mockHomebridge.platform.log,
+        platformConfig,
+        mockHomebridge.platform.api,
+        false
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'refreshTokenOrAuthenticate',
+        (callback) => {
+            platform.airstageClient._apiClient.accessToken = 'testAccessToken';
+            platform.airstageClient._apiClient.accessTokenExpiry = new Date('2022-01-01');
+            platform.airstageClient._apiClient.refreshToken = 'testRefreshToken';
+
+            callback(null);
+        }
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'getUserMetadata',
+        (callback) => {
+            callback(null);
+        }
+    );
+
+    context.mock.method(
+        platform.airstageClient,
+        'getDevices',
+        (limit, callback) => {
+            callback(null, {'metadata': {}});
+        }
+    );
+
+    // Mock configManager.saveTokens to verify correct values are saved
+    let savedTokens = null;
+    context.mock.method(
+        platform.configManager,
+        'saveTokens',
+        (accessToken, accessTokenExpiry, refreshToken) => {
+            savedTokens = {
+                accessToken,
+                accessTokenExpiry,
+                refreshToken
+            };
+        }
+    );
+
+    platform.discoverDevices(function(error) {
+        assert.strictEqual(error, null);
+
+        // Check that saveTokens was called with the correct values
+        assert.ok(savedTokens, 'saveTokens should be called');
+        assert.strictEqual(savedTokens.accessToken, 'testAccessToken');
+        assert.strictEqual(savedTokens.accessTokenExpiry.toISOString(), '2022-01-01T00:00:00.000Z');
+        assert.strictEqual(savedTokens.refreshToken, 'testRefreshToken');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
 test('Platform#discoverDevices registers accessory when enableThermostat is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
