@@ -7,7 +7,6 @@ const airstage = require('./airstage');
 const settings = require('./settings');
 
 class Platform {
-
     accessories = [];
 
     constructor(log, config, api, withSetInterval = true) {
@@ -19,10 +18,20 @@ class Platform {
         if (!this.log.success) {
             this.log.success = this.log.info;
         }
+        
+        // Initialize platform Airstage client and accessories
+        this._init(withSetInterval);
+    }
 
+    _init(withSetInterval) {
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
+        this.configManager = new ConfigManager(this.config, this.api);
+        this.accessoryManager = new PlatformAccessoryManager(this);
+
+        let tokens = this.configManager.getTokens();
+        
         this.airstageClient = new airstage.Client(
             this.config.region,
             this.config.country,
@@ -31,26 +40,21 @@ class Platform {
             this.config.password || null,
             null,
             null,
-            this.config.accessToken || null,
-            this.config.accessTokenExpiry || null,
-            this.config.refreshToken || null
+            tokens.accessToken || null,
+            tokens.accessTokenExpiry || null,
+            tokens.refreshToken || null
         );
-
-        this.configManager = new ConfigManager(this.config, this.api);
-        this.accessoryManager = new PlatformAccessoryManager(this);
 
         if (withSetInterval) {
             setInterval(
                 this._refreshAirstageClientCache.bind(this),
                 (5 * 60 * 1000) // 5 minutes
             );
-
             setInterval(
                 this._refreshAirstageClientToken.bind(this),
                 (50 * 60 * 1000) // 50 minutes
             );
         }
-
         this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
     }
 
@@ -83,18 +87,16 @@ class Platform {
         const refreshToken = this.airstageClient.getRefreshToken();
 
         if (accessToken && accessTokenExpiry && refreshToken) {
-            this.configManager.updateConfigWithAccessToken(
+            this.configManager.saveTokens(
                 accessToken,
                 accessTokenExpiry,
                 refreshToken
             );
-
-            this.log.debug('Updated config with Airstage client token');
         }
     }
 
     _unsetAccessTokenInConfig() {
-        this.configManager.updateConfigWithAccessToken(null, null, null);
+        this.configManager.saveTokens(null, null, null);
     }
 
     _configureAirstageDevices(callback) {
@@ -122,7 +124,7 @@ class Platform {
                     const deviceMetadata = devices.metadata[deviceId];
                     const deviceParameters = devices.parameters[deviceId];
                     const deviceName = deviceMetadata.deviceName;
-                    const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL];
+                    const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL] || 'Airstage';
 
                     this._configureAirstageDevice(
                         deviceId,
