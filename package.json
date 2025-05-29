@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Fujitsu Airstage",
   "name": "homebridge-fujitsu-airstage",
-  "version": "2.5.1",
+  "version": "2.5.2",
   "description": "A Homebridge plugin to control devices that use the Fujitsu Airstage API.",
   "license": "MIT",
   "homepage": "https://github.com/PatrickStankard/homebridge-fujitsu-airstage",
@@ -18,11 +18,11 @@
   },
   "main": "src/index.js",
   "scripts": {
-      "test": "node --test --experimental-test-coverage"
+    "test": "node --test --experimental-test-coverage"
   },
   "funding": {
-      "type": "venmo",
-      "url": "https://account.venmo.com/u/patrickstankard"
+    "type": "venmo",
+    "url": "https://account.venmo.com/u/patrickstankard"
   },
   "keywords": [
     "homebridge",
