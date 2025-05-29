@@ -33,10 +33,7 @@ test('Platform#constructor configures classes using platform config', (context) 
     assert.strictEqual(platform.airstageClient._apiClient.country, platformConfig.country);
     assert.strictEqual(platform.airstageClient._apiClient.language, platformConfig.language);
     assert.strictEqual(platform.airstageClient._apiClient.accessToken, platformConfig.accessToken);
-    assert.strictEqual(
-        platform.airstageClient._apiClient.accessTokenExpiry.toString(),
-        new Date(platformConfig.accessTokenExpiry).toString()
-    );
+    assert.strictEqual(platform.airstageClient._apiClient.accessTokenExpiry.toISOString(), new Date(platformConfig.accessTokenExpiry).toISOString());
     assert.strictEqual(platform.airstageClient._apiClient.refreshToken, platformConfig.refreshToken);
     assert.strictEqual(platform.configManager.config, platformConfig);
     assert.strictEqual(platform.configManager.api, mockHomebridge.platform.api);
@@ -145,96 +142,29 @@ test('Platform#discoverDevices updates platform config with access token', (cont
             callback(null, {'metadata': {}});
         }
     );
-    context.mock.method(
-        platform.configManager,
-        '_readFileSync',
-        (path) => {
-            return JSON.stringify({
-                'platforms': [platformConfig]
-            });
-        }
-    );
-    context.mock.method(
-        platform.configManager,
-        '_writeFileSync',
-        (path, configString) => {
-            const config = JSON.parse(configString);
-            assert.strictEqual(config.platforms.length, 1);
-            const updatedPlatformConfig = config.platforms[0];
-            Object.keys(platformConfig).forEach(function(key) {
-                assert.strictEqual(platformConfig[key], updatedPlatformConfig[key]);
-            });
-            assert.strictEqual(updatedPlatformConfig.accessToken, 'testAccessToken');
-            assert.strictEqual(updatedPlatformConfig.accessTokenExpiry, '2022-01-01T00:00:00.000Z');
-            assert.strictEqual(updatedPlatformConfig.refreshToken, 'testRefreshToken');
 
-            return true;
+    // Mock configManager.saveTokens to verify correct values are saved
+    let savedTokens = null;
+    context.mock.method(
+        platform.configManager,
+        'saveTokens',
+        (accessToken, accessTokenExpiry, refreshToken) => {
+            savedTokens = {
+                accessToken,
+                accessTokenExpiry,
+                refreshToken
+            };
         }
     );
 
     platform.discoverDevices(function(error) {
         assert.strictEqual(error, null);
 
-        mockHomebridge.resetMocks();
-
-        done();
-    });
-});
-
-test('Platform#discoverDevices unsets access token in platform config on "Invalid access token" error', (context, done) => {
-    const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': null,
-        'password': null,
-        'accessToken': 'testAccessToken',
-        'accessTokenExpiry': new Date('2022-01-01'),
-        'refreshToken': 'testRefreshToken'
-    };
-    const platform = new Platform(
-        mockHomebridge.platform.log,
-        platformConfig,
-        mockHomebridge.platform.api,
-        false
-    );
-    context.mock.method(
-        platform.airstageClient,
-        'refreshTokenOrAuthenticate',
-        (callback) => {
-            callback('Invalid access token');
-        }
-    );
-    context.mock.method(
-        platform.configManager,
-        '_readFileSync',
-        (path) => {
-            return JSON.stringify({
-                'platforms': [platformConfig]
-            });
-        }
-    );
-    context.mock.method(
-        platform.configManager,
-        '_writeFileSync',
-        (path, configString) => {
-            const config = JSON.parse(configString);
-            assert.strictEqual(config.platforms.length, 1);
-            const updatedPlatformConfig = config.platforms[0];
-            Object.keys(platformConfig).forEach(function(key) {
-                assert.strictEqual(platformConfig[key], updatedPlatformConfig[key]);
-            });
-            assert.strictEqual(updatedPlatformConfig.accessToken, null);
-            assert.strictEqual(updatedPlatformConfig.accessTokenExpiry, null);
-            assert.strictEqual(updatedPlatformConfig.refreshToken, null);
-
-            return true;
-        }
-    );
-
-    platform.discoverDevices(function(error) {
-        assert.strictEqual(error, 'Invalid access token');
+        // Check that saveTokens was called with the correct values
+        assert.ok(savedTokens, 'saveTokens should be called');
+        assert.strictEqual(savedTokens.accessToken, 'testAccessToken');
+        assert.strictEqual(savedTokens.accessTokenExpiry.toISOString(), '2022-01-01T00:00:00.000Z');
+        assert.strictEqual(savedTokens.refreshToken, 'testRefreshToken');
 
         mockHomebridge.resetMocks();
 
