@@ -36,6 +36,7 @@ installed and configured this plugin:
             "enableThermostat": true,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,
+            "enableAutoFanSpeedSwitch": false,
             "enableDryModeSwitch": false,
             "enableEconomySwitch": false,
             "enableEnergySavingFanSwitch": false,
@@ -87,6 +88,11 @@ represented in the plugin using the
 
 The fan speed of this accessory represents the position of the vertical slats.
 If the accessory is off, the vertical slats will oscillate.
+
+### "Auto Fan Speed" Switch
+
+This accessory allows you to control the "Auto Fan Speed" setting (on/off) of
+your device.
 
 ### "Dry Mode" Switch
 

@@ -77,6 +77,11 @@
                 "type": "boolean",
                 "default": false
             },
+            "enableAutoFanSpeedSwitch": {
+                "title": "Enable 'Auto Fan Speed' switch",
+                "type": "boolean",
+                "default": false
+            },
             "enableDryModeSwitch": {
                 "title": "Enable 'Dry Mode' switch",
                 "type": "boolean",

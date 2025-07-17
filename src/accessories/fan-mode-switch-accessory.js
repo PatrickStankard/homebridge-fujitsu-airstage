@@ -188,6 +188,7 @@ class FanModeSwitchAccessory extends Accessory {
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);

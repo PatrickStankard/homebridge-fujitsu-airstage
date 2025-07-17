@@ -3,12 +3,12 @@
 const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class DryModeSwitchAccessory extends Accessory {
+class FanModeSwitchAccessory extends Accessory {
 
     constructor(platform, accessory) {
         super(platform, accessory);
 
-        this.lastKnownOperationMode = null;
+        this.lastKnownFanSpeed = null;
 
         this.service = (
             this.accessory.getService(this.Service.Switch) ||
@@ -47,9 +47,9 @@ class DryModeSwitchAccessory extends Accessory {
                     return callback(null, value);
                 }
 
-                this.airstageClient.getOperationMode(
+                this.airstageClient.getFanSpeed(
                     this.deviceId,
-                    (function(error, operationMode) {
+                    (function(error, fanSpeed) {
                         let value = null;
 
                         if (error) {
@@ -58,7 +58,7 @@ class DryModeSwitchAccessory extends Accessory {
                             return callback(error, null);
                         }
 
-                        value = (operationMode === airstage.constants.OPERATION_MODE_DRY);
+                        value = (fanSpeed === airstage.constants.FAN_SPEED_AUTO);
 
                         this._logMethodCallResult(methodName, null, value);
 
@@ -74,15 +74,15 @@ class DryModeSwitchAccessory extends Accessory {
 
         this._logMethodCall(methodName, value);
 
-        let operationMode = null;
+        let fanSpeed = null;
 
         if (value) {
-            operationMode = airstage.constants.OPERATION_MODE_DRY;
+            fanSpeed = airstage.constants.FAN_SPEED_AUTO;
         } else {
-            if (this.lastKnownOperationMode !== null) {
-                operationMode = this.lastKnownOperationMode;
+            if (this.lastKnownFanSpeed !== null) {
+                fanSpeed = this.lastKnownFanSpeed;
             } else {
-                operationMode = airstage.constants.OPERATION_MODE_AUTO;
+                fanSpeed = airstage.constants.FAN_SPEED_LOW;
             }
         }
 
@@ -108,17 +108,17 @@ class DryModeSwitchAccessory extends Accessory {
                                 return callback(error);
                             }
 
-                            this._setOperationMode(
+                            this._setFanSpeed(
                                 methodName,
-                                operationMode,
+                                fanSpeed,
                                 callback
                             );
                         }).bind(this)
                     );
                 } else {
-                    this._setOperationMode(
+                    this._setFanSpeed(
                         methodName,
-                        operationMode,
+                        fanSpeed,
                         callback
                     );
                 }
@@ -140,7 +140,7 @@ class DryModeSwitchAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                const value = name + ' Dry Mode Switch';
+                const value = name + ' Auto Fan Speed Switch';
 
                 this._logMethodCallResult(methodName, null, value);
 
@@ -149,21 +149,21 @@ class DryModeSwitchAccessory extends Accessory {
         );
     }
 
-    _setOperationMode(methodName, operationMode, callback) {
-        this.airstageClient.getOperationMode(
+    _setFanSpeed(methodName, fanSpeed, callback) {
+        this.airstageClient.getFanSpeed(
             this.deviceId,
-            (function(error, currentOperationMode) {
+            (function(error, currentFanSpeed) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
-                    return callback(error);
+                    return callback(error, null);
                 }
 
-                this.lastKnownOperationMode = currentOperationMode;
+                this.lastKnownFanSpeed = currentFanSpeed;
 
-                this.airstageClient.setOperationMode(
+                this.airstageClient.setFanSpeed(
                     this.deviceId,
-                    operationMode,
+                    fanSpeed,
                     (function(error) {
                         if (error) {
                             this._logMethodCallResult(methodName, error);
@@ -188,13 +188,12 @@ class DryModeSwitchAccessory extends Accessory {
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 
-module.exports = DryModeSwitchAccessory;
+module.exports = FanModeSwitchAccessory;

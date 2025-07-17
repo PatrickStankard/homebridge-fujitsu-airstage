@@ -538,6 +538,128 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
     });
 });
 
+test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch is true', (context, done) => {
+    const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'region': 'us',
+        'country': 'United States',
+        'language': 'en',
+        'email': 'test@example.com',
+        'password': 'test1234',
+        'enableAutoFanSpeedSwitch': true
+    };
+    const platform = new Platform(
+        mockHomebridge.platform.log,
+        platformConfig,
+        mockHomebridge.platform.api,
+        false
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'refreshTokenOrAuthenticate',
+        (callback) => {
+            callback(null);
+        }
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'getUserMetadata',
+        (callback) => {
+            callback(null);
+        }
+    );
+
+    context.mock.method(
+        platform.airstageClient,
+        'getDevices',
+        (limit, callback) => {
+            callback(null, {
+                'metadata': {
+                    'testDevice': {
+                        'deviceName': 'Test Device'
+                    }
+                },
+                'parameters': {
+                    'testDevice': {
+                        'iu_model': 'Fujitsu Mini Split'
+                    }
+                }
+            });
+        }
+    );
+
+    platform.discoverDevices(function(error) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(platform.accessories.length, 1);
+        const accessory = platform.accessories[0];
+        assert.strictEqual(accessory.name, 'Test Device Auto Fan Speed Switch');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('Platform#discoverDevices does not register accessory when enableAutoFanSpeedSwitch is false', (context, done) => {
+    const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'region': 'us',
+        'country': 'United States',
+        'language': 'en',
+        'email': 'test@example.com',
+        'password': 'test1234',
+        'enableAutoFanSpeedSwitch': false
+    };
+    const platform = new Platform(
+        mockHomebridge.platform.log,
+        platformConfig,
+        mockHomebridge.platform.api,
+        false
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'refreshTokenOrAuthenticate',
+        (callback) => {
+            callback(null);
+        }
+    );
+    context.mock.method(
+        platform.airstageClient,
+        'getUserMetadata',
+        (callback) => {
+            callback(null);
+        }
+    );
+
+    context.mock.method(
+        platform.airstageClient,
+        'getDevices',
+        (limit, callback) => {
+            callback(null, {
+                'metadata': {
+                    'testDevice': {
+                        'deviceName': 'Test Device'
+                    }
+                },
+                'parameters': {
+                    'testDevice': {
+                        'iu_model': 'Fujitsu Mini Split'
+                    }
+                }
+            });
+        }
+    );
+
+    platform.discoverDevices(function(error) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(platform.accessories.length, 0);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
 test('Platform#discoverDevices registers accessory when enableDryModeSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',

@@ -190,6 +190,20 @@ class Platform {
             );
         }
 
+        // "Auto Fan Speed" switch
+        if (this.config.enableAutoFanSpeedSwitch) {
+            this.accessoryManager.registerAutoFanSpeedSwitchAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterAutoFanSpeedSwitchAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
         // "Dry Mode" switch
         if (this.config.enableDryModeSwitch) {
             this.accessoryManager.registerDryModeSwitchAccessory(
