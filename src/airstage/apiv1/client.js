@@ -308,22 +308,30 @@ class Client {
     }
 
     _storeAccessToken(result) {
+        let accessToken = null;
+        let accessTokenExpiry = null;
+        let refreshToken = null;
+
         if (result.response) {
             if (result.response.accessToken) {
-                this.accessToken = result.response.accessToken;
+                accessToken = result.response.accessToken;
             }
 
             if (result.response.expiresIn) {
-                this.accessTokenExpiry = new Date();
-                this.accessTokenExpiry.setSeconds(
-                    this.accessTokenExpiry.getSeconds() + result.response.expiresIn
+                accessTokenExpiry = new Date();
+                accessTokenExpiry.setSeconds(
+                    accessTokenExpiry.getSeconds() + result.response.expiresIn
                 );
             }
 
             if (result.response.refreshToken) {
-                this.refreshToken = result.response.refreshToken;
+                refreshToken = result.response.refreshToken;
             }
         }
+
+        this.accessToken = accessToken;
+        this.accessTokenExpiry = accessTokenExpiry;
+        this.refreshToken = refreshToken;
     }
 
     _generateDeviceToken() {
