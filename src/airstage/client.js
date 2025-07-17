@@ -36,9 +36,9 @@ class Client {
     }
 
     refreshTokenOrAuthenticate(callback) {
-        if (this._apiClient.accessToken && this._apiClient.refreshToken) {
+        if (this._hasValidAccessToken()) {
             this.refreshToken(callback);
-        } else if (this.email && this.password) {
+        } else if (this._hasValidLoginCredentials()) {
             this.authenticate(callback);
         } else {
             callback('Could not refresh token or authenticate', null);
@@ -938,15 +938,37 @@ class Client {
     }
 
     getAccessToken() {
-        return this._apiClient.accessToken;
+        return this._apiClient.accessToken || null;
     }
 
     getAccessTokenExpiry() {
-        return this._apiClient.accessTokenExpiry;
+        return this._apiClient.accessTokenExpiry || null;
     }
 
     getRefreshToken() {
-        return this._apiClient.refreshToken;
+        return this._apiClient.refreshToken || null;
+    }
+
+    _hasValidLoginCredentials() {
+        return (
+            this._getEmail() !== null &&
+            this._getPassword() !== null
+        );
+    }
+
+    _getEmail() {
+        return this.email || null;
+    }
+
+    _getPassword() {
+        return this.password || null;
+    }
+
+    _hasValidAccessToken() {
+        return (
+            this.getAccessToken() !== null &&
+            this.getAccessTokenExpiry() !== null
+        );
     }
 
     _isInvalidLoginResult(result) {

@@ -18,7 +18,7 @@ class Platform {
         if (!this.log.success) {
             this.log.success = this.log.info;
         }
-        
+
         // Initialize platform Airstage client and accessories
         this._init(withSetInterval);
     }
@@ -31,7 +31,7 @@ class Platform {
         this.accessoryManager = new PlatformAccessoryManager(this);
 
         let tokens = this.configManager.getTokens();
-        
+
         this.airstageClient = new airstage.Client(
             this.config.region,
             this.config.country,
@@ -50,11 +50,13 @@ class Platform {
                 this._refreshAirstageClientCache.bind(this),
                 (5 * 60 * 1000) // 5 minutes
             );
+
             setInterval(
-                this._refreshAirstageClientToken.bind(this),
+                this._refreshAirstageClientTokenOrAuthenticate.bind(this),
                 (50 * 60 * 1000) // 50 minutes
             );
         }
+
         this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
     }
 
@@ -82,17 +84,11 @@ class Platform {
     }
 
     _updateConfigWithAccessToken() {
-        const accessToken = this.airstageClient.getAccessToken();
-        const accessTokenExpiry = this.airstageClient.getAccessTokenExpiry();
-        const refreshToken = this.airstageClient.getRefreshToken();
-
-        if (accessToken && accessTokenExpiry && refreshToken) {
-            this.configManager.saveTokens(
-                accessToken,
-                accessTokenExpiry,
-                refreshToken
-            );
-        }
+        this.configManager.saveTokens(
+            this.airstageClient.getAccessToken(),
+            this.airstageClient.getAccessTokenExpiry(),
+            this.airstageClient.getRefreshToken()
+        );
     }
 
     _unsetAccessTokenInConfig() {
@@ -279,15 +275,19 @@ class Platform {
         }
     }
 
-    _refreshAirstageClientToken() {
-        this.airstageClient.refreshToken((function(error) {
+    _refreshAirstageClientTokenOrAuthenticate() {
+        this.airstageClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
-                return this.log.error('Error when attempting to refresh Airstage access token:', error);
+                if (error === 'Invalid access token') {
+                    this._unsetAccessTokenInConfig();
+                }
+
+                return this.log.error('Error when attempting to authenticate with Airstage:', error);
             }
 
             this._updateConfigWithAccessToken();
 
-            this.log.debug('Refreshed Airstage client token');
+            this.log.debug('Refreshed Airstage authentication');
         }).bind(this));
     }
 
