@@ -214,6 +214,11 @@ class ThermostatAccessory extends Accessory {
                             }).bind(this)
                         );
                     } else if (powerState === airstage.constants.TOGGLE_OFF) {
+                        this._logMethodCallResult(methodName, null, null);
+
+                        this._refreshDynamicServiceCharacteristics();
+                        this._refreshRelatedAccessoryCharacteristics();
+
                         callback(null);
                     }
                 } else {

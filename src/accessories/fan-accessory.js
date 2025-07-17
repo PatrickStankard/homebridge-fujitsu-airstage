@@ -181,12 +181,16 @@ class FanAccessory extends Accessory {
                     this._logMethodCallResult(methodName, null, null);
 
                     this._refreshDynamicServiceCharacteristics();
+                    this._refreshRelatedAccessoryCharacteristics();
 
                     callback(null);
                 }).bind(this)
             );
         } else {
             this._logMethodCallResult(methodName, null, null);
+
+            this._refreshDynamicServiceCharacteristics();
+            this._refreshRelatedAccessoryCharacteristics();
 
             callback(null);
         }
@@ -365,6 +369,7 @@ class FanAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, null);
 
                 this._refreshDynamicServiceCharacteristics();
+                this._refreshRelatedAccessoryCharacteristics();
 
                 this._setFanSpeedHandle = null;
 

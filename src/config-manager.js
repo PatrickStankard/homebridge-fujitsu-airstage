@@ -64,7 +64,6 @@ class ConfigManager {
 
         return tokens;
     }
-    
 }
 
 module.exports = ConfigManager;
