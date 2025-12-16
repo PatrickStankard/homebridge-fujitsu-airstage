@@ -1,47 +1,51 @@
-'use strict';
+"use strict";
 
-const assert = require('node:assert');
-const { mock, test } = require('node:test');
-const airstage = require('./../../src/airstage');
+const assert = require("node:assert");
+const { mock, test } = require("node:test");
+const airstage = require("./../../src/airstage");
 
 const clientWithAccessToken = new airstage.Client(
-    'us',
-    'United States',
-    'en',
-    'example@example.com',
-    'password',
+    "us",
+    "United States",
+    "en",
+    "example@example.com",
+    "password",
     null,
     null,
-    'existingAccessToken',
-    '2099-01-01',
-    'existingRefreshToken'
+    "existingAccessToken",
+    "2099-01-01",
+    "existingRefreshToken",
 );
 const clientWithoutAccessToken = new airstage.Client(
-    'us',
-    'United States',
-    'en',
-    'example@example.com',
-    'password'
+    "us",
+    "United States",
+    "en",
+    "example@example.com",
+    "password",
 );
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with success', (context, done) => {
+test("airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with success", (context, done) => {
     const expectedResponse = {
-        'accessToken': 'testAccessToken',
-        'expiresIn': 3600,
-        'refreshToken': 'testRefreshToken'
+        accessToken: "testAccessToken",
+        expiresIn: 3600,
+        refreshToken: "testRefreshToken",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postUsersMeRefreshToken',
+        "postUsersMeRefreshToken",
         (refreshToken, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'existingRefreshToken');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "existingRefreshToken",
+        );
     });
 
     clientWithAccessToken.refreshTokenOrAuthenticate((error, result) => {
@@ -52,20 +56,24 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRef
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postUsersMeRefreshToken',
+        "postUsersMeRefreshToken",
         (refreshToken, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'existingRefreshToken');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "existingRefreshToken",
+        );
     });
 
     clientWithAccessToken.refreshTokenOrAuthenticate((error, result) => {
@@ -76,25 +84,29 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRef
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with success', (context, done) => {
+test("airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with success", (context, done) => {
     const expectedResponse = {
-        'accessToken': 'testAccessToken',
-        'expiresIn': 3600,
-        'refreshToken': 'testRefreshToken'
+        accessToken: "testAccessToken",
+        expiresIn: 3600,
+        refreshToken: "testRefreshToken",
     };
     context.mock.method(
         clientWithoutAccessToken._apiClient,
-        'postUsersSignIn',
+        "postUsersSignIn",
         (email, password, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithoutAccessToken._apiClient.postUsersSignIn.mock;
+        const mockedMethod =
+            clientWithoutAccessToken._apiClient.postUsersSignIn.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'example@example.com');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'password');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "example@example.com",
+        );
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "password");
     });
 
     clientWithoutAccessToken.refreshTokenOrAuthenticate((error, result) => {
@@ -105,21 +117,25 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignI
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithoutAccessToken._apiClient,
-        'postUsersSignIn',
+        "postUsersSignIn",
         (email, password, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithoutAccessToken._apiClient.postUsersSignIn.mock;
+        const mockedMethod =
+            clientWithoutAccessToken._apiClient.postUsersSignIn.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'example@example.com');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'password');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "example@example.com",
+        );
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "password");
     });
 
     clientWithoutAccessToken.refreshTokenOrAuthenticate((error, result) => {
@@ -130,22 +146,13 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignI
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate returns error', (context, done) => {
-    const client = new airstage.Client(
-        'us',
-        'United States',
-        'en'
-    );
-    context.mock.method(
-        client._apiClient,
-        'postUsersMeRefreshToken'
-    );
-    context.mock.method(
-        client._apiClient,
-        'postUsersSignIn'
-    );
+test("airstage.Client#refreshTokenOrAuthenticate returns error", (context, done) => {
+    const client = new airstage.Client("us", "United States", "en");
+    context.mock.method(client._apiClient, "postUsersMeRefreshToken");
+    context.mock.method(client._apiClient, "postUsersSignIn");
     context.after(() => {
-        const mockedRefreshMethod = client._apiClient.postUsersMeRefreshToken.mock;
+        const mockedRefreshMethod =
+            client._apiClient.postUsersMeRefreshToken.mock;
         const mockedAuthenticateMethod = client._apiClient.postUsersSignIn.mock;
 
         assert.strictEqual(mockedRefreshMethod.calls.length, 0);
@@ -153,32 +160,36 @@ test('airstage.Client#refreshTokenOrAuthenticate returns error', (context, done)
     });
 
     client.refreshTokenOrAuthenticate((error, result) => {
-        assert.strictEqual(error, 'Could not refresh token or authenticate');
+        assert.strictEqual(error, "Could not refresh token or authenticate");
         assert.strictEqual(result, null);
 
         done();
     });
 });
 
-test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with success', (context, done) => {
+test("airstage.Client#authenticate calls _apiClient.postUsersSignIn with success", (context, done) => {
     const expectedResponse = {
-        'accessToken': 'testAccessToken',
-        'expiresIn': 3600,
-        'refreshToken': 'testRefreshToken'
+        accessToken: "testAccessToken",
+        expiresIn: 3600,
+        refreshToken: "testRefreshToken",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postUsersSignIn',
+        "postUsersSignIn",
         (email, password, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postUsersSignIn.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postUsersSignIn.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'example@example.com');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'password');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "example@example.com",
+        );
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "password");
     });
 
     clientWithAccessToken.authenticate((error, result) => {
@@ -189,21 +200,25 @@ test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with success
     });
 });
 
-test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#authenticate calls _apiClient.postUsersSignIn with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postUsersSignIn',
+        "postUsersSignIn",
         (email, password, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postUsersSignIn.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postUsersSignIn.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'example@example.com');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'password');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "example@example.com",
+        );
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "password");
     });
 
     clientWithAccessToken.authenticate((error, result) => {
@@ -214,24 +229,28 @@ test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with error',
     });
 });
 
-test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with success', (context, done) => {
+test("airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with success", (context, done) => {
     const expectedResponse = {
-        'accessToken': 'testAccessToken',
-        'expiresIn': 3600,
-        'refreshToken': 'testRefreshToken'
+        accessToken: "testAccessToken",
+        expiresIn: 3600,
+        refreshToken: "testRefreshToken",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postUsersMeRefreshToken',
+        "postUsersMeRefreshToken",
         (refreshToken, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'existingRefreshToken');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "existingRefreshToken",
+        );
     });
 
     clientWithAccessToken.refreshToken((error, result) => {
@@ -242,20 +261,24 @@ test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with
     });
 });
 
-test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postUsersMeRefreshToken',
+        "postUsersMeRefreshToken",
         (refreshToken, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'existingRefreshToken');
+        assert.strictEqual(
+            mockedMethod.calls[0].arguments[0],
+            "existingRefreshToken",
+        );
     });
 
     clientWithAccessToken.refreshToken((error, result) => {
@@ -266,16 +289,16 @@ test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with
     });
 });
 
-test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with success', (context, done) => {
+test("airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with success", (context, done) => {
     const expectedResponse = {
-        'tempUnit': 'F'
+        tempUnit: "F",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getUsersMe',
+        "getUsersMe",
         (callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getUsersMe.mock;
@@ -293,14 +316,14 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with succe
     });
 });
 
-test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getUsersMe',
+        "getUsersMe",
         (callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getUsersMe.mock;
@@ -318,28 +341,28 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error
     });
 });
 
-test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with success', (context, done) => {
+test("airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with success", (context, done) => {
     const expectedResponse = {
-        'tempUnit': 'F'
+        tempUnit: "F",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'putUsersMe',
+        "putUsersMe",
         (parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.putUsersMe.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 3);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "tempUnit");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "F");
     });
     clientWithAccessToken.resetUserMetadataCache();
 
-    clientWithAccessToken.setTemperatureScale('F', (error, result) => {
+    clientWithAccessToken.setTemperatureScale("F", (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, expectedResponse.tempUnit);
 
@@ -347,29 +370,29 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with succe
     });
 });
 
-test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'putUsersMe',
+        "putUsersMe",
         (parameterName, parameterValue, callback) => {
-            assert.strictEqual(parameterName, 'tempUnit');
-            assert.strictEqual(parameterValue, 'F');
+            assert.strictEqual(parameterName, "tempUnit");
+            assert.strictEqual(parameterValue, "F");
 
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.putUsersMe.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 3);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "tempUnit");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "F");
     });
     clientWithAccessToken.resetUserMetadataCache();
 
-    clientWithAccessToken.setTemperatureScale('F', (error, result) => {
+    clientWithAccessToken.setTemperatureScale("F", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -377,27 +400,27 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error
     });
 });
 
-test('airstage.Client#getName calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getName calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'deviceName': 'My Device'
+        deviceName: "My Device",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getName('12345', (error, result) => {
+    clientWithAccessToken.getName("12345", (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, expectedResponse.deviceName);
 
@@ -405,25 +428,25 @@ test('airstage.Client#getName calls _apiClient.getDevice with success', (context
     });
 });
 
-test('airstage.Client#getName calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getName calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getName('12345', (error, result) => {
+    clientWithAccessToken.getName("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -431,27 +454,27 @@ test('airstage.Client#getName calls _apiClient.getDevice with error', (context, 
     });
 });
 
-test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getConnectionStatus calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'connectionStatus': 'Online'
+        connectionStatus: "Online",
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getConnectionStatus('12345', (error, result) => {
+    clientWithAccessToken.getConnectionStatus("12345", (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, expectedResponse.connectionStatus);
 
@@ -459,25 +482,25 @@ test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with succes
     });
 });
 
-test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getConnectionStatus calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getConnectionStatus('12345', (error, result) => {
+    clientWithAccessToken.getConnectionStatus("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -485,32 +508,32 @@ test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with error'
     });
 });
 
-test('airstage.Client#getModel calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getModel calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_model',
-                'value': 'AZ123'
-            }
-        ]
+                name: "iu_model",
+                value: "AZ123",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getModel('12345', (error, result) => {
+    clientWithAccessToken.getModel("12345", (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, expectedResponse.parameters[0].value);
 
@@ -518,25 +541,25 @@ test('airstage.Client#getModel calls _apiClient.getDevice with success', (contex
     });
 });
 
-test('airstage.Client#getModel calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getModel calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getModel('12345', (error, result) => {
+    clientWithAccessToken.getModel("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -544,58 +567,58 @@ test('airstage.Client#getModel calls _apiClient.getDevice with error', (context,
     });
 });
 
-test('airstage.Client#getPowerState calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getPowerState calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_onoff',
-                'value': '1'
-            }
-        ]
+                name: "iu_onoff",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getPowerState('12345', (error, result) => {
+    clientWithAccessToken.getPowerState("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#getPowerState calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getPowerState calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getPowerState('12345', (error, result) => {
+    clientWithAccessToken.getPowerState("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -603,74 +626,81 @@ test('airstage.Client#getPowerState calls _apiClient.getDevice with error', (con
     });
 });
 
-test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_onoff',
-                'value': '1'
-            }
-        ]
+                name: "iu_onoff",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_onoff');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_onoff");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setPowerState('12345', 'ON', (error, result) => {
+    clientWithAccessToken.setPowerState("12345", "ON", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_onoff');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_onoff");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setPowerState('12345', 'ON', (error, result) => {
+    clientWithAccessToken.setPowerState("12345", "ON", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -678,58 +708,58 @@ test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersReq
     });
 });
 
-test('airstage.Client#getOperationMode calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getOperationMode calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_op_mode',
-                'value': '1'
-            }
-        ]
+                name: "iu_op_mode",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getOperationMode('12345', (error, result) => {
+    clientWithAccessToken.getOperationMode("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'COOL');
+        assert.strictEqual(result, "COOL");
 
         done();
     });
 });
 
-test('airstage.Client#getOperationMode calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getOperationMode calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getOperationMode('12345', (error, result) => {
+    clientWithAccessToken.getOperationMode("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -737,125 +767,137 @@ test('airstage.Client#getOperationMode calls _apiClient.getDevice with error', (
     });
 });
 
-test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_op_mode',
-                'value': '1'
-            }
-        ]
+                name: "iu_op_mode",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_op_mode');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_op_mode");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setOperationMode('12345', 'COOL', (error, result) => {
+    clientWithAccessToken.setOperationMode("12345", "COOL", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'COOL');
+        assert.strictEqual(result, "COOL");
 
         done();
     });
 });
 
-test('airstage.Client#setOperationMode updates fan speed in device cache to AUTO when DRY with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setOperationMode updates fan speed in device cache to AUTO when DRY with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_op_mode',
-                'value': '2'
-            }
-        ]
+                name: "iu_op_mode",
+                value: "2",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_op_mode');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '2');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_op_mode");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "2");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setOperationMode('12345', 'DRY', (error, result) => {
+    clientWithAccessToken.setOperationMode("12345", "DRY", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'DRY');
+        assert.strictEqual(result, "DRY");
 
-        clientWithAccessToken.getFanSpeed('12345', (error, result) => {
+        clientWithAccessToken.getFanSpeed("12345", (error, result) => {
             assert.strictEqual(error, null);
-            assert.strictEqual(result, 'AUTO');
+            assert.strictEqual(result, "AUTO");
 
             done();
         });
     });
 });
 
-test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_op_mode');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_op_mode");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setOperationMode('12345', 'COOL', (error, result) => {
+    clientWithAccessToken.setOperationMode("12345", "COOL", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -863,229 +905,262 @@ test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParameters
     });
 });
 
-test('airstage.Client#getIndoorTemperature calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getIndoorTemperature calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_indoor_tmp',
-                'value': '7200'
-            }
-        ]
+                name: "iu_indoor_tmp",
+                value: "7200",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getIndoorTemperature('12345', 'F', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 72);
+    clientWithAccessToken.getIndoorTemperature(
+        "12345",
+        "F",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, 72);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getIndoorTemperature calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getIndoorTemperature calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getIndoorTemperature('12345', 'F', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.getIndoorTemperature(
+        "12345",
+        "F",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getTargetTemperature calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getTargetTemperature calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_set_tmp',
-                'value': '220'
-            }
-        ]
+                name: "iu_set_tmp",
+                value: "220",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getTargetTemperature('12345', 'F', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 72);
+    clientWithAccessToken.getTargetTemperature(
+        "12345",
+        "F",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, 72);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getTargetTemperature calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getTargetTemperature calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getTargetTemperature('12345', 'F', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.getTargetTemperature(
+        "12345",
+        "F",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_set_tmp',
-                'value': '220'
-            }
-        ]
+                name: "iu_set_tmp",
+                value: "220",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_set_tmp');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '220');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_set_tmp");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "220");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setTargetTemperature('12345', 72, 'F', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 72);
+    clientWithAccessToken.setTargetTemperature(
+        "12345",
+        72,
+        "F",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, 72);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_set_tmp');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '220');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_set_tmp");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "220");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setTargetTemperature('12345', 72, 'F', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.setTargetTemperature(
+        "12345",
+        72,
+        "F",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getTemperatureDelta calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_indoor_tmp',
-                'value': '7400'
+                name: "iu_indoor_tmp",
+                value: "7400",
             },
             {
-                'name': 'iu_set_tmp',
-                'value': '220'
-            }
-        ]
+                name: "iu_set_tmp",
+                value: "220",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 2);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getTemperatureDelta('12345', 'F', (error, result) => {
+    clientWithAccessToken.getTemperatureDelta("12345", "F", (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, 4);
 
@@ -1093,25 +1168,25 @@ test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with succes
     });
 });
 
-test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getTemperatureDelta calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getTemperatureDelta('12345', 'F', (error, result) => {
+    clientWithAccessToken.getTemperatureDelta("12345", "F", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1119,58 +1194,58 @@ test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with error'
     });
 });
 
-test('airstage.Client#getFanSpeed calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getFanSpeed calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_fan_spd',
-                'value': '11'
-            }
-        ]
+                name: "iu_fan_spd",
+                value: "11",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getFanSpeed('12345', (error, result) => {
+    clientWithAccessToken.getFanSpeed("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'HIGH');
+        assert.strictEqual(result, "HIGH");
 
         done();
     });
 });
 
-test('airstage.Client#getFanSpeed calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getFanSpeed calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getFanSpeed('12345', (error, result) => {
+    clientWithAccessToken.getFanSpeed("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1178,74 +1253,81 @@ test('airstage.Client#getFanSpeed calls _apiClient.getDevice with error', (conte
     });
 });
 
-test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_fan_spd',
-                'value': '11'
-            }
-        ]
+                name: "iu_fan_spd",
+                value: "11",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_fan_spd');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '11');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_fan_spd");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "11");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setFanSpeed('12345', 'HIGH', (error, result) => {
+    clientWithAccessToken.setFanSpeed("12345", "HIGH", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'HIGH');
+        assert.strictEqual(result, "HIGH");
 
         done();
     });
 });
 
-test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_fan_spd');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '11');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_fan_spd");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "11");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setFanSpeed('12345', 'HIGH', (error, result) => {
+    clientWithAccessToken.setFanSpeed("12345", "HIGH", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1253,326 +1335,368 @@ test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersReque
     });
 });
 
-test('airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_af_dir_vrt',
-                'value': '1'
-            }
-        ]
+                name: "iu_af_dir_vrt",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getAirflowVerticalDirection('12345', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 1);
+    clientWithAccessToken.getAirflowVerticalDirection(
+        "12345",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, 1);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getAirflowVerticalDirection('12345', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.getAirflowVerticalDirection(
+        "12345",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_af_dir_vrt',
-                'value': '1'
-            }
-        ]
+                name: "iu_af_dir_vrt",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_dir_vrt');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_af_dir_vrt");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setAirflowVerticalDirection('12345', 1, (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 1);
+    clientWithAccessToken.setAirflowVerticalDirection(
+        "12345",
+        1,
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, 1);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_dir_vrt');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_af_dir_vrt");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setAirflowVerticalDirection('12345', 1, (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.setAirflowVerticalDirection(
+        "12345",
+        1,
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_af_swg_vrt',
-                'value': '1'
-            }
-        ]
+                name: "iu_af_swg_vrt",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getAirflowVerticalSwingState('12345', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+    clientWithAccessToken.getAirflowVerticalSwingState(
+        "12345",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, "ON");
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getAirflowVerticalSwingState('12345', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.getAirflowVerticalSwingState(
+        "12345",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_af_swg_vrt',
-                'value': '1'
-            }
-        ]
+                name: "iu_af_swg_vrt",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_swg_vrt');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_af_swg_vrt");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setAirflowVerticalSwingState('12345', 'ON', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+    clientWithAccessToken.setAirflowVerticalSwingState(
+        "12345",
+        "ON",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, "ON");
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_swg_vrt');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_af_swg_vrt");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setAirflowVerticalSwingState('12345', 'ON', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.setAirflowVerticalSwingState(
+        "12345",
+        "ON",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getPowerfulState calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getPowerfulState calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_powerful',
-                'value': '1'
-            }
-        ]
+                name: "iu_powerful",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getPowerfulState('12345', (error, result) => {
+    clientWithAccessToken.getPowerfulState("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#getPowerfulState calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getPowerfulState calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getPowerfulState('12345', (error, result) => {
+    clientWithAccessToken.getPowerfulState("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1580,74 +1704,81 @@ test('airstage.Client#getPowerfulState calls _apiClient.getDevice with error', (
     });
 });
 
-test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_powerful',
-                'value': '1'
-            }
-        ]
+                name: "iu_powerful",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_powerful');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_powerful");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setPowerfulState('12345', 'ON', (error, result) => {
+    clientWithAccessToken.setPowerfulState("12345", "ON", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_powerful');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_powerful");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setPowerfulState('12345', 'ON', (error, result) => {
+    clientWithAccessToken.setPowerfulState("12345", "ON", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1655,58 +1786,58 @@ test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParameters
     });
 });
 
-test('airstage.Client#getEconomyState calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getEconomyState calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_economy',
-                'value': '1'
-            }
-        ]
+                name: "iu_economy",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getEconomyState('12345', (error, result) => {
+    clientWithAccessToken.getEconomyState("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#getEconomyState calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getEconomyState calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getEconomyState('12345', (error, result) => {
+    clientWithAccessToken.getEconomyState("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1714,74 +1845,81 @@ test('airstage.Client#getEconomyState calls _apiClient.getDevice with error', (c
     });
 });
 
-test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_economy',
-                'value': '1'
-            }
-        ]
+                name: "iu_economy",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_economy');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_economy");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setEconomyState('12345', 'ON', (error, result) => {
+    clientWithAccessToken.setEconomyState("12345", "ON", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_economy');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_economy");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setEconomyState('12345', 'ON', (error, result) => {
+    clientWithAccessToken.setEconomyState("12345", "ON", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1789,58 +1927,58 @@ test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersR
     });
 });
 
-test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_fan_ctrl',
-                'value': '1'
-            }
-        ]
+                name: "iu_fan_ctrl",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getEnergySavingFanState('12345', (error, result) => {
+    clientWithAccessToken.getEnergySavingFanState("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getEnergySavingFanState('12345', (error, result) => {
+    clientWithAccessToken.getEnergySavingFanState("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1848,133 +1986,148 @@ test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with er
     });
 });
 
-test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+test("airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with success", (context, done) => {
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_fan_ctrl',
-                'value': '1'
-            }
-        ]
+                name: "iu_fan_ctrl",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_fan_ctrl');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_fan_ctrl");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setEnergySavingFanState('12345', 'ON', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+    clientWithAccessToken.setEnergySavingFanState(
+        "12345",
+        "ON",
+        (error, result) => {
+            assert.strictEqual(error, null);
+            assert.strictEqual(result, "ON");
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_fan_ctrl');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_fan_ctrl");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setEnergySavingFanState('12345', 'ON', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
+    clientWithAccessToken.setEnergySavingFanState(
+        "12345",
+        "ON",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
-test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with success', (context, done) => {
+test("airstage.Client#getMinimumHeatState calls _apiClient.getDevice with success", (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_min_heat',
-                'value': '1'
-            }
-        ]
+                name: "iu_min_heat",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getMinimumHeatState('12345', (error, result) => {
+    clientWithAccessToken.getMinimumHeatState("12345", (error, result) => {
         assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
+        assert.strictEqual(result, "ON");
 
         done();
     });
 });
 
-test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with error', (context, done) => {
-    const expectedError = 'Error';
+test("airstage.Client#getMinimumHeatState calls _apiClient.getDevice with error", (context, done) => {
+    const expectedError = "Error";
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+            callback({ error: expectedError, response: null });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getMinimumHeatState('12345', (error, result) => {
+    clientWithAccessToken.getMinimumHeatState("12345", (error, result) => {
         assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
@@ -1983,229 +2136,290 @@ test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with error'
 });
 
 test('airstage.Client#setMinimumHeatState with "ON" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_min_heat',
-                'value': '1'
-            }
-        ]
+                name: "iu_min_heat",
+                value: "1",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_min_heat');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_min_heat");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setMinimumHeatState('12345', 'ON', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 'ON');
-
-        clientWithAccessToken.getPowerState('12345', (error, powerState) => {
+    clientWithAccessToken.setMinimumHeatState(
+        "12345",
+        "ON",
+        (error, result) => {
             assert.strictEqual(error, null);
-            assert.strictEqual(powerState, 'ON');
+            assert.strictEqual(result, "ON");
 
-            clientWithAccessToken.getFanSpeed('12345', (error, fanSpeed) => {
-                assert.strictEqual(error, null);
-                assert.strictEqual(fanSpeed, 'AUTO');
-
-                clientWithAccessToken.getOperationMode('12345', (error, operationMode) => {
+            clientWithAccessToken.getPowerState(
+                "12345",
+                (error, powerState) => {
                     assert.strictEqual(error, null);
-                    assert.strictEqual(operationMode, 'HEAT');
+                    assert.strictEqual(powerState, "ON");
 
-                    clientWithAccessToken.getTargetTemperature('12345', 'F', (error, targetTemperature) => {
-                        assert.strictEqual(error, null);
-                        assert.strictEqual(targetTemperature, 50);
+                    clientWithAccessToken.getFanSpeed(
+                        "12345",
+                        (error, fanSpeed) => {
+                            assert.strictEqual(error, null);
+                            assert.strictEqual(fanSpeed, "AUTO");
 
-                        done();
-                    });
-                });
-            });
-        });
-    });
+                            clientWithAccessToken.getOperationMode(
+                                "12345",
+                                (error, operationMode) => {
+                                    assert.strictEqual(error, null);
+                                    assert.strictEqual(operationMode, "HEAT");
+
+                                    clientWithAccessToken.getTargetTemperature(
+                                        "12345",
+                                        "F",
+                                        (error, targetTemperature) => {
+                                            assert.strictEqual(error, null);
+                                            assert.strictEqual(
+                                                targetTemperature,
+                                                50,
+                                            );
+
+                                            done();
+                                        },
+                                    );
+                                },
+                            );
+                        },
+                    );
+                },
+            );
+        },
+    );
 });
 
 test('airstage.Client#setMinimumHeatState with "OFF" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
-    const expectedResponse = {'reqId': '54321'};
+    const expectedResponse = { reqId: "54321" };
     const expectedGetDevicesRequestResponse = {
-        'status': 'complete',
-        'result': 'success',
-        'parameters': [
+        status: "complete",
+        result: "success",
+        parameters: [
             {
-                'name': 'iu_min_heat',
-                'value': '0'
-            }
-        ]
+                name: "iu_min_heat",
+                value: "0",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
+        "postDevicesSetParametersRequest",
         (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevicesRequest',
+        "getDevicesRequest",
         (deviceId, requestId, callback) => {
-            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
-        }
+            callback({
+                error: null,
+                response: expectedGetDevicesRequestResponse,
+            });
+        },
     );
     context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_min_heat');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_min_heat");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "0");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.setMinimumHeatState('12345', 'OFF', (error, result) => {
-        assert.strictEqual(error, null);
-        assert.strictEqual(result, 'OFF');
-
-        clientWithAccessToken.getPowerState('12345', (error, powerState) => {
+    clientWithAccessToken.setMinimumHeatState(
+        "12345",
+        "OFF",
+        (error, result) => {
             assert.strictEqual(error, null);
-            assert.strictEqual(powerState, 'OFF');
+            assert.strictEqual(result, "OFF");
+
+            clientWithAccessToken.getPowerState(
+                "12345",
+                (error, powerState) => {
+                    assert.strictEqual(error, null);
+                    assert.strictEqual(powerState, "OFF");
+
+                    done();
+                },
+            );
+        },
+    );
+});
+
+test("airstage.Client#setMinimumHeatState calls _apiClient.postDevicesSetParametersRequest with error", (context, done) => {
+    const expectedError = "Error";
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        "postDevicesSetParametersRequest",
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({ error: expectedError, response: null });
+        },
+    );
+    context.after(() => {
+        const mockedMethod =
+            clientWithAccessToken._apiClient.postDevicesSetParametersRequest
+                .mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], "0");
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], "iu_min_heat");
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], "1");
+    });
+    clientWithAccessToken.resetDeviceCache("12345");
+
+    clientWithAccessToken.setMinimumHeatState(
+        "12345",
+        "ON",
+        (error, result) => {
+            assert.strictEqual(error, expectedError);
+            assert.strictEqual(result, null);
 
             done();
-        });
-    });
-});
-
-test('airstage.Client#setMinimumHeatState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
-    const expectedError = 'Error';
-    context.mock.method(
-        clientWithAccessToken._apiClient,
-        'postDevicesSetParametersRequest',
-        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
-            callback({'error': expectedError, 'response': null});
-        }
+        },
     );
-    context.after(() => {
-        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
-
-        assert.strictEqual(mockedMethod.calls.length, 1);
-        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_min_heat');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
-    });
-    clientWithAccessToken.resetDeviceCache('12345');
-
-    clientWithAccessToken.setMinimumHeatState('12345', 'ON', (error, result) => {
-        assert.strictEqual(error, expectedError);
-        assert.strictEqual(result, null);
-
-        done();
-    });
 });
 
-test('airstage.Client#getAccessToken returns access token', (context) => {
+test("airstage.Client#getAccessToken returns access token", (context) => {
     const accessToken = clientWithAccessToken.getAccessToken();
 
-    assert.strictEqual(accessToken, 'existingAccessToken');
+    assert.strictEqual(accessToken, "existingAccessToken");
 });
 
-test('airstage.Client#getAccessTokenExpiry returns access token expiry', (context) => {
+test("airstage.Client#getAccessTokenExpiry returns access token expiry", (context) => {
     const accessTokenExpiry = clientWithAccessToken.getAccessTokenExpiry();
 
-    assert.strictEqual(accessTokenExpiry.toISOString(), '2099-01-01T00:00:00.000Z');
+    assert.strictEqual(
+        accessTokenExpiry.toISOString(),
+        "2099-01-01T00:00:00.000Z",
+    );
 });
 
-test('airstage.Client#getRefreshToken returns access token', (context) => {
+test("airstage.Client#getRefreshToken returns access token", (context) => {
     const refreshToken = clientWithAccessToken.getRefreshToken();
 
-    assert.strictEqual(refreshToken, 'existingRefreshToken');
+    assert.strictEqual(refreshToken, "existingRefreshToken");
 });
 
 test('airstage.Client#getParameter calls _apiClient.getDevice with "Parameter not available" error', (context, done) => {
     const expectedResponse = {
-        'parameters': [
+        parameters: [
             {
-                'name': 'iu_indoor_tmp',
-                'value': '65535'
-            }
-        ]
+                name: "iu_indoor_tmp",
+                value: "65535",
+            },
+        ],
     };
     context.mock.method(
         clientWithAccessToken._apiClient,
-        'getDevice',
+        "getDevice",
         (deviceId, callback) => {
-            callback({'error': null, 'response': expectedResponse});
-        }
+            callback({ error: null, response: expectedResponse });
+        },
     );
     context.after(() => {
         const mockedMethod = clientWithAccessToken._apiClient.getDevice.mock;
 
         assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], "12345");
     });
-    clientWithAccessToken.resetDeviceCache('12345');
+    clientWithAccessToken.resetDeviceCache("12345");
 
-    clientWithAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
-        assert.strictEqual(error, 'Parameter not available: iu_indoor_tmp');
-        assert.strictEqual(result, null);
+    clientWithAccessToken.getParameter(
+        "12345",
+        "iu_indoor_tmp",
+        (error, result) => {
+            assert.strictEqual(error, "Parameter not available: iu_indoor_tmp");
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
 test('airstage.Client#getParameter with "Could not determine hostname" error', (context, done) => {
     const clientWithInvalidRegion = new airstage.Client(
-        'cn',
-        'China',
-        'en',
+        "cn",
+        "China",
+        "en",
         null,
         null,
         null,
         null,
-        'existingAccessToken',
-        '2099-01-01',
-        'existingRefreshToken'
+        "existingAccessToken",
+        "2099-01-01",
+        "existingRefreshToken",
     );
 
-    clientWithInvalidRegion.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
-        assert.strictEqual(error, 'Could not determine hostname for region: cn');
-        assert.strictEqual(result, null);
+    clientWithInvalidRegion.getParameter(
+        "12345",
+        "iu_indoor_tmp",
+        (error, result) => {
+            assert.strictEqual(
+                error,
+                "Could not determine hostname for region: cn",
+            );
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });
 
 test('airstage.Client#getParameter with "Access token not set" error', (context, done) => {
-    clientWithoutAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
-        assert.strictEqual(error, 'Access token not set');
-        assert.strictEqual(result, null);
+    clientWithoutAccessToken.getParameter(
+        "12345",
+        "iu_indoor_tmp",
+        (error, result) => {
+            assert.strictEqual(error, "Access token not set");
+            assert.strictEqual(result, null);
 
-        done();
-    });
+            done();
+        },
+    );
 });

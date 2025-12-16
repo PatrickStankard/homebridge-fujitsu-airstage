@@ -62,12 +62,12 @@ http://{device_ip}/SetParam
 
 ```json
 {
-  "device_id": "A0B1C2D3E4F5",
-  "device_sub_id": 0,
-  "req_id": "",
-  "modified_by": "",
-  "set_level": "03",
-  "list": ["iu_onoff", "iu_indoor_tmp", "iu_set_tmp", "iu_op_mode"]
+    "device_id": "A0B1C2D3E4F5",
+    "device_sub_id": 0,
+    "req_id": "",
+    "modified_by": "",
+    "set_level": "03",
+    "list": ["iu_onoff", "iu_indoor_tmp", "iu_set_tmp", "iu_op_mode"]
 }
 ```
 
@@ -88,13 +88,13 @@ http://{device_ip}/SetParam
 
 ```json
 {
-  "result": "OK",
-  "value": {
-    "iu_onoff": "1",
-    "iu_indoor_tmp": "7200",
-    "iu_set_tmp": "220",
-    "iu_op_mode": "1"
-  }
+    "result": "OK",
+    "value": {
+        "iu_onoff": "1",
+        "iu_indoor_tmp": "7200",
+        "iu_set_tmp": "220",
+        "iu_op_mode": "1"
+    }
 }
 ```
 
@@ -102,8 +102,8 @@ http://{device_ip}/SetParam
 
 ```json
 {
-  "result": "NG",
-  "error": "0002"
+    "result": "NG",
+    "error": "0002"
 }
 ```
 
@@ -119,16 +119,16 @@ http://{device_ip}/SetParam
 
 ```json
 {
-  "device_id": "A0B1C2D3E4F5",
-  "device_sub_id": 0,
-  "req_id": "",
-  "modified_by": "",
-  "set_level": "02",
-  "value": {
-    "iu_onoff": "1",
-    "iu_set_tmp": "220",
-    "iu_op_mode": "1"
-  }
+    "device_id": "A0B1C2D3E4F5",
+    "device_sub_id": 0,
+    "req_id": "",
+    "modified_by": "",
+    "set_level": "02",
+    "value": {
+        "iu_onoff": "1",
+        "iu_set_tmp": "220",
+        "iu_op_mode": "1"
+    }
 }
 ```
 
@@ -149,7 +149,7 @@ http://{device_ip}/SetParam
 
 ```json
 {
-  "result": "OK"
+    "result": "OK"
 }
 ```
 
@@ -157,8 +157,8 @@ http://{device_ip}/SetParam
 
 ```json
 {
-  "result": "NG",
-  "error": "0002"
+    "result": "NG",
+    "error": "0002"
 }
 ```
 
@@ -315,8 +315,8 @@ The following parameters may be available on some models:
 
 ```json
 {
-  "result": "NG",
-  "error": "XXXX"
+    "result": "NG",
+    "error": "XXXX"
 }
 ```
 
@@ -350,15 +350,15 @@ const RETRY_DELAY_MS = 1000;
 const TIMEOUT_MS = 5000;
 
 async function requestWithRetry(url, payload, attempt = 1) {
-  try {
-    return await httpPost(url, payload, { timeout: TIMEOUT_MS });
-  } catch (error) {
-    if (attempt < MAX_RETRIES) {
-      await sleep(RETRY_DELAY_MS * attempt);
-      return requestWithRetry(url, payload, attempt + 1);
+    try {
+        return await httpPost(url, payload, { timeout: TIMEOUT_MS });
+    } catch (error) {
+        if (attempt < MAX_RETRIES) {
+            await sleep(RETRY_DELAY_MS * attempt);
+            return requestWithRetry(url, payload, attempt + 1);
+        }
+        throw error;
     }
-    throw error;
-  }
 }
 ```
 
@@ -370,135 +370,139 @@ async function requestWithRetry(url, payload, attempt = 1) {
 const http = require("http");
 
 class AirstageLocalClient {
-  constructor(ipAddress, deviceId, deviceSubId = 0) {
-    this.ipAddress = ipAddress;
-    this.deviceId = deviceId;
-    this.deviceSubId = deviceSubId;
-  }
+    constructor(ipAddress, deviceId, deviceSubId = 0) {
+        this.ipAddress = ipAddress;
+        this.deviceId = deviceId;
+        this.deviceSubId = deviceSubId;
+    }
 
-  async getParam(parameters) {
-    const payload = {
-      device_id: this.deviceId,
-      device_sub_id: this.deviceSubId,
-      req_id: "",
-      modified_by: "",
-      set_level: "03",
-      list: parameters,
-    };
+    async getParam(parameters) {
+        const payload = {
+            device_id: this.deviceId,
+            device_sub_id: this.deviceSubId,
+            req_id: "",
+            modified_by: "",
+            set_level: "03",
+            list: parameters,
+        };
 
-    return this.request("/GetParam", payload);
-  }
+        return this.request("/GetParam", payload);
+    }
 
-  async setParam(values) {
-    const payload = {
-      device_id: this.deviceId,
-      device_sub_id: this.deviceSubId,
-      req_id: "",
-      modified_by: "",
-      set_level: "02",
-      value: values,
-    };
+    async setParam(values) {
+        const payload = {
+            device_id: this.deviceId,
+            device_sub_id: this.deviceSubId,
+            req_id: "",
+            modified_by: "",
+            set_level: "02",
+            value: values,
+        };
 
-    return this.request("/SetParam", payload);
-  }
+        return this.request("/SetParam", payload);
+    }
 
-  request(endpoint, payload) {
-    return new Promise((resolve, reject) => {
-      const postData = JSON.stringify(payload);
+    request(endpoint, payload) {
+        return new Promise((resolve, reject) => {
+            const postData = JSON.stringify(payload);
 
-      const options = {
-        hostname: this.ipAddress,
-        port: 80,
-        path: endpoint,
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Content-Length": Buffer.byteLength(postData),
-        },
-        timeout: 5000,
-      };
+            const options = {
+                hostname: this.ipAddress,
+                port: 80,
+                path: endpoint,
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Content-Length": Buffer.byteLength(postData),
+                },
+                timeout: 5000,
+            };
 
-      const req = http.request(options, (res) => {
-        let data = "";
+            const req = http.request(options, (res) => {
+                let data = "";
 
-        res.on("data", (chunk) => {
-          data += chunk;
+                res.on("data", (chunk) => {
+                    data += chunk;
+                });
+
+                res.on("end", () => {
+                    try {
+                        const response = JSON.parse(data);
+
+                        if (response.result === "OK") {
+                            resolve(response.value || response);
+                        } else {
+                            reject(
+                                new Error(
+                                    `API Error: ${response.error || "Unknown"}`,
+                                ),
+                            );
+                        }
+                    } catch (e) {
+                        reject(new Error(`JSON Parse Error: ${e.message}`));
+                    }
+                });
+            });
+
+            req.on("error", (e) => {
+                reject(new Error(`HTTP Request Error: ${e.message}`));
+            });
+
+            req.on("timeout", () => {
+                req.destroy();
+                reject(new Error("Request timeout"));
+            });
+
+            req.write(postData);
+            req.end();
         });
+    }
 
-        res.on("end", () => {
-          try {
-            const response = JSON.parse(data);
+    // Temperature conversion helpers
+    encodeTemperature(celsius) {
+        return Math.round(celsius * 10).toString();
+    }
 
-            if (response.result === "OK") {
-              resolve(response.value || response);
-            } else {
-              reject(new Error(`API Error: ${response.error || "Unknown"}`));
-            }
-          } catch (e) {
-            reject(new Error(`JSON Parse Error: ${e.message}`));
-          }
-        });
-      });
+    decodeCelsiusTemperature(apiValue) {
+        return parseInt(apiValue) / 10;
+    }
 
-      req.on("error", (e) => {
-        reject(new Error(`HTTP Request Error: ${e.message}`));
-      });
-
-      req.on("timeout", () => {
-        req.destroy();
-        reject(new Error("Request timeout"));
-      });
-
-      req.write(postData);
-      req.end();
-    });
-  }
-
-  // Temperature conversion helpers
-  encodeTemperature(celsius) {
-    return Math.round(celsius * 10).toString();
-  }
-
-  decodeCelsiusTemperature(apiValue) {
-    return parseInt(apiValue) / 10;
-  }
-
-  decodeFahrenheitTemperature(apiValue) {
-    const fahrenheit = parseInt(apiValue) / 100;
-    return ((fahrenheit - 32) * 5) / 9;
-  }
+    decodeFahrenheitTemperature(apiValue) {
+        const fahrenheit = parseInt(apiValue) / 100;
+        return ((fahrenheit - 32) * 5) / 9;
+    }
 }
 
 // Usage example
 async function example() {
-  const client = new AirstageLocalClient("192.168.1.100", "A0B1C2D3E4F5");
+    const client = new AirstageLocalClient("192.168.1.100", "A0B1C2D3E4F5");
 
-  // Get device status
-  const status = await client.getParam([
-    "iu_onoff",
-    "iu_indoor_tmp",
-    "iu_set_tmp",
-    "iu_op_mode",
-  ]);
+    // Get device status
+    const status = await client.getParam([
+        "iu_onoff",
+        "iu_indoor_tmp",
+        "iu_set_tmp",
+        "iu_op_mode",
+    ]);
 
-  console.log("Device Status:", status);
-  console.log(
-    "Indoor Temp:",
-    client.decodeFahrenheitTemperature(status.iu_indoor_tmp),
-    "°C"
-  );
-  console.log(
-    "Target Temp:",
-    client.decodeCelsiusTemperature(status.iu_set_tmp),
-    "°C"
-  );
+    console.log("Device Status:", status);
+    console.log(
+        "Indoor Temp:",
+        client.decodeFahrenheitTemperature(status.iu_indoor_tmp),
+        "°C",
+    );
+    console.log(
+        "Target Temp:",
+        client.decodeCelsiusTemperature(status.iu_set_tmp),
+        "°C",
+    );
 
-  // Set temperature to 22°C
-  await client.setParam({
-    iu_onoff: "1",
-    iu_set_tmp: client.encodeTemperature(22),
-    iu_op_mode: "1", // Cooling
-  });
+    // Set temperature to 22°C
+    await client.setParam({
+        iu_onoff: "1",
+        iu_set_tmp: client.encodeTemperature(22),
+        iu_op_mode: "1", // Cooling
+    });
 }
 ```
 
@@ -593,16 +597,16 @@ This specification has been validated against:
 
 ### Complete Parameter Table
 
-| Parameter        | R/W | Type   | Values/Encoding                                  |
-| ---------------- | --- | ------ | ------------------------------------------------ |
-| `iu_onoff`       | R/W | String | "0"=OFF, "1"=ON                                  |
-| `iu_set_tmp`     | R/W | String | Celsius × 10                                     |
-| `iu_indoor_tmp`  | R   | String | Fahrenheit × 100                                 |
-| `iu_op_mode`     | R/W | String | "0"=Auto, "1"=Cool, "2"=Dry, "3"=Fan, "4"=Heat   |
-| `iu_fan_spd`     | R/W | String | "0"=Auto, "2"=Quiet, "5"=Low, "8"=Med, "11"=High |
-| `iu_fan_ctrl`    | R/W | String | "0"=Normal, "1"=Advanced                         |
-| `iu_economy`     | R/W | String | "0"=OFF, "1"=ON                                  |
-| `iu_powerful`    | R/W | String | "0"=OFF, "1"=ON                                  |
-| `ou_low_noise`   | R/W | String | "0"=OFF, "1"=ON                                  |
-| `iu_filter`      | R   | String | Device dependent                                 |
-| `iu_error_code`  | R   | String | Device dependent                                 |
+| Parameter       | R/W | Type   | Values/Encoding                                  |
+| --------------- | --- | ------ | ------------------------------------------------ |
+| `iu_onoff`      | R/W | String | "0"=OFF, "1"=ON                                  |
+| `iu_set_tmp`    | R/W | String | Celsius × 10                                     |
+| `iu_indoor_tmp` | R   | String | Fahrenheit × 100                                 |
+| `iu_op_mode`    | R/W | String | "0"=Auto, "1"=Cool, "2"=Dry, "3"=Fan, "4"=Heat   |
+| `iu_fan_spd`    | R/W | String | "0"=Auto, "2"=Quiet, "5"=Low, "8"=Med, "11"=High |
+| `iu_fan_ctrl`   | R/W | String | "0"=Normal, "1"=Advanced                         |
+| `iu_economy`    | R/W | String | "0"=OFF, "1"=ON                                  |
+| `iu_powerful`   | R/W | String | "0"=OFF, "1"=ON                                  |
+| `ou_low_noise`  | R/W | String | "0"=OFF, "1"=ON                                  |
+| `iu_filter`     | R   | String | Device dependent                                 |
+| `iu_error_code` | R   | String | Device dependent                                 |

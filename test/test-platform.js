@@ -1,100 +1,121 @@
-'use strict';
+"use strict";
 
-const assert = require('node:assert');
-const { mock, test } = require('node:test');
-const hap = require('hap-nodejs');
-const MockHomebridge = require('../src/test/mock-homebridge');
-const Platform = require('../src/platform');
+const assert = require("node:assert");
+const { mock, test } = require("node:test");
+const hap = require("hap-nodejs");
+const MockHomebridge = require("../src/test/mock-homebridge");
+const Platform = require("../src/platform");
 
 const mockHomebridge = new MockHomebridge();
 
-test('Platform#constructor configures classes using platform config', (context) => {
+test("Platform#constructor configures classes using platform config", (context) => {
     const platformConfig = {
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'accessToken': 'testAccessToken',
-        'accessTokenExpiry': '2022-01-01',
-        'refreshToken': 'testRefreshToken'
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        accessToken: "testAccessToken",
+        accessTokenExpiry: "2022-01-01",
+        refreshToken: "testRefreshToken",
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
 
     // Success method now exists in mock logger (no polyfill needed)
-    assert.ok(typeof mockHomebridge.platform.log.success === 'function');
+    assert.ok(typeof mockHomebridge.platform.log.success === "function");
     assert.strictEqual(platform.airstageClient.email, platformConfig.email);
-    assert.strictEqual(platform.airstageClient.password, platformConfig.password);
-    assert.strictEqual(platform.airstageClient._apiClient.region, platformConfig.region);
-    assert.strictEqual(platform.airstageClient._apiClient.country, platformConfig.country);
-    assert.strictEqual(platform.airstageClient._apiClient.language, platformConfig.language);
-    assert.strictEqual(platform.airstageClient._apiClient.accessToken, platformConfig.accessToken);
-    assert.strictEqual(platform.airstageClient._apiClient.accessTokenExpiry.toISOString(), new Date(platformConfig.accessTokenExpiry).toISOString());
-    assert.strictEqual(platform.airstageClient._apiClient.refreshToken, platformConfig.refreshToken);
+    assert.strictEqual(
+        platform.airstageClient.password,
+        platformConfig.password,
+    );
+    assert.strictEqual(
+        platform.airstageClient._apiClient.region,
+        platformConfig.region,
+    );
+    assert.strictEqual(
+        platform.airstageClient._apiClient.country,
+        platformConfig.country,
+    );
+    assert.strictEqual(
+        platform.airstageClient._apiClient.language,
+        platformConfig.language,
+    );
+    assert.strictEqual(
+        platform.airstageClient._apiClient.accessToken,
+        platformConfig.accessToken,
+    );
+    assert.strictEqual(
+        platform.airstageClient._apiClient.accessTokenExpiry.toISOString(),
+        new Date(platformConfig.accessTokenExpiry).toISOString(),
+    );
+    assert.strictEqual(
+        platform.airstageClient._apiClient.refreshToken,
+        platformConfig.refreshToken,
+    );
     assert.strictEqual(platform.configManager.config, platformConfig);
     assert.strictEqual(platform.configManager.api, mockHomebridge.platform.api);
     assert.strictEqual(platform.accessoryManager.platform, platform);
     assert.strictEqual(mockHomebridge.platform.api.on.mock.calls.length, 1);
     assert.strictEqual(
         mockHomebridge.platform.api.on.mock.calls[0].arguments[0],
-        'didFinishLaunching'
+        "didFinishLaunching",
     );
     assert.strictEqual(
         mockHomebridge.platform.api.on.mock.calls[0].arguments[1].name,
-        platform.discoverDevices.bind(platform).name
+        platform.discoverDevices.bind(platform).name,
     );
 });
 
-test('Platform#configureAccessory pushes accessory to accessories', (context) => {
+test("Platform#configureAccessory pushes accessory to accessories", (context) => {
     const platformConfig = {
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234'
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
 
-    platform.configureAccessory('foo');
+    platform.configureAccessory("foo");
 
     assert.strictEqual(platform.accessories.length, 1);
-    assert.strictEqual(platform.accessories[0], 'foo');
+    assert.strictEqual(platform.accessories[0], "foo");
 });
 
-test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate returns error', (context, done) => {
+test("Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate returns error", (context, done) => {
     const platformConfig = {
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234'
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
-            callback('refreshTokenOrAuthenticate error');
-        }
+            callback("refreshTokenOrAuthenticate error");
+        },
     );
 
-    platform.discoverDevices(function(error) {
-        assert.strictEqual(error, 'refreshTokenOrAuthenticate error');
+    platform.discoverDevices(function (error) {
+        assert.strictEqual(error, "refreshTokenOrAuthenticate error");
 
         mockHomebridge.resetMocks();
 
@@ -102,70 +123,76 @@ test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate re
     });
 });
 
-test('Platform#discoverDevices updates platform config with access token', (context, done) => {
+test("Platform#discoverDevices updates platform config with access token", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234'
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
-            platform.airstageClient._apiClient.accessToken = 'testAccessToken';
-            platform.airstageClient._apiClient.accessTokenExpiry = new Date('2022-01-01');
-            platform.airstageClient._apiClient.refreshToken = 'testRefreshToken';
+            platform.airstageClient._apiClient.accessToken = "testAccessToken";
+            platform.airstageClient._apiClient.accessTokenExpiry = new Date(
+                "2022-01-01",
+            );
+            platform.airstageClient._apiClient.refreshToken =
+                "testRefreshToken";
 
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
-            callback(null, {'metadata': {}});
-        }
+            callback(null, { metadata: {} });
+        },
     );
 
     // Mock configManager.saveTokens to verify correct values are saved
     let savedTokens = null;
     context.mock.method(
         platform.configManager,
-        'saveTokens',
+        "saveTokens",
         (accessToken, accessTokenExpiry, refreshToken) => {
             savedTokens = {
                 accessToken,
                 accessTokenExpiry,
-                refreshToken
+                refreshToken,
             };
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
 
         // Check that saveTokens was called with the correct values
-        assert.ok(savedTokens, 'saveTokens should be called');
-        assert.strictEqual(savedTokens.accessToken, 'testAccessToken');
-        assert.strictEqual(savedTokens.accessTokenExpiry.toISOString(), '2022-01-01T00:00:00.000Z');
-        assert.strictEqual(savedTokens.refreshToken, 'testRefreshToken');
+        assert.ok(savedTokens, "saveTokens should be called");
+        assert.strictEqual(savedTokens.accessToken, "testAccessToken");
+        assert.strictEqual(
+            savedTokens.accessTokenExpiry.toISOString(),
+            "2022-01-01T00:00:00.000Z",
+        );
+        assert.strictEqual(savedTokens.refreshToken, "testRefreshToken");
 
         mockHomebridge.resetMocks();
 
@@ -173,61 +200,61 @@ test('Platform#discoverDevices updates platform config with access token', (cont
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableThermostat is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableThermostat is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableThermostat': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableThermostat: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Thermostat');
+        assert.strictEqual(accessory.name, "Test Device Thermostat");
 
         mockHomebridge.resetMocks();
 
@@ -235,57 +262,57 @@ test('Platform#discoverDevices registers accessory when enableThermostat is true
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableThermostat is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableThermostat is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableThermostat': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableThermostat: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -295,61 +322,61 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableFan is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableFan is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableFan': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableFan: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Fan');
+        assert.strictEqual(accessory.name, "Test Device Fan");
 
         mockHomebridge.resetMocks();
 
@@ -357,57 +384,57 @@ test('Platform#discoverDevices registers accessory when enableFan is true', (con
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableFan is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableFan is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableFan': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableFan: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -417,61 +444,64 @@ test('Platform#discoverDevices does not register accessory when enableFan is fal
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableVerticalAirflowDirection is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableVerticalAirflowDirection is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableVerticalAirflowDirection': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableVerticalAirflowDirection: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Vertical Airflow Direction');
+        assert.strictEqual(
+            accessory.name,
+            "Test Device Vertical Airflow Direction",
+        );
 
         mockHomebridge.resetMocks();
 
@@ -479,57 +509,57 @@ test('Platform#discoverDevices registers accessory when enableVerticalAirflowDir
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableVerticalAirflowDirection is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableVerticalAirflowDirection is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableVerticalAirflowDirection': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableVerticalAirflowDirection: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -539,61 +569,61 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableAutoFanSpeedSwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableAutoFanSpeedSwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Auto Fan Speed Switch');
+        assert.strictEqual(accessory.name, "Test Device Auto Fan Speed Switch");
 
         mockHomebridge.resetMocks();
 
@@ -601,57 +631,57 @@ test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableAutoFanSpeedSwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableAutoFanSpeedSwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableAutoFanSpeedSwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableAutoFanSpeedSwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -661,61 +691,61 @@ test('Platform#discoverDevices does not register accessory when enableAutoFanSpe
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableDryModeSwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableDryModeSwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableDryModeSwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableDryModeSwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Dry Mode Switch');
+        assert.strictEqual(accessory.name, "Test Device Dry Mode Switch");
 
         mockHomebridge.resetMocks();
 
@@ -723,57 +753,57 @@ test('Platform#discoverDevices registers accessory when enableDryModeSwitch is t
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableDryModeSwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableDryModeSwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableDryModeSwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableDryModeSwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -783,61 +813,61 @@ test('Platform#discoverDevices does not register accessory when enableDryModeSwi
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableEconomySwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableEconomySwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableEconomySwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableEconomySwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Economy Switch');
+        assert.strictEqual(accessory.name, "Test Device Economy Switch");
 
         mockHomebridge.resetMocks();
 
@@ -845,57 +875,57 @@ test('Platform#discoverDevices registers accessory when enableEconomySwitch is t
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableEconomySwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableEconomySwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableEconomySwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableEconomySwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -905,61 +935,64 @@ test('Platform#discoverDevices does not register accessory when enableEconomySwi
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableEnergySavingFanSwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableEnergySavingFanSwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableEnergySavingFanSwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Energy Saving Fan Switch');
+        assert.strictEqual(
+            accessory.name,
+            "Test Device Energy Saving Fan Switch",
+        );
 
         mockHomebridge.resetMocks();
 
@@ -967,57 +1000,57 @@ test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwi
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableEnergySavingFanSwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableEnergySavingFanSwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableEnergySavingFanSwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableEnergySavingFanSwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -1027,61 +1060,61 @@ test('Platform#discoverDevices does not register accessory when enableEnergySavi
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableFanModeSwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableFanModeSwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableFanModeSwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableFanModeSwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Fan Mode Switch');
+        assert.strictEqual(accessory.name, "Test Device Fan Mode Switch");
 
         mockHomebridge.resetMocks();
 
@@ -1089,57 +1122,57 @@ test('Platform#discoverDevices registers accessory when enableFanModeSwitch is t
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableFanModeSwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableFanModeSwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableFanModeSwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableFanModeSwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -1149,61 +1182,64 @@ test('Platform#discoverDevices does not register accessory when enableFanModeSwi
     });
 });
 
-test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enableMinimumHeatModeSwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableMinimumHeatModeSwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableMinimumHeatModeSwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Minimum Heat Mode Switch');
+        assert.strictEqual(
+            accessory.name,
+            "Test Device Minimum Heat Mode Switch",
+        );
 
         mockHomebridge.resetMocks();
 
@@ -1211,57 +1247,57 @@ test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwi
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enableMinimumHeatModeSwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enableMinimumHeatModeSwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enableMinimumHeatModeSwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enableMinimumHeatModeSwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 
@@ -1271,61 +1307,61 @@ test('Platform#discoverDevices does not register accessory when enableMinimumHea
     });
 });
 
-test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is true', (context, done) => {
+test("Platform#discoverDevices registers accessory when enablePowerfulSwitch is true", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enablePowerfulSwitch': true
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enablePowerfulSwitch: true,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 1);
         const accessory = platform.accessories[0];
-        assert.strictEqual(accessory.name, 'Test Device Powerful Switch');
+        assert.strictEqual(accessory.name, "Test Device Powerful Switch");
 
         mockHomebridge.resetMocks();
 
@@ -1333,57 +1369,57 @@ test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is 
     });
 });
 
-test('Platform#discoverDevices does not register accessory when enablePowerfulSwitch is false', (context, done) => {
+test("Platform#discoverDevices does not register accessory when enablePowerfulSwitch is false", (context, done) => {
     const platformConfig = {
-        'platform': 'fujitsu-airstage',
-        'region': 'us',
-        'country': 'United States',
-        'language': 'en',
-        'email': 'test@example.com',
-        'password': 'test1234',
-        'enablePowerfulSwitch': false
+        platform: "fujitsu-airstage",
+        region: "us",
+        country: "United States",
+        language: "en",
+        email: "test@example.com",
+        password: "test1234",
+        enablePowerfulSwitch: false,
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
         platformConfig,
         mockHomebridge.platform.api,
-        false
+        false,
     );
     context.mock.method(
         platform.airstageClient,
-        'refreshTokenOrAuthenticate',
+        "refreshTokenOrAuthenticate",
         (callback) => {
             callback(null);
-        }
+        },
     );
     context.mock.method(
         platform.airstageClient,
-        'getUserMetadata',
+        "getUserMetadata",
         (callback) => {
             callback(null);
-        }
+        },
     );
 
     context.mock.method(
         platform.airstageClient,
-        'getDevices',
+        "getDevices",
         (limit, callback) => {
             callback(null, {
-                'metadata': {
-                    'testDevice': {
-                        'deviceName': 'Test Device'
-                    }
+                metadata: {
+                    testDevice: {
+                        deviceName: "Test Device",
+                    },
                 },
-                'parameters': {
-                    'testDevice': {
-                        'iu_model': 'Fujitsu Mini Split'
-                    }
-                }
+                parameters: {
+                    testDevice: {
+                        iu_model: "Fujitsu Mini Split",
+                    },
+                },
             });
-        }
+        },
     );
 
-    platform.discoverDevices(function(error) {
+    platform.discoverDevices(function (error) {
         assert.strictEqual(error, null);
         assert.strictEqual(platform.accessories.length, 0);
 

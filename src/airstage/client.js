@@ -1,10 +1,9 @@
-'use strict';
+"use strict";
 
-const apiv1 = require('./apiv1');
-const constants = require('./constants');
+const apiv1 = require("./apiv1");
+const constants = require("./constants");
 
 class Client {
-
     constructor(
         region,
         country,
@@ -16,7 +15,7 @@ class Client {
         accessToken = null,
         accessTokenExpiry = null,
         refreshToken = null,
-        logger = null
+        logger = null,
     ) {
         this.email = email;
         this.password = password;
@@ -30,7 +29,7 @@ class Client {
             userAgent || null,
             accessToken || null,
             accessTokenExpiry || null,
-            refreshToken || null
+            refreshToken || null,
         );
 
         this.resetUserMetadataCache();
@@ -43,69 +42,77 @@ class Client {
         } else if (this._hasValidLoginCredentials()) {
             this.authenticate(callback);
         } else {
-            callback('Could not refresh token or authenticate', null);
+            callback("Could not refresh token or authenticate", null);
         }
     }
 
     authenticate(callback) {
-        this.logger?.info( '[Cloud] Authenticating with cloud API');
+        this.logger?.info("[Cloud] Authenticating with cloud API");
 
         this._apiClient.postUsersSignIn(
             this.email,
             this.password,
-            (function(result) {
+            function (result) {
                 let response = null;
 
                 if (this._isInvalidLoginResult(result)) {
-                    this.logger?.error( '[Cloud] Authentication failed: Invalid email or password');
-                    return callback('Invalid email or password', null);
+                    this.logger?.error(
+                        "[Cloud] Authentication failed: Invalid email or password",
+                    );
+                    return callback("Invalid email or password", null);
                 }
 
                 if (result.error) {
-                    this.logger?.error( `[Cloud] Authentication failed: ${result.error}`);
+                    this.logger?.error(
+                        `[Cloud] Authentication failed: ${result.error}`,
+                    );
                     return callback(result.error, null);
                 }
 
                 if (result.response) {
                     response = result.response;
-                    this.logger?.info( '[Cloud] Authentication successful');
+                    this.logger?.info("[Cloud] Authentication successful");
                 }
 
                 callback(null, response);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     refreshToken(callback) {
-        this.logger?.debug( '[Cloud] Refreshing access token');
+        this.logger?.debug("[Cloud] Refreshing access token");
 
         this._apiClient.postUsersMeRefreshToken(
             this._apiClient.refreshToken,
-            (function(result) {
+            function (result) {
                 let response = null;
 
                 if (this._isInvalidTokenResult(result)) {
-                    this.logger?.error( '[Cloud] Token refresh failed: Invalid access token');
-                    return callback('Invalid access token', null);
+                    this.logger?.error(
+                        "[Cloud] Token refresh failed: Invalid access token",
+                    );
+                    return callback("Invalid access token", null);
                 }
 
                 if (result.error) {
-                    this.logger?.error( `[Cloud] Token refresh failed: ${result.error}`);
+                    this.logger?.error(
+                        `[Cloud] Token refresh failed: ${result.error}`,
+                    );
                     return callback(result.error, null);
                 }
 
                 if (result.response) {
                     response = result.response;
-                    this.logger?.debug( '[Cloud] Token refresh successful');
+                    this.logger?.debug("[Cloud] Token refresh successful");
                 }
 
                 callback(null, response);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     getTemperatureScale(callback) {
-        this.getUserMetadata(function(error, userMetadata) {
+        this.getUserMetadata(function (error, userMetadata) {
             let temperatureScale = null;
 
             if (error) {
@@ -113,7 +120,8 @@ class Client {
             }
 
             if (apiv1.constants.USER_TEMPERATURE_SCALE in userMetadata) {
-                temperatureScale = userMetadata[apiv1.constants.USER_TEMPERATURE_SCALE];
+                temperatureScale =
+                    userMetadata[apiv1.constants.USER_TEMPERATURE_SCALE];
             }
 
             callback(null, temperatureScale);
@@ -121,41 +129,52 @@ class Client {
     }
 
     setTemperatureScale(scale, callback) {
-        const scaleLabel = scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT ? '°F' : '°C';
-        this.logger?.info( `[Cloud] Temperature display units changed to: ${scaleLabel}`);
+        const scaleLabel =
+            scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT
+                ? "°F"
+                : "°C";
+        this.logger?.info(
+            `[Cloud] Temperature display units changed to: ${scaleLabel}`,
+        );
 
         this._apiClient.putUsersMe(
             apiv1.constants.USER_TEMPERATURE_SCALE,
             scale,
-            (function(result) {
+            function (result) {
                 let responseScale = null;
                 let userMetadataCache = null;
 
                 if (this._isInvalidTokenResult(result)) {
-                    this.logger?.error( '[Cloud] Temperature scale change failed: Invalid access token');
-                    return callback('Invalid access token', null);
+                    this.logger?.error(
+                        "[Cloud] Temperature scale change failed: Invalid access token",
+                    );
+                    return callback("Invalid access token", null);
                 }
 
                 if (result.error) {
-                    this.logger?.error( `[Cloud] Temperature scale change failed: ${result.error}`);
+                    this.logger?.error(
+                        `[Cloud] Temperature scale change failed: ${result.error}`,
+                    );
                     return callback(result.error, null);
                 }
 
                 if (result.response) {
-                    responseScale = result.response[apiv1.constants.USER_TEMPERATURE_SCALE];
+                    responseScale =
+                        result.response[apiv1.constants.USER_TEMPERATURE_SCALE];
 
                     userMetadataCache = this._getUserMetadataCache();
-                    userMetadataCache[apiv1.constants.USER_TEMPERATURE_SCALE] = responseScale;
+                    userMetadataCache[apiv1.constants.USER_TEMPERATURE_SCALE] =
+                        responseScale;
                     this._setUserMetadataCache(userMetadataCache);
                 }
 
                 callback(null, responseScale);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     getName(deviceId, callback) {
-        this.getDevice(deviceId, function(error, device) {
+        this.getDevice(deviceId, function (error, device) {
             let result = null;
 
             if (error) {
@@ -171,7 +190,7 @@ class Client {
     }
 
     getConnectionStatus(deviceId, callback) {
-        this.getDevice(deviceId, function(error, device) {
+        this.getDevice(deviceId, function (error, device) {
             let result = null;
 
             if (error) {
@@ -179,7 +198,8 @@ class Client {
             }
 
             if (apiv1.constants.METADATA_CONNECTION_STATUS in device.metadata) {
-                result = device.metadata[apiv1.constants.METADATA_CONNECTION_STATUS];
+                result =
+                    device.metadata[apiv1.constants.METADATA_CONNECTION_STATUS];
             }
 
             callback(null, result);
@@ -190,7 +210,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_MODEL,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -198,7 +218,7 @@ class Client {
                 }
 
                 callback(null, parameterValue);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -206,7 +226,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_ON_OFF,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -216,13 +236,13 @@ class Client {
                 result = this._parameterValueToToggle(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     setPowerState(deviceId, toggle, callback) {
-        const state = toggle === constants.TOGGLE_ON ? 'ON' : 'OFF';
-        this.logger?.info( `[Cloud] ${deviceId} - Power: ${state}`);
+        const state = toggle === constants.TOGGLE_ON ? "ON" : "OFF";
+        this.logger?.info(`[Cloud] ${deviceId} - Power: ${state}`);
 
         const parameterValue = this._toggleToParameterValue(toggle);
 
@@ -230,22 +250,24 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_ON_OFF,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
-                    this.logger?.error( `[Cloud] ${deviceId} - Power state change failed: ${error}`);
+                    this.logger?.error(
+                        `[Cloud] ${deviceId} - Power state change failed: ${error}`,
+                    );
                     return callback(error, null);
                 }
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_ON_OFF]
+                        device.parameters[apiv1.constants.PARAMETER_ON_OFF],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -253,7 +275,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_OPERATION_MODE,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -263,32 +285,35 @@ class Client {
                 result = this._parameterValueToOperationMode(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     setOperationMode(deviceId, operationMode, callback) {
         const modeNames = {
-            [constants.OPERATION_MODE_AUTO]: 'Auto',
-            [constants.OPERATION_MODE_COOL]: 'Cool',
-            [constants.OPERATION_MODE_DRY]: 'Dry',
-            [constants.OPERATION_MODE_FAN]: 'Fan',
-            [constants.OPERATION_MODE_HEAT]: 'Heat'
+            [constants.OPERATION_MODE_AUTO]: "Auto",
+            [constants.OPERATION_MODE_COOL]: "Cool",
+            [constants.OPERATION_MODE_DRY]: "Dry",
+            [constants.OPERATION_MODE_FAN]: "Fan",
+            [constants.OPERATION_MODE_HEAT]: "Heat",
         };
         const modeName = modeNames[operationMode] || operationMode;
-        this.logger?.info( `[Cloud] ${deviceId} - Operation Mode: ${modeName}`);
+        this.logger?.info(`[Cloud] ${deviceId} - Operation Mode: ${modeName}`);
 
-        const parameterValue = this._operationModeToParameterValue(operationMode);
+        const parameterValue =
+            this._operationModeToParameterValue(operationMode);
 
         this.setParameter(
             deviceId,
             apiv1.constants.PARAMETER_OPERATION_MODE,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
-                    this.logger?.error( `[Cloud] ${deviceId} - Operation mode change failed: ${error}`);
+                    this.logger?.error(
+                        `[Cloud] ${deviceId} - Operation mode change failed: ${error}`,
+                    );
                     return callback(error, null);
                 }
 
@@ -297,27 +322,26 @@ class Client {
                     // when turning on dry mode, so let's update
                     // them in the local device cache:
                     // - The fan speed is set to "AUTO"
-                    this._setDeviceParameterCache(
-                        deviceId,
-                        {
-                            'parameters': [
-                                {
-                                    'name': apiv1.constants.PARAMETER_FAN_SPEED,
-                                    'value': apiv1.constants.PARAMETER_FAN_SPEED_AUTO
-                                }
-                            ]
-                        }
-                    );
+                    this._setDeviceParameterCache(deviceId, {
+                        parameters: [
+                            {
+                                name: apiv1.constants.PARAMETER_FAN_SPEED,
+                                value: apiv1.constants.PARAMETER_FAN_SPEED_AUTO,
+                            },
+                        ],
+                    });
                 }
 
                 if (device.parameters) {
                     result = this._parameterValueToOperationMode(
-                        device.parameters[apiv1.constants.PARAMETER_OPERATION_MODE]
+                        device.parameters[
+                            apiv1.constants.PARAMETER_OPERATION_MODE
+                        ],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -325,7 +349,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_INDOOR_TEMPERATURE,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -335,13 +359,15 @@ class Client {
                 if (parameterValue !== null) {
                     result = this._indoorIntValueToTemperature(parameterValue);
 
-                    if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+                    if (
+                        scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT
+                    ) {
                         result = this._celsiusToFahrenheit(result);
                     }
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -349,7 +375,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_SET_TEMPERATURE,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -363,13 +389,18 @@ class Client {
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     setTargetTemperature(deviceId, temperature, scale, callback) {
-        const scaleLabel = scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT ? '°F' : '°C';
-        this.logger?.info( `[Cloud] ${deviceId} - Target Temperature: ${temperature}${scaleLabel}`);
+        const scaleLabel =
+            scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT
+                ? "°F"
+                : "°C";
+        this.logger?.info(
+            `[Cloud] ${deviceId} - Target Temperature: ${temperature}${scaleLabel}`,
+        );
 
         let intValue = null;
 
@@ -378,7 +409,7 @@ class Client {
         } else if (scale === apiv1.constants.TEMPERATURE_SCALE_CELSIUS) {
             temperature = this._getClosestValidTemperature(
                 temperature,
-                apiv1.constants.TEMPERATURE_SCALE_CELSIUS
+                apiv1.constants.TEMPERATURE_SCALE_CELSIUS,
             );
         }
 
@@ -388,54 +419,70 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_SET_TEMPERATURE,
             intValue.toString(),
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
                 let parameterValue = null;
 
                 if (error) {
-                    this.logger?.error( `[Cloud] ${deviceId} - Target temperature change failed: ${error}`);
+                    this.logger?.error(
+                        `[Cloud] ${deviceId} - Target temperature change failed: ${error}`,
+                    );
                     return callback(error, null);
                 }
 
                 if (device.parameters) {
-                    parameterValue = device.parameters[apiv1.constants.PARAMETER_SET_TEMPERATURE];
+                    parameterValue =
+                        device.parameters[
+                            apiv1.constants.PARAMETER_SET_TEMPERATURE
+                        ];
                     result = this._intValueToTemperature(parameterValue);
 
-                    if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+                    if (
+                        scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT
+                    ) {
                         result = this._celsiusToFahrenheit(result);
                     }
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     getTemperatureDelta(deviceId, scale, callback) {
-        this.getIndoorTemperature(deviceId, scale, (function(error, indoorTemperature) {
-            if (error) {
-                return callback(error, null);
-            }
-
-            this.getTargetTemperature(deviceId, scale, (function(error, targetTemperature) {
-                let temperatureDelta = null;
-
+        this.getIndoorTemperature(
+            deviceId,
+            scale,
+            function (error, indoorTemperature) {
                 if (error) {
                     return callback(error, null);
                 }
 
-                temperatureDelta = (indoorTemperature - targetTemperature);
+                this.getTargetTemperature(
+                    deviceId,
+                    scale,
+                    function (error, targetTemperature) {
+                        let temperatureDelta = null;
 
-                callback(null, temperatureDelta);
-            }).bind(this));
-        }).bind(this));
+                        if (error) {
+                            return callback(error, null);
+                        }
+
+                        temperatureDelta =
+                            indoorTemperature - targetTemperature;
+
+                        callback(null, temperatureDelta);
+                    }.bind(this),
+                );
+            }.bind(this),
+        );
     }
 
     getFanSpeed(deviceId, callback) {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_FAN_SPEED,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -445,20 +492,20 @@ class Client {
                 result = this._parameterValueToFanSpeed(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     setFanSpeed(deviceId, fanSpeed, callback) {
         const speedNames = {
-            [constants.FAN_SPEED_AUTO]: 'Auto',
-            [constants.FAN_SPEED_QUIET]: 'Quiet',
-            [constants.FAN_SPEED_LOW]: 'Low',
-            [constants.FAN_SPEED_MEDIUM]: 'Medium',
-            [constants.FAN_SPEED_HIGH]: 'High'
+            [constants.FAN_SPEED_AUTO]: "Auto",
+            [constants.FAN_SPEED_QUIET]: "Quiet",
+            [constants.FAN_SPEED_LOW]: "Low",
+            [constants.FAN_SPEED_MEDIUM]: "Medium",
+            [constants.FAN_SPEED_HIGH]: "High",
         };
         const speedName = speedNames[fanSpeed] || fanSpeed;
-        this.logger?.info( `[Cloud] ${deviceId} - Fan Speed: ${speedName}`);
+        this.logger?.info(`[Cloud] ${deviceId} - Fan Speed: ${speedName}`);
 
         const parameterValue = this._fanSpeedToParameterValue(fanSpeed);
 
@@ -466,22 +513,24 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_FAN_SPEED,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
-                    this.logger?.error( `[Cloud] ${deviceId} - Fan speed change failed: ${error}`);
+                    this.logger?.error(
+                        `[Cloud] ${deviceId} - Fan speed change failed: ${error}`,
+                    );
                     return callback(error, null);
                 }
 
                 if (device.parameters) {
                     result = this._parameterValueToFanSpeed(
-                        device.parameters[apiv1.constants.PARAMETER_FAN_SPEED]
+                        device.parameters[apiv1.constants.PARAMETER_FAN_SPEED],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -489,7 +538,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -497,22 +546,23 @@ class Client {
                 }
 
                 result = this._validateAirflowVerticalDirectionValue(
-                    parseInt(parameterValue)
+                    parseInt(parameterValue),
                 );
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     setAirflowVerticalDirection(deviceId, value, callback) {
-        const parameterValue = this._validateAirflowVerticalDirectionValue(value).toString();
+        const parameterValue =
+            this._validateAirflowVerticalDirectionValue(value).toString();
 
         this.setParameter(
             deviceId,
             apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
@@ -521,12 +571,17 @@ class Client {
 
                 if (device.parameters) {
                     result = this._validateAirflowVerticalDirectionValue(
-                        parseInt(device.parameters[apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION])
+                        parseInt(
+                            device.parameters[
+                                apiv1.constants
+                                    .PARAMETER_AIRFLOW_VERTICAL_DIRECTION
+                            ],
+                        ),
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -534,7 +589,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -544,7 +599,7 @@ class Client {
                 result = this._parameterValueToToggle(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -555,7 +610,7 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
@@ -564,12 +619,14 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING]
+                        device.parameters[
+                            apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING
+                        ],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -577,7 +634,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_POWERFUL,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -587,7 +644,7 @@ class Client {
                 result = this._parameterValueToToggle(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -598,7 +655,7 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_POWERFUL,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
@@ -607,12 +664,12 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_POWERFUL]
+                        device.parameters[apiv1.constants.PARAMETER_POWERFUL],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -620,7 +677,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_ECONOMY,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -630,7 +687,7 @@ class Client {
                 result = this._parameterValueToToggle(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -641,7 +698,7 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_ECONOMY,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
@@ -650,12 +707,12 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_ECONOMY]
+                        device.parameters[apiv1.constants.PARAMETER_ECONOMY],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -663,7 +720,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_ENERGY_SAVING_FAN,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -673,7 +730,7 @@ class Client {
                 result = this._parameterValueToToggle(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -684,7 +741,7 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_ENERGY_SAVING_FAN,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
@@ -693,12 +750,14 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_ENERGY_SAVING_FAN]
+                        device.parameters[
+                            apiv1.constants.PARAMETER_ENERGY_SAVING_FAN
+                        ],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -706,7 +765,7 @@ class Client {
         this.getParameter(
             deviceId,
             apiv1.constants.PARAMETER_MINIMUM_HEAT,
-            (function(error, parameterValue) {
+            function (error, parameterValue) {
                 let result = null;
 
                 if (error) {
@@ -716,7 +775,7 @@ class Client {
                 result = this._parameterValueToToggle(parameterValue);
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -727,7 +786,7 @@ class Client {
             deviceId,
             apiv1.constants.PARAMETER_MINIMUM_HEAT,
             parameterValue,
-            (function(error, device) {
+            function (error, device) {
                 let result = null;
 
                 if (error) {
@@ -742,60 +801,57 @@ class Client {
                     // - The fan speed is set to "AUTO"
                     // - The operation mode is set to "HEAT"
                     // - The temperature is set to 10 degrees (C)
-                    this._setDeviceParameterCache(
-                        deviceId,
-                        {
-                            'parameters': [
-                                {
-                                    'name': apiv1.constants.PARAMETER_ON_OFF,
-                                    'value': apiv1.constants.PARAMETER_ON
-                                },
-                                {
-                                    'name': apiv1.constants.PARAMETER_FAN_SPEED,
-                                    'value': apiv1.constants.PARAMETER_FAN_SPEED_AUTO
-                                },
-                                {
-                                    'name': apiv1.constants.PARAMETER_OPERATION_MODE,
-                                    'value': apiv1.constants.PARAMETER_OPERATION_MODE_HEAT
-                                },
-                                {
-                                    'name': apiv1.constants.PARAMETER_SET_TEMPERATURE,
-                                    'value': '100'
-                                }
-                            ]
-                        }
-                    );
+                    this._setDeviceParameterCache(deviceId, {
+                        parameters: [
+                            {
+                                name: apiv1.constants.PARAMETER_ON_OFF,
+                                value: apiv1.constants.PARAMETER_ON,
+                            },
+                            {
+                                name: apiv1.constants.PARAMETER_FAN_SPEED,
+                                value: apiv1.constants.PARAMETER_FAN_SPEED_AUTO,
+                            },
+                            {
+                                name: apiv1.constants.PARAMETER_OPERATION_MODE,
+                                value: apiv1.constants
+                                    .PARAMETER_OPERATION_MODE_HEAT,
+                            },
+                            {
+                                name: apiv1.constants.PARAMETER_SET_TEMPERATURE,
+                                value: "100",
+                            },
+                        ],
+                    });
                 } else if (toggle === constants.TOGGLE_OFF) {
                     // These things automatically happen on the Airstage side
                     // when turning off minimum heat, so let's update
                     // them in the local device cache:
                     // - The power state is set to "OFF"
-                    this._setDeviceParameterCache(
-                        deviceId,
-                        {
-                            'parameters': [
-                                {
-                                    'name': apiv1.constants.PARAMETER_ON_OFF,
-                                    'value': apiv1.constants.PARAMETER_OFF
-                                }
-                            ]
-                        }
-                    );
+                    this._setDeviceParameterCache(deviceId, {
+                        parameters: [
+                            {
+                                name: apiv1.constants.PARAMETER_ON_OFF,
+                                value: apiv1.constants.PARAMETER_OFF,
+                            },
+                        ],
+                    });
                 }
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_MINIMUM_HEAT]
+                        device.parameters[
+                            apiv1.constants.PARAMETER_MINIMUM_HEAT
+                        ],
                     );
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     getParameter(deviceId, name, callback) {
-        this.getDevice(deviceId, function(error, device) {
+        this.getDevice(deviceId, function (error, device) {
             let result = null;
 
             if (error) {
@@ -807,7 +863,7 @@ class Client {
             }
 
             if (result === null) {
-                return callback('Parameter not available: ' + name, null);
+                return callback("Parameter not available: " + name, null);
             }
 
             callback(null, result);
@@ -815,18 +871,18 @@ class Client {
     }
 
     setParameter(deviceId, name, value, callback) {
-        const deviceSubId = '0';
+        const deviceSubId = "0";
 
         this._apiClient.postDevicesSetParametersRequest(
             deviceId,
             deviceSubId,
             name,
             value,
-            (function(result) {
+            function (result) {
                 let requestId = null;
 
                 if (this._isInvalidTokenResult(result)) {
-                    return callback('Invalid access token', null);
+                    return callback("Invalid access token", null);
                 }
 
                 if (result.error) {
@@ -837,12 +893,8 @@ class Client {
                     requestId = result.response.reqId;
                 }
 
-                this._pollRequestStatus(
-                    deviceId,
-                    requestId,
-                    callback
-                );
-            }).bind(this)
+                this._pollRequestStatus(deviceId, requestId, callback);
+            }.bind(this),
         );
     }
 
@@ -850,11 +902,11 @@ class Client {
         this._apiClient.getDevicesRequest(
             deviceId,
             requestId,
-            (function(result) {
+            function (result) {
                 let response = null;
 
                 if (this._isInvalidTokenResult(result)) {
-                    return callback('Invalid access token', null);
+                    return callback("Invalid access token", null);
                 }
 
                 if (result.error) {
@@ -866,18 +918,17 @@ class Client {
                 }
 
                 callback(null, response);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     getDevices(limit, callback) {
         const devicesFromCache = this._getDevicesFromCache();
-        const isCacheHit = (
+        const isCacheHit =
             devicesFromCache.metadata &&
             Object.keys(devicesFromCache.metadata).length > 0 &&
             devicesFromCache.parameters &&
-            Object.keys(devicesFromCache.parameters).length > 0
-        );
+            Object.keys(devicesFromCache.parameters).length > 0;
 
         if (isCacheHit) {
             return callback(null, devicesFromCache);
@@ -888,10 +939,9 @@ class Client {
 
     getDevice(deviceId, callback) {
         const deviceFromCache = this._getDeviceFromCache(deviceId);
-        const isCacheHit = (
+        const isCacheHit =
             deviceFromCache.metadata !== null &&
-            deviceFromCache.parameters !== null
-        );
+            deviceFromCache.parameters !== null;
 
         if (isCacheHit) {
             return callback(null, deviceFromCache);
@@ -899,9 +949,9 @@ class Client {
 
         this._apiClient.getDevice(
             deviceId,
-            (function(result) {
+            function (result) {
                 if (this._isInvalidTokenResult(result)) {
-                    return callback('Invalid access token', null);
+                    return callback("Invalid access token", null);
                 }
 
                 if (result.error) {
@@ -914,19 +964,19 @@ class Client {
                 if (result.response) {
                     deviceMetadata = this._setDeviceMetadataCache(
                         result.response.deviceId,
-                        result.response
+                        result.response,
                     );
                     deviceParameters = this._setDeviceParameterCache(
                         result.response.deviceId,
-                        result.response
+                        result.response,
                     );
                 }
 
                 callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
+                    metadata: deviceMetadata,
+                    parameters: deviceParameters,
                 });
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -961,26 +1011,26 @@ class Client {
 
     refreshUserMetadataCache(callback) {
         this._getUserMetadata(
-            (function(error, result) {
+            function (error, result) {
                 if (error) {
                     return callback(error);
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     refreshDeviceCache(callback) {
         this._getDevicesFromApi(
             null,
-            (function(error, result) {
+            function (error, result) {
                 if (error) {
                     return callback(error);
                 }
 
                 callback(null, result);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -997,10 +1047,7 @@ class Client {
     }
 
     _hasValidLoginCredentials() {
-        return (
-            this._getEmail() !== null &&
-            this._getPassword() !== null
-        );
+        return this._getEmail() !== null && this._getPassword() !== null;
     }
 
     _getEmail() {
@@ -1021,22 +1068,20 @@ class Client {
     _isInvalidLoginResult(result) {
         return (
             result.statusCode === 401 ||
-            (
-                result.response &&
-                'messageCode' in result.response &&
-                result.response.messageCode === apiv1.constants.MESSAGE_CODE_INVALID_LOGIN
-            )
+            (result.response &&
+                "messageCode" in result.response &&
+                result.response.messageCode ===
+                    apiv1.constants.MESSAGE_CODE_INVALID_LOGIN)
         );
     }
 
     _isInvalidTokenResult(result) {
         return (
             result.statusCode === 403 ||
-            (
-                result.response &&
-                'messageCode' in result.response &&
-                result.response.messageCode === apiv1.constants.MESSAGE_CODE_INVALID_TOKEN
-            )
+            (result.response &&
+                "messageCode" in result.response &&
+                result.response.messageCode ===
+                    apiv1.constants.MESSAGE_CODE_INVALID_TOKEN)
         );
     }
 
@@ -1063,12 +1108,12 @@ class Client {
     }
 
     _setDeviceMetadataCache(deviceId, device) {
-        if ((deviceId in this._deviceMetadataCache) === false) {
+        if (deviceId in this._deviceMetadataCache === false) {
             this._deviceMetadataCache[deviceId] = {};
         }
 
         if (device) {
-            apiv1.constants.METADATA_KEYS.forEach(function(key) {
+            apiv1.constants.METADATA_KEYS.forEach(function (key) {
                 if (key in device) {
                     this._deviceMetadataCache[deviceId][key] = device[key];
                 }
@@ -1091,12 +1136,12 @@ class Client {
     }
 
     _setDeviceParameterCache(deviceId, device) {
-        if ((deviceId in this._deviceParameterCache) === false) {
+        if (deviceId in this._deviceParameterCache === false) {
             this._deviceParameterCache[deviceId] = {};
         }
 
-        if (device && 'parameters' in device) {
-            device.parameters.forEach(function(parameter) {
+        if (device && "parameters" in device) {
+            device.parameters.forEach(function (parameter) {
                 let parameterName = null;
                 let parameterValue = null;
 
@@ -1104,12 +1149,15 @@ class Client {
                     parameterName = parameter.name;
                 }
 
-                if (parameter.value !== apiv1.constants.PARAMETER_NOT_AVAILABLE) {
+                if (
+                    parameter.value !== apiv1.constants.PARAMETER_NOT_AVAILABLE
+                ) {
                     parameterValue = parameter.value;
                 }
 
                 if (parameterName) {
-                    this._deviceParameterCache[deviceId][parameterName] = parameterValue;
+                    this._deviceParameterCache[deviceId][parameterName] =
+                        parameterValue;
                 }
             }, this);
         }
@@ -1124,9 +1172,9 @@ class Client {
     _getDevicesFromApi(limit, callback) {
         this._apiClient.getDevicesAll(
             limit,
-            (function(result) {
+            function (result) {
                 if (this._isInvalidTokenResult(result)) {
-                    return callback('Invalid access token', null);
+                    return callback("Invalid access token", null);
                 }
 
                 if (result.error) {
@@ -1134,15 +1182,9 @@ class Client {
                 }
 
                 if (result.response) {
-                    result.response.devices.forEach(function(device) {
-                        this._setDeviceMetadataCache(
-                            device.deviceId,
-                            device
-                        );
-                        this._setDeviceParameterCache(
-                            device.deviceId,
-                            device
-                        );
+                    result.response.devices.forEach(function (device) {
+                        this._setDeviceMetadataCache(device.deviceId, device);
+                        this._setDeviceParameterCache(device.deviceId, device);
                     }, this);
                 }
 
@@ -1150,47 +1192,49 @@ class Client {
                 const deviceParameters = this._getDeviceParameterCache(null);
 
                 callback(null, {
-                    'metadata': deviceMetadata,
-                    'parameters': deviceParameters
+                    metadata: deviceMetadata,
+                    parameters: deviceParameters,
                 });
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     _getDeviceFromCache(deviceId) {
         return {
-            'metadata': this._getDeviceMetadataCache(deviceId),
-            'parameters' : this._getDeviceParameterCache(deviceId)
+            metadata: this._getDeviceMetadataCache(deviceId),
+            parameters: this._getDeviceParameterCache(deviceId),
         };
     }
 
     _getUserMetadata(callback) {
         let userMetadata = this._getUserMetadataCache();
 
-        this._apiClient.getUsersMe((function(result) {
-            if (this._isInvalidTokenResult(result)) {
-                return callback('Invalid access token', null);
-            }
+        this._apiClient.getUsersMe(
+            function (result) {
+                if (this._isInvalidTokenResult(result)) {
+                    return callback("Invalid access token", null);
+                }
 
-            if (result.error) {
-                return callback(result.error, null);
-            }
+                if (result.error) {
+                    return callback(result.error, null);
+                }
 
-            if (result.response) {
-                userMetadata = result.response;
+                if (result.response) {
+                    userMetadata = result.response;
 
-                this._setUserMetadataCache(userMetadata);
-            }
+                    this._setUserMetadataCache(userMetadata);
+                }
 
-            callback(null, userMetadata);
-        }).bind(this));
+                callback(null, userMetadata);
+            }.bind(this),
+        );
     }
 
     _pollRequestStatus(deviceId, requestId, callback) {
         this._apiClient.getDevicesRequest(
             deviceId,
             requestId,
-            (function(result) {
+            function (result) {
                 let deviceMetadata = null;
                 let deviceParameters = null;
 
@@ -1198,24 +1242,27 @@ class Client {
                     return callback(result.error, null);
                 }
 
-                if (result.response.status === apiv1.constants.PARAMETER_STATUS_WAITING) {
+                if (
+                    result.response.status ===
+                    apiv1.constants.PARAMETER_STATUS_WAITING
+                ) {
                     this._pollRequestStatus(deviceId, requestId, callback);
                 } else {
                     deviceMetadata = this._setDeviceMetadataCache(
                         deviceId,
-                        result.response
+                        result.response,
                     );
                     deviceParameters = this._setDeviceParameterCache(
                         deviceId,
-                        result.response
+                        result.response,
                     );
 
                     callback(null, {
-                        'metadata': deviceMetadata,
-                        'parameters': deviceParameters
+                        metadata: deviceMetadata,
+                        parameters: deviceParameters,
                     });
                 }
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -1223,34 +1270,42 @@ class Client {
         let closestTemperature = null;
 
         if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
-            closestTemperature = constants.VALID_FAHRENHEIT_VALUES.reduce(function(x, y) {
-                return (Math.abs(y - temperature) < Math.abs(x - temperature) ? y : x);
-            });
+            closestTemperature = constants.VALID_FAHRENHEIT_VALUES.reduce(
+                function (x, y) {
+                    return Math.abs(y - temperature) < Math.abs(x - temperature)
+                        ? y
+                        : x;
+                },
+            );
         } else if (scale === apiv1.constants.TEMPERATURE_SCALE_CELSIUS) {
-            closestTemperature = constants.VALID_CELSIUS_VALUES.reduce(function(x, y) {
-                return (Math.abs(y - temperature) < Math.abs(x - temperature) ? y : x);
-            });
+            closestTemperature = constants.VALID_CELSIUS_VALUES.reduce(
+                function (x, y) {
+                    return Math.abs(y - temperature) < Math.abs(x - temperature)
+                        ? y
+                        : x;
+                },
+            );
         }
 
         return closestTemperature;
     }
 
     _temperatureToIntValue(temperature) {
-        return (temperature * 10);
+        return temperature * 10;
     }
 
     _indoorIntValueToTemperature(intValue) {
-        return ((intValue - 5000) / 100);
+        return (intValue - 5000) / 100;
     }
 
     _intValueToTemperature(intValue) {
-        return (intValue / 10);
+        return intValue / 10;
     }
 
     _fahrenheitToCelsius(fahrenheit) {
         const closestFahrenheit = this._getClosestValidTemperature(
             fahrenheit,
-            apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT
+            apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT,
         );
 
         return constants.FAHRENHEIT_TO_CELSIUS_MAP[closestFahrenheit];
@@ -1259,7 +1314,7 @@ class Client {
     _celsiusToFahrenheit(celsius) {
         const closestCelsius = this._getClosestValidTemperature(
             celsius,
-            apiv1.constants.TEMPERATURE_SCALE_CELSIUS
+            apiv1.constants.TEMPERATURE_SCALE_CELSIUS,
         );
 
         return constants.CELSIUS_TO_FAHRENHEIT_MAP[closestCelsius];

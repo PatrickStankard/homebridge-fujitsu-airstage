@@ -100,6 +100,7 @@ The Local LAN connection mode connects directly to your AirStage device over you
 ### Prerequisites
 
 Before using Local LAN mode, ensure:
+
 - Your AirStage WiFi adapter is already installed and configured
 - The WiFi adapter is connected to the **same local network** as your Homebridge host
 - You can access your router's admin interface to find device IP addresses
@@ -114,10 +115,10 @@ Before using Local LAN mode, ensure:
 4. Device ID is auto-detected via ARP or manually configured
 5. Both Homebridge and the AirStage device must be on the same network/VLAN
 6. **Hybrid Pull/Push Model**:
-   - **Pull (On-Demand)**: HomeKit can query device status at any time via GET handlers
-   - **Push (Polling)**: Plugin periodically polls the device and pushes updates to HomeKit only when values change
-   - **Push (Optimistic)**: Instant feedback after SET operations without waiting for device confirmation
-   - This hybrid approach provides responsive updates while minimizing unnecessary network traffic
+    - **Pull (On-Demand)**: HomeKit can query device status at any time via GET handlers
+    - **Push (Polling)**: Plugin periodically polls the device and pushes updates to HomeKit only when values change
+    - **Push (Optimistic)**: Instant feedback after SET operations without waiting for device confirmation
+    - This hybrid approach provides responsive updates while minimizing unnecessary network traffic
 
 ### When to use Local LAN
 
@@ -140,17 +141,17 @@ In the Homebridge UI, select **"Local LAN (Direct)"** as the connection mode and
 #### Optional Settings
 
 - **Device ID**: 12-character device ID (MAC address without colons)
-  - If left empty, the plugin will attempt to auto-detect via ARP
-  - Example: `A0B1C2D3E4F5`
+    - If left empty, the plugin will attempt to auto-detect via ARP
+    - Example: `A0B1C2D3E4F5`
 - **Device Sub ID**: For multi-zone systems, specify the indoor unit number (0-15)
-  - Use `0` for single-zone systems (default)
-  - Use `1-15` for specific zones in multi-zone systems
+    - Use `0` for single-zone systems (default)
+    - Use `1-15` for specific zones in multi-zone systems
 - **Local Polling Interval**: How often to poll the device for status updates (in seconds)
-  - Default: `120` seconds (2 minutes)
-  - Range: `0` to `600` seconds
-  - Set to `0` to disable automatic polling (HomeKit will only update when you open the app)
-  - Lower values provide more responsive updates but increase network traffic
-  - Higher values reduce network traffic but may delay status updates
+    - Default: `120` seconds (2 minutes)
+    - Range: `0` to `600` seconds
+    - Set to `0` to disable automatic polling (HomeKit will only update when you open the app)
+    - Lower values provide more responsive updates but increase network traffic
+    - Higher values reduce network traffic but may delay status updates
 
 ### Setup Instructions
 
@@ -216,10 +217,10 @@ If you have a multi-zone AirStage system (one outdoor unit with multiple indoor 
 
 1. Configure the same IP address for each zone
 2. Set a different **Device Sub ID** for each zone:
-   - Zone 1: Device Sub ID = `1`
-   - Zone 2: Device Sub ID = `2`
-   - Zone 3: Device Sub ID = `3`
-   - etc.
+    - Zone 1: Device Sub ID = `1`
+    - Zone 2: Device Sub ID = `2`
+    - Zone 3: Device Sub ID = `3`
+    - etc.
 
 You'll need to create separate Homebridge platform instances for each zone.
 

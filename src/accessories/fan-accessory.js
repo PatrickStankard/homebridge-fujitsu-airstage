@@ -1,43 +1,53 @@
-'use strict';
+"use strict";
 
-const Accessory = require('./accessory');
-const airstage = require('./../airstage');
+const Accessory = require("./accessory");
+const airstage = require("./../airstage");
 
 class FanAccessory extends Accessory {
-
     constructor(platform, accessory) {
         super(platform, accessory);
 
-        this.service = (
+        this.service =
             this.accessory.getService(this.Service.Fanv2) ||
-            this.accessory.addService(this.Service.Fanv2)
-        );
+            this.accessory.addService(this.Service.Fanv2);
 
         this.dynamicServiceCharacteristics.push(this.Characteristic.Active);
-        this.service.getCharacteristic(this.Characteristic.Active)
-            .on('get', this.getActive.bind(this))
-            .on('set', this.setActive.bind(this));
+        this.service
+            .getCharacteristic(this.Characteristic.Active)
+            .on("get", this.getActive.bind(this))
+            .on("set", this.setActive.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.Characteristic.CurrentFanState);
-        this.service.getCharacteristic(this.Characteristic.CurrentFanState)
-            .on('get', this.getCurrentFanState.bind(this));
+        this.dynamicServiceCharacteristics.push(
+            this.Characteristic.CurrentFanState,
+        );
+        this.service
+            .getCharacteristic(this.Characteristic.CurrentFanState)
+            .on("get", this.getCurrentFanState.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.Characteristic.TargetFanState);
-        this.service.getCharacteristic(this.Characteristic.TargetFanState)
-            .on('get', this.getTargetFanState.bind(this))
-            .on('set', this.setTargetFanState.bind(this));
+        this.dynamicServiceCharacteristics.push(
+            this.Characteristic.TargetFanState,
+        );
+        this.service
+            .getCharacteristic(this.Characteristic.TargetFanState)
+            .on("get", this.getTargetFanState.bind(this))
+            .on("set", this.setTargetFanState.bind(this));
 
-        this.service.getCharacteristic(this.Characteristic.Name)
-            .on('get', this.getName.bind(this));
+        this.service
+            .getCharacteristic(this.Characteristic.Name)
+            .on("get", this.getName.bind(this));
 
-        this.dynamicServiceCharacteristics.push(this.Characteristic.RotationSpeed);
-        this.service.getCharacteristic(this.Characteristic.RotationSpeed)
-            .on('get', this.getRotationSpeed.bind(this))
-            .on('set', this.setRotationSpeed.bind(this));
+        this.dynamicServiceCharacteristics.push(
+            this.Characteristic.RotationSpeed,
+        );
+        this.service
+            .getCharacteristic(this.Characteristic.RotationSpeed)
+            .on("get", this.getRotationSpeed.bind(this))
+            .on("set", this.setRotationSpeed.bind(this));
 
-        this.service.getCharacteristic(this.Characteristic.SwingMode)
-            .on('get', this.getSwingMode.bind(this))
-            .on('set', this.setSwingMode.bind(this));
+        this.service
+            .getCharacteristic(this.Characteristic.SwingMode)
+            .on("get", this.getSwingMode.bind(this))
+            .on("set", this.setSwingMode.bind(this));
 
         this._setFanSpeedHandle = null;
     }
@@ -49,7 +59,7 @@ class FanAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, powerState) {
+            function (error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -65,7 +75,7 @@ class FanAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -85,9 +95,14 @@ class FanAccessory extends Accessory {
         this.airstageClient.setPowerState(
             this.deviceId,
             powerState,
-            (function(error) {
+            function (error) {
                 if (error) {
-                    return this._handleError(methodName, error, callback, false);
+                    return this._handleError(
+                        methodName,
+                        error,
+                        callback,
+                        false,
+                    );
                 }
 
                 this._logMethodCallResult(methodName, null, null);
@@ -96,7 +111,7 @@ class FanAccessory extends Accessory {
                 this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -107,7 +122,7 @@ class FanAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, powerState) {
+            function (error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -123,7 +138,7 @@ class FanAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -134,7 +149,7 @@ class FanAccessory extends Accessory {
 
         this.airstageClient.getFanSpeed(
             this.deviceId,
-            (function(error, fanSpeed) {
+            function (error, fanSpeed) {
                 let value = null;
 
                 if (error) {
@@ -150,7 +165,7 @@ class FanAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -163,9 +178,14 @@ class FanAccessory extends Accessory {
             this.airstageClient.setFanSpeed(
                 this.deviceId,
                 airstage.constants.FAN_SPEED_AUTO,
-                (function(error) {
+                function (error) {
                     if (error) {
-                        return this._handleError(methodName, error, callback, false);
+                        return this._handleError(
+                            methodName,
+                            error,
+                            callback,
+                            false,
+                        );
                     }
 
                     this._logMethodCallResult(methodName, null, null);
@@ -174,7 +194,7 @@ class FanAccessory extends Accessory {
                     this._refreshRelatedAccessoryCharacteristics();
 
                     callback(null);
-                }).bind(this)
+                }.bind(this),
             );
         } else {
             this._logMethodCallResult(methodName, null, null);
@@ -193,17 +213,17 @@ class FanAccessory extends Accessory {
 
         this.airstageClient.getName(
             this.deviceId,
-            (function(error, name) {
+            function (error, name) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
 
-                const value = name + ' Fan';
+                const value = name + " Fan";
 
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -214,7 +234,7 @@ class FanAccessory extends Accessory {
 
         this.airstageClient.getFanSpeed(
             this.deviceId,
-            (function(error, fanSpeed) {
+            function (error, fanSpeed) {
                 let value = null;
 
                 if (error) {
@@ -236,7 +256,7 @@ class FanAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -264,10 +284,10 @@ class FanAccessory extends Accessory {
             }
 
             this._setFanSpeedHandle = setTimeout(
-                (function() {
+                function () {
                     this._setFanSpeed(methodName, fanSpeed);
-                }).bind(this),
-                500
+                }.bind(this),
+                500,
             );
 
             callback(null);
@@ -283,7 +303,7 @@ class FanAccessory extends Accessory {
 
         this.airstageClient.getAirflowVerticalSwingState(
             this.deviceId,
-            (function(error, swingState) {
+            function (error, swingState) {
                 let value = null;
 
                 if (error) {
@@ -299,7 +319,7 @@ class FanAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -319,9 +339,14 @@ class FanAccessory extends Accessory {
         this.airstageClient.setAirflowVerticalSwingState(
             this.deviceId,
             swingState,
-            (function(error) {
+            function (error) {
                 if (error) {
-                    return this._handleError(methodName, error, callback, false);
+                    return this._handleError(
+                        methodName,
+                        error,
+                        callback,
+                        false,
+                    );
                 }
 
                 this._logMethodCallResult(methodName, null, null);
@@ -329,7 +354,7 @@ class FanAccessory extends Accessory {
                 this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -337,7 +362,7 @@ class FanAccessory extends Accessory {
         this.airstageClient.setFanSpeed(
             this.deviceId,
             fanSpeed,
-            (function(error) {
+            function (error) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
@@ -358,22 +383,40 @@ class FanAccessory extends Accessory {
                 if (callback !== null) {
                     callback(null);
                 }
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
-        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshThermostatAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
     }
 }
 

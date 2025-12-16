@@ -1,26 +1,26 @@
-'use strict';
+"use strict";
 
-const Accessory = require('./accessory');
-const airstage = require('./../airstage');
+const Accessory = require("./accessory");
+const airstage = require("./../airstage");
 
 class DryModeSwitchAccessory extends Accessory {
-
     constructor(platform, accessory) {
         super(platform, accessory);
 
         this.lastKnownOperationMode = null;
 
-        this.service = (
+        this.service =
             this.accessory.getService(this.Service.Switch) ||
-            this.accessory.addService(this.Service.Switch)
-        );
+            this.accessory.addService(this.Service.Switch);
 
-        this.service.getCharacteristic(this.Characteristic.On)
-            .on('get', this.getOn.bind(this))
-            .on('set', this.setOn.bind(this));
+        this.service
+            .getCharacteristic(this.Characteristic.On)
+            .on("get", this.getOn.bind(this))
+            .on("set", this.setOn.bind(this));
 
-        this.service.getCharacteristic(this.Characteristic.Name)
-            .on('get', this.getName.bind(this));
+        this.service
+            .getCharacteristic(this.Characteristic.Name)
+            .on("get", this.getName.bind(this));
     }
 
     getOn(callback) {
@@ -30,7 +30,7 @@ class DryModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, powerState) {
+            function (error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -47,7 +47,7 @@ class DryModeSwitchAccessory extends Accessory {
 
                 this.airstageClient.getOperationMode(
                     this.deviceId,
-                    (function(error, operationMode) {
+                    function (error, operationMode) {
                         let value = null;
 
                         if (error) {
@@ -56,14 +56,16 @@ class DryModeSwitchAccessory extends Accessory {
                             return callback(error, null);
                         }
 
-                        value = (operationMode === airstage.constants.OPERATION_MODE_DRY);
+                        value =
+                            operationMode ===
+                            airstage.constants.OPERATION_MODE_DRY;
 
                         this._logMethodCallResult(methodName, null, value);
 
                         callback(null, value);
-                    }).bind(this)
+                    }.bind(this),
                 );
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -86,7 +88,7 @@ class DryModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            (function(error, powerState) {
+            function (error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -97,7 +99,7 @@ class DryModeSwitchAccessory extends Accessory {
                     this.airstageClient.setPowerState(
                         this.deviceId,
                         airstage.constants.TOGGLE_ON,
-                        (function(error) {
+                        function (error) {
                             if (error) {
                                 this._logMethodCallResult(methodName, error);
 
@@ -107,18 +109,14 @@ class DryModeSwitchAccessory extends Accessory {
                             this._setOperationMode(
                                 methodName,
                                 operationMode,
-                                callback
+                                callback,
                             );
-                        }).bind(this)
+                        }.bind(this),
                     );
                 } else {
-                    this._setOperationMode(
-                        methodName,
-                        operationMode,
-                        callback
-                    );
+                    this._setOperationMode(methodName, operationMode, callback);
                 }
-            }).bind(this)
+            }.bind(this),
         );
     }
 
@@ -129,24 +127,24 @@ class DryModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getName(
             this.deviceId,
-            (function(error, name) {
+            function (error, name) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
 
-                const value = name + ' Dry Mode Switch';
+                const value = name + " Dry Mode Switch";
 
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     _setOperationMode(methodName, operationMode, callback) {
         this.airstageClient.getOperationMode(
             this.deviceId,
-            (function(error, currentOperationMode) {
+            function (error, currentOperationMode) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
@@ -158,9 +156,14 @@ class DryModeSwitchAccessory extends Accessory {
                 this.airstageClient.setOperationMode(
                     this.deviceId,
                     operationMode,
-                    (function(error) {
+                    function (error) {
                         if (error) {
-                            return this._handleError(methodName, error, callback, false);
+                            return this._handleError(
+                                methodName,
+                                error,
+                                callback,
+                                false,
+                            );
                         }
 
                         this._logMethodCallResult(methodName, null, null);
@@ -168,24 +171,40 @@ class DryModeSwitchAccessory extends Accessory {
                         this._refreshRelatedAccessoryCharacteristics();
 
                         callback(null);
-                    }).bind(this)
+                    }.bind(this),
                 );
-            }).bind(this)
+            }.bind(this),
         );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
-        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshThermostatAccessoryCharacteristics(
+            this.deviceId,
+        );
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(
+            this.deviceId,
+        );
     }
 }
 

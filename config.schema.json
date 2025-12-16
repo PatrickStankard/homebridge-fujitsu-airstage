@@ -1,301 +1,269 @@
 {
-	"pluginAlias": "fujitsu-airstage",
-	"pluginType": "platform",
-	"singular": true,
-	"schema": {
-		"type": "object",
-		"properties": {
-			"name": {
-				"title": "Name",
-				"type": "string",
-				"default": "Airstage Platform",
-				"required": true,
-				"description": "The display name for this platform instance."
-			},
-			"connectionMode": {
-				"title": "Connection Mode",
-				"type": "string",
-				"default": "cloud",
-				"required": true,
-				"oneOf": [
-					{
-						"title": "Cloud API (Internet)",
-						"const": "cloud"
-					},
-					{
-						"title": "Local LAN (Direct)",
-						"const": "local"
-					}
-				],
-				"description": "Choose how to connect to your Airstage devices: Cloud API requires internet and Airstage account, Local LAN connects directly to devices on your network."
-			},
-			"localDevice": {
-				"title": "Local LAN Device",
-				"type": "object",
-				"condition": {
-					"functionBody": "return model.connectionMode === 'local';"
-				},
-				"properties": {
-					"name": {
-						"title": "Device Name",
-						"type": "string",
-						"required": true,
-						"placeholder": "Living Room AC",
-						"description": "A friendly name for this device."
-					},
-					"ipAddress": {
-						"title": "IP Address",
-						"type": "string",
-						"format": "ipv4",
-						"required": true,
-						"placeholder": "192.168.1.100",
-						"description": "The local IP address of the device. Use a static IP or DHCP reservation."
-					},
-					"deviceId": {
-						"title": "Device ID (Optional)",
-						"type": "string",
-						"required": false,
-						"pattern": "^[A-Fa-f0-9]{12}$",
-						"placeholder": "Auto-detected via ARP",
-						"description": "12-character device ID (MAC address without colons). Leave empty for automatic detection via ARP."
-					},
-					"localPollingInterval": {
-						"title": "Local Polling Interval (seconds)",
-						"type": "number",
-						"default": 120,
-						"minimum": 0,
-						"maximum": 600,
-						"required": false,
-						"placeholder": "120",
-						"description": "How often to poll the local device for status updates (in seconds). Default is 120 seconds (2 minutes). Set to 0 to disable automatic polling. Only applies to Local LAN connection mode.",
-						"controlType": "number"
-					},
-					"deviceSubId": {
-						"title": "Device Sub ID",
-						"type": "integer",
-						"required": true,
-						"default": 0,
-						"oneOf": [
-							{
-								"title": "0 (Default - Single Zone)",
-								"enum": [
-									0
-								]
-							},
-							{
-								"title": "1",
-								"enum": [
-									1
-								]
-							},
-							{
-								"title": "2",
-								"enum": [
-									2
-								]
-							},
-							{
-								"title": "3",
-								"enum": [
-									3
-								]
-							},
-							{
-								"title": "4",
-								"enum": [
-									4
-								]
-							},
-							{
-								"title": "5",
-								"enum": [
-									5
-								]
-							},
-							{
-								"title": "6",
-								"enum": [
-									6
-								]
-							},
-							{
-								"title": "7",
-								"enum": [
-									7
-								]
-							},
-							{
-								"title": "8",
-								"enum": [
-									8
-								]
-							},
-							{
-								"title": "9",
-								"enum": [
-									9
-								]
-							},
-							{
-								"title": "10",
-								"enum": [
-									10
-								]
-							},
-							{
-								"title": "11",
-								"enum": [
-									11
-								]
-							},
-							{
-								"title": "12",
-								"enum": [
-									12
-								]
-							},
-							{
-								"title": "13",
-								"enum": [
-									13
-								]
-							},
-							{
-								"title": "14",
-								"enum": [
-									14
-								]
-							},
-							{
-								"title": "15",
-								"enum": [
-									15
-								]
-							}
-						],
-						"description": "For multi-zone systems, specify the indoor unit number (0-15). Use 0 for single-zone systems."
-					}
-				},
-				"description": "Configure your local LAN device. Requires a name and IP address. Device ID will be auto-detected if not provided."
-			},
-			"region": {
-				"title": "Region",
-				"type": "string",
-				"default": "us",
-				"required": true,
-				"oneOf": [
-					{
-						"title": "U.S.",
-						"const": "us"
-					},
-					{
-						"title": "Europe",
-						"const": "eu"
-					}
-				],
-				"condition": {
-					"functionBody": "return model.connectionMode === 'cloud';"
-				},
-				"description": "The region for your Airstage account (us or eu)."
-			},
-			"country": {
-				"title": "Country",
-				"type": "string",
-				"required": true,
-				"default": "United States",
-				"condition": {
-					"functionBody": "return model.connectionMode === 'cloud';"
-				},
-				"description": "The country associated with your Airstage account."
-			},
-			"language": {
-				"title": "Language",
-				"type": "string",
-				"required": true,
-				"default": "en",
-				"condition": {
-					"functionBody": "return model.connectionMode === 'cloud';"
-				},
-				"description": "The language code for your Airstage account (e.g., 'en')."
-			},
-			"email": {
-				"title": "Airstage Email",
-				"type": "string",
-				"format": "email",
-				"default": "",
-				"condition": {
-					"functionBody": "return model.connectionMode === 'cloud';"
-				},
-				"description": "The email address for your Airstage account."
-			},
-			"password": {
-				"title": "Airstage Password",
-				"type": "string",
-				"default": "",
-				"condition": {
-					"functionBody": "return model.connectionMode === 'cloud';"
-				},
-				"description": "The password for your Airstage account."
-			},
-			"rememberEmailAndPassword": {
-				"title": "Remember Airstage Email and Password",
-				"type": "boolean",
-				"default": false,
-				"condition": {
-					"functionBody": "return model.connectionMode === 'cloud';"
-				},
-				"description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
-			},
-			"enableThermostat": {
-				"title": "Enable thermostat control",
-				"type": "boolean",
-				"default": true
-			},
-			"enableFan": {
-				"title": "Enable fan control",
-				"type": "boolean",
-				"default": true
-			},
-			"enableVerticalAirflowDirection": {
-				"title": "Enable vertical airflow direction control",
-				"type": "boolean",
-				"default": false
-			},
-			"enableAutoFanSpeedSwitch": {
-				"title": "Enable 'Auto Fan Speed' switch",
-				"type": "boolean",
-				"default": false
-			},
-			"enableDryModeSwitch": {
-				"title": "Enable 'Dry Mode' switch",
-				"type": "boolean",
-				"default": false
-			},
-			"enableEconomySwitch": {
-				"title": "Enable 'Economy' switch",
-				"type": "boolean",
-				"default": false
-			},
-			"enableEnergySavingFanSwitch": {
-				"title": "Enable 'Energy Saving Fan' switch",
-				"type": "boolean",
-				"default": false
-			},
-			"enableFanModeSwitch": {
-				"title": "Enable 'Fan Mode' switch",
-				"type": "boolean",
-				"default": false
-			},
-			"enableMinimumHeatModeSwitch": {
-				"title": "Enable 'Minimum Heat Mode' switch",
-				"type": "boolean",
-				"default": false
-			},
-			"enablePowerfulSwitch": {
-				"title": "Enable 'Powerful' switch",
-				"type": "boolean",
-				"default": false
-			}
-		}
-	}
+    "pluginAlias": "fujitsu-airstage",
+    "pluginType": "platform",
+    "singular": true,
+    "schema": {
+        "type": "object",
+        "properties": {
+            "name": {
+                "title": "Name",
+                "type": "string",
+                "default": "Airstage Platform",
+                "required": true,
+                "description": "The display name for this platform instance."
+            },
+            "connectionMode": {
+                "title": "Connection Mode",
+                "type": "string",
+                "default": "cloud",
+                "required": true,
+                "oneOf": [
+                    {
+                        "title": "Cloud API (Internet)",
+                        "const": "cloud"
+                    },
+                    {
+                        "title": "Local LAN (Direct)",
+                        "const": "local"
+                    }
+                ],
+                "description": "Choose how to connect to your Airstage devices: Cloud API requires internet and Airstage account, Local LAN connects directly to devices on your network."
+            },
+            "localDevice": {
+                "title": "Local LAN Device",
+                "type": "object",
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'local';"
+                },
+                "properties": {
+                    "name": {
+                        "title": "Device Name",
+                        "type": "string",
+                        "required": true,
+                        "placeholder": "Living Room AC",
+                        "description": "A friendly name for this device."
+                    },
+                    "ipAddress": {
+                        "title": "IP Address",
+                        "type": "string",
+                        "format": "ipv4",
+                        "required": true,
+                        "placeholder": "192.168.1.100",
+                        "description": "The local IP address of the device. Use a static IP or DHCP reservation."
+                    },
+                    "deviceId": {
+                        "title": "Device ID (Optional)",
+                        "type": "string",
+                        "required": false,
+                        "pattern": "^[A-Fa-f0-9]{12}$",
+                        "placeholder": "Auto-detected via ARP",
+                        "description": "12-character device ID (MAC address without colons). Leave empty for automatic detection via ARP."
+                    },
+                    "localPollingInterval": {
+                        "title": "Local Polling Interval (seconds)",
+                        "type": "number",
+                        "default": 120,
+                        "minimum": 0,
+                        "maximum": 600,
+                        "required": false,
+                        "placeholder": "120",
+                        "description": "How often to poll the local device for status updates (in seconds). Default is 120 seconds (2 minutes). Set to 0 to disable automatic polling. Only applies to Local LAN connection mode.",
+                        "controlType": "number"
+                    },
+                    "deviceSubId": {
+                        "title": "Device Sub ID",
+                        "type": "integer",
+                        "required": true,
+                        "default": 0,
+                        "oneOf": [
+                            {
+                                "title": "0 (Default - Single Zone)",
+                                "enum": [0]
+                            },
+                            {
+                                "title": "1",
+                                "enum": [1]
+                            },
+                            {
+                                "title": "2",
+                                "enum": [2]
+                            },
+                            {
+                                "title": "3",
+                                "enum": [3]
+                            },
+                            {
+                                "title": "4",
+                                "enum": [4]
+                            },
+                            {
+                                "title": "5",
+                                "enum": [5]
+                            },
+                            {
+                                "title": "6",
+                                "enum": [6]
+                            },
+                            {
+                                "title": "7",
+                                "enum": [7]
+                            },
+                            {
+                                "title": "8",
+                                "enum": [8]
+                            },
+                            {
+                                "title": "9",
+                                "enum": [9]
+                            },
+                            {
+                                "title": "10",
+                                "enum": [10]
+                            },
+                            {
+                                "title": "11",
+                                "enum": [11]
+                            },
+                            {
+                                "title": "12",
+                                "enum": [12]
+                            },
+                            {
+                                "title": "13",
+                                "enum": [13]
+                            },
+                            {
+                                "title": "14",
+                                "enum": [14]
+                            },
+                            {
+                                "title": "15",
+                                "enum": [15]
+                            }
+                        ],
+                        "description": "For multi-zone systems, specify the indoor unit number (0-15). Use 0 for single-zone systems."
+                    }
+                },
+                "description": "Configure your local LAN device. Requires a name and IP address. Device ID will be auto-detected if not provided."
+            },
+            "region": {
+                "title": "Region",
+                "type": "string",
+                "default": "us",
+                "required": true,
+                "oneOf": [
+                    {
+                        "title": "U.S.",
+                        "const": "us"
+                    },
+                    {
+                        "title": "Europe",
+                        "const": "eu"
+                    }
+                ],
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'cloud';"
+                },
+                "description": "The region for your Airstage account (us or eu)."
+            },
+            "country": {
+                "title": "Country",
+                "type": "string",
+                "required": true,
+                "default": "United States",
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'cloud';"
+                },
+                "description": "The country associated with your Airstage account."
+            },
+            "language": {
+                "title": "Language",
+                "type": "string",
+                "required": true,
+                "default": "en",
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'cloud';"
+                },
+                "description": "The language code for your Airstage account (e.g., 'en')."
+            },
+            "email": {
+                "title": "Airstage Email",
+                "type": "string",
+                "format": "email",
+                "default": "",
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'cloud';"
+                },
+                "description": "The email address for your Airstage account."
+            },
+            "password": {
+                "title": "Airstage Password",
+                "type": "string",
+                "default": "",
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'cloud';"
+                },
+                "description": "The password for your Airstage account."
+            },
+            "rememberEmailAndPassword": {
+                "title": "Remember Airstage Email and Password",
+                "type": "boolean",
+                "default": false,
+                "condition": {
+                    "functionBody": "return model.connectionMode === 'cloud';"
+                },
+                "description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
+            },
+            "enableThermostat": {
+                "title": "Enable thermostat control",
+                "type": "boolean",
+                "default": true
+            },
+            "enableFan": {
+                "title": "Enable fan control",
+                "type": "boolean",
+                "default": true
+            },
+            "enableVerticalAirflowDirection": {
+                "title": "Enable vertical airflow direction control",
+                "type": "boolean",
+                "default": false
+            },
+            "enableAutoFanSpeedSwitch": {
+                "title": "Enable 'Auto Fan Speed' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableDryModeSwitch": {
+                "title": "Enable 'Dry Mode' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableEconomySwitch": {
+                "title": "Enable 'Economy' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableEnergySavingFanSwitch": {
+                "title": "Enable 'Energy Saving Fan' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableFanModeSwitch": {
+                "title": "Enable 'Fan Mode' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enableMinimumHeatModeSwitch": {
+                "title": "Enable 'Minimum Heat Mode' switch",
+                "type": "boolean",
+                "default": false
+            },
+            "enablePowerfulSwitch": {
+                "title": "Enable 'Powerful' switch",
+                "type": "boolean",
+                "default": false
+            }
+        }
+    }
 }

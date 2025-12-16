@@ -50,29 +50,29 @@ When configuring the plugin, you'll first choose a **Connection Mode**:
 
 ```json
 {
-  "platforms": [
-    {
-      "name": "Airstage Platform",
-      "platform": "fujitsu-airstage",
-      "connectionMode": "cloud",
-      "region": "us",
-      "country": "United States",
-      "language": "en",
-      "email": "test@example.com",
-      "password": "test1234",
-      "rememberEmailAndPassword": false,
-      "enableThermostat": true,
-      "enableFan": true,
-      "enableVerticalAirflowDirection": false,
-      "enableAutoFanSpeedSwitch": false,
-      "enableDryModeSwitch": false,
-      "enableEconomySwitch": false,
-      "enableEnergySavingFanSwitch": false,
-      "enableFanModeSwitch": false,
-      "enableMinimumHeatModeSwitch": false,
-      "enablePowerfulSwitch": false
-    }
-  ]
+    "platforms": [
+        {
+            "name": "Airstage Platform",
+            "platform": "fujitsu-airstage",
+            "connectionMode": "cloud",
+            "region": "us",
+            "country": "United States",
+            "language": "en",
+            "email": "test@example.com",
+            "password": "test1234",
+            "rememberEmailAndPassword": false,
+            "enableThermostat": true,
+            "enableFan": true,
+            "enableVerticalAirflowDirection": false,
+            "enableAutoFanSpeedSwitch": false,
+            "enableDryModeSwitch": false,
+            "enableEconomySwitch": false,
+            "enableEnergySavingFanSwitch": false,
+            "enableFanModeSwitch": false,
+            "enableMinimumHeatModeSwitch": false,
+            "enablePowerfulSwitch": false
+        }
+    ]
 }
 ```
 
@@ -92,29 +92,29 @@ Airstage API.
 
 ```json
 {
-  "platforms": [
-    {
-      "name": "Airstage Platform",
-      "platform": "fujitsu-airstage",
-      "connectionMode": "local",
-      "localDevice": {
-        "name": "Living Room AC",
-        "ipAddress": "192.168.1.100",
-        "deviceId": "",
-        "deviceSubId": 0
-      },
-      "enableThermostat": true,
-      "enableFan": true,
-      "enableVerticalAirflowDirection": false,
-      "enableAutoFanSpeedSwitch": false,
-      "enableDryModeSwitch": false,
-      "enableEconomySwitch": false,
-      "enableEnergySavingFanSwitch": false,
-      "enableFanModeSwitch": false,
-      "enableMinimumHeatModeSwitch": false,
-      "enablePowerfulSwitch": false
-    }
-  ]
+    "platforms": [
+        {
+            "name": "Airstage Platform",
+            "platform": "fujitsu-airstage",
+            "connectionMode": "local",
+            "localDevice": {
+                "name": "Living Room AC",
+                "ipAddress": "192.168.1.100",
+                "deviceId": "",
+                "deviceSubId": 0
+            },
+            "enableThermostat": true,
+            "enableFan": true,
+            "enableVerticalAirflowDirection": false,
+            "enableAutoFanSpeedSwitch": false,
+            "enableDryModeSwitch": false,
+            "enableEconomySwitch": false,
+            "enableEnergySavingFanSwitch": false,
+            "enableFanModeSwitch": false,
+            "enableMinimumHeatModeSwitch": false,
+            "enablePowerfulSwitch": false
+        }
+    ]
 }
 ```
 
