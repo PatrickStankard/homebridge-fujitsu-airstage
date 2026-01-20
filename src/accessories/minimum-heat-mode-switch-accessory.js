@@ -1,27 +1,27 @@
-"use strict";
+'use strict';
 
-const Accessory = require("./accessory");
-const airstage = require("./../airstage");
+const Accessory = require('./accessory');
+const airstage = require('./../airstage');
 
 class MinimumHeatModeSwitchAccessory extends Accessory {
+
     constructor(platform, accessory) {
         super(platform, accessory);
 
         this.lastKnownOperationMode = null;
         this.lastKnownTargetTemperature = null;
 
-        this.service =
+        this.service = (
             this.accessory.getService(this.Service.Switch) ||
-            this.accessory.addService(this.Service.Switch);
+            this.accessory.addService(this.Service.Switch)
+        );
 
-        this.service
-            .getCharacteristic(this.Characteristic.On)
-            .on("get", this.getOn.bind(this))
-            .on("set", this.setOn.bind(this));
+        this.service.getCharacteristic(this.Characteristic.On)
+            .on('get', this.getOn.bind(this))
+            .on('set', this.setOn.bind(this));
 
-        this.service
-            .getCharacteristic(this.Characteristic.Name)
-            .on("get", this.getName.bind(this));
+        this.service.getCharacteristic(this.Characteristic.Name)
+            .on('get', this.getName.bind(this));
     }
 
     getOn(callback) {
@@ -31,7 +31,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -48,7 +48,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
 
                 this.airstageClient.getMinimumHeatState(
                     this.deviceId,
-                    function (error, minimumHeatState) {
+                    (function(error, minimumHeatState) {
                         let value = null;
 
                         if (error) {
@@ -59,18 +59,16 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
 
                         if (minimumHeatState === airstage.constants.TOGGLE_ON) {
                             value = true;
-                        } else if (
-                            minimumHeatState === airstage.constants.TOGGLE_OFF
-                        ) {
+                        } else if (minimumHeatState === airstage.constants.TOGGLE_OFF) {
                             value = false;
                         }
 
                         this._logMethodCallResult(methodName, null, value);
 
                         callback(null, value);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -89,7 +87,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -100,7 +98,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                     this.airstageClient.setPowerState(
                         this.deviceId,
                         airstage.constants.TOGGLE_ON,
-                        function (error) {
+                        (function(error) {
                             if (error) {
                                 this._logMethodCallResult(methodName, error);
 
@@ -110,18 +108,18 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                             this._setMinimumHeatState(
                                 methodName,
                                 minimumHeatState,
-                                callback,
+                                callback
                             );
-                        }.bind(this),
+                        }).bind(this)
                     );
                 } else {
                     this._setMinimumHeatState(
                         methodName,
                         minimumHeatState,
-                        callback,
+                        callback
                     );
                 }
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -132,17 +130,17 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getName(
             this.deviceId,
-            function (error, name) {
+            (function(error, name) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
 
-                const value = name + " Minimum Heat Mode Switch";
+                const value = name + ' Minimum Heat Mode Switch';
 
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -157,7 +155,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
     _enableMinimumHeat(methodName, callback) {
         this.airstageClient.getOperationMode(
             this.deviceId,
-            function (error, operationMode) {
+            (function(error, operationMode) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
@@ -169,14 +167,9 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                 this.airstageClient.getTargetTemperature(
                     this.deviceId,
                     airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-                    function (error, targetTemperature) {
+                    (function(error, targetTemperature) {
                         if (error) {
-                            return this._handleError(
-                                methodName,
-                                error,
-                                callback,
-                                false,
-                            );
+                            return this._handleError(methodName, error, callback, false);
                         }
 
                         this.lastKnownTargetTemperature = targetTemperature;
@@ -184,30 +177,23 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                         this.airstageClient.setMinimumHeatState(
                             this.deviceId,
                             airstage.constants.TOGGLE_ON,
-                            function (error) {
+                            (function(error) {
                                 if (error) {
-                                    this._logMethodCallResult(
-                                        methodName,
-                                        error,
-                                    );
+                                    this._logMethodCallResult(methodName, error);
 
                                     return callback(error);
                                 }
 
-                                this._logMethodCallResult(
-                                    methodName,
-                                    null,
-                                    null,
-                                );
+                                this._logMethodCallResult(methodName, null, null);
 
                                 this._refreshRelatedAccessoryCharacteristics();
 
                                 callback(null);
-                            }.bind(this),
+                            }).bind(this)
                         );
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -215,7 +201,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
         this.airstageClient.setMinimumHeatState(
             this.deviceId,
             airstage.constants.TOGGLE_OFF,
-            function (error) {
+            (function(error) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
@@ -226,7 +212,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                     this.airstageClient.setOperationMode(
                         this.deviceId,
                         this.lastKnownOperationMode,
-                        function (error) {
+                        (function(error) {
                             if (error) {
                                 this._logMethodCallResult(methodName, error);
                             }
@@ -234,7 +220,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                             this.lastKnownOperationMode = null;
 
                             this._refreshRelatedAccessoryCharacteristics();
-                        }.bind(this),
+                        }).bind(this)
                     );
                 }
 
@@ -243,7 +229,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                         this.deviceId,
                         this.lastKnownTargetTemperature,
                         airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-                        function (error) {
+                        (function(error) {
                             if (error) {
                                 this._logMethodCallResult(methodName, error);
                             }
@@ -251,7 +237,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                             this.lastKnownTargetTemperature = null;
 
                             this._refreshRelatedAccessoryCharacteristics();
-                        }.bind(this),
+                        }).bind(this)
                     );
                 }
 
@@ -260,38 +246,22 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                 this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
-            }.bind(this),
+            }).bind(this)
         );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
-        accessoryManager.refreshThermostatAccessoryCharacteristics(
-            this.deviceId,
-        );
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

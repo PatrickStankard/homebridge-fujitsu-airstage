@@ -1,9 +1,10 @@
-"use strict";
+'use strict';
 
-const airstage = require("./../airstage");
-const settings = require("./../settings");
+const airstage = require('./../airstage');
+const settings = require('./../settings');
 
 class Accessory {
+
     constructor(platform, accessory) {
         this.platform = platform;
         this.accessory = accessory;
@@ -18,33 +19,14 @@ class Accessory {
 
         // Register this wrapper in the WeakMap for state management during polling
         // WeakMap doesn't get serialized, avoiding circular reference errors
-        this.platform.accessoryManager.registerAccessoryWrapper(
-            this.accessory,
-            this,
-        );
+        this.platform.accessoryManager.registerAccessoryWrapper(this.accessory, this);
 
-        this.accessory
-            .getService(this.Service.AccessoryInformation)
-            .setCharacteristic(
-                this.Characteristic.Manufacturer,
-                airstage.constants.MANUFACTURER_FUJITSU,
-            )
-            .setCharacteristic(
-                this.Characteristic.Model,
-                this.accessory.context.model,
-            )
-            .setCharacteristic(
-                this.Characteristic.SerialNumber,
-                this.accessory.context.deviceId,
-            )
-            .setCharacteristic(
-                this.Characteristic.FirmwareRevision,
-                settings.PLUGIN_VERSION,
-            )
-            .setCharacteristic(
-                this.Characteristic.StatusFault,
-                this.Characteristic.StatusFault.NO_FAULT,
-            );
+        this.accessory.getService(this.Service.AccessoryInformation)
+            .setCharacteristic(this.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
+            .setCharacteristic(this.Characteristic.Model, this.accessory.context.model)
+            .setCharacteristic(this.Characteristic.SerialNumber, this.accessory.context.deviceId)
+            .setCharacteristic(this.Characteristic.FirmwareRevision, settings.PLUGIN_VERSION)
+            .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT);
     }
 
     _refreshDynamicServiceCharacteristics(onlyNotifyOnChange = false) {
@@ -52,7 +34,7 @@ class Accessory {
             this.service,
             this.dynamicServiceCharacteristics,
             onlyNotifyOnChange,
-            this, // Pass the accessory wrapper for state management
+            this // Pass the accessory wrapper for state management
         );
     }
 
@@ -79,27 +61,25 @@ class Accessory {
     }
 
     _logMethodCall(methodName, value) {
-        let logMessage = "[" + this.constructor.name + "] called " + methodName;
+        let logMessage = '[' + this.constructor.name + '] called ' + methodName;
 
         if (value) {
-            logMessage = logMessage + " with value: " + value;
+            logMessage = logMessage + ' with value: ' + value;
         }
 
         this.platform.log.debug(logMessage);
     }
 
     _logMethodCallResult(methodName, error, value) {
-        let logMessage =
-            "[" + this.constructor.name + "] call to " + methodName;
+        let logMessage = '[' + this.constructor.name + '] call to ' + methodName;
 
         if (error) {
-            logMessage =
-                logMessage + " unsuccessful, resulted in error: " + error;
+            logMessage = logMessage + ' unsuccessful, resulted in error: ' + error;
             this.platform.log.error(logMessage);
         } else {
-            logMessage = logMessage + " successful";
+            logMessage = logMessage + ' successful';
             if (value !== null) {
-                logMessage = logMessage + ", resulted in value: " + value;
+                logMessage = logMessage + ', resulted in value: ' + value;
             }
 
             this.platform.log.debug(logMessage);
@@ -110,39 +90,34 @@ class Accessory {
         this._logMethodCallResult(methodName, error);
 
         // Check if error indicates device is unreachable
-        const errorMessage = error?.message || "";
-        const isUnreachableError =
-            errorMessage.includes("unreachable") ||
-            errorMessage.includes("timeout") ||
-            errorMessage.includes("ECONNREFUSED") ||
-            errorMessage.includes("EHOSTUNREACH") ||
-            errorMessage.includes("ETIMEDOUT") ||
-            errorMessage.includes("ENETUNREACH");
+        const errorMessage = error?.message || '';
+        const isUnreachableError = errorMessage.includes('unreachable') ||
+                                   errorMessage.includes('timeout') ||
+                                   errorMessage.includes('ECONNREFUSED') ||
+                                   errorMessage.includes('EHOSTUNREACH') ||
+                                   errorMessage.includes('ETIMEDOUT') ||
+                                   errorMessage.includes('ENETUNREACH');
 
         if (isUnreachableError) {
             // Update StatusFault to indicate device problem
-            const infoService = this.accessory.getService(
-                this.Service.AccessoryInformation,
-            );
+            const infoService = this.accessory.getService(this.Service.AccessoryInformation);
             if (infoService) {
                 infoService.setCharacteristic(
                     this.Characteristic.StatusFault,
-                    this.Characteristic.StatusFault.GENERAL_FAULT,
+                    this.Characteristic.StatusFault.GENERAL_FAULT
                 );
             }
 
             this.platform.log.warn(
-                `[${this.constructor.name}] Device ${this.deviceId} appears unreachable: ${errorMessage}`,
+                `[${this.constructor.name}] Device ${this.deviceId} appears unreachable: ${errorMessage}`
             );
         } else {
             // For non-unreachable errors, ensure StatusFault is cleared
-            const infoService = this.accessory.getService(
-                this.Service.AccessoryInformation,
-            );
+            const infoService = this.accessory.getService(this.Service.AccessoryInformation);
             if (infoService) {
                 infoService.setCharacteristic(
                     this.Characteristic.StatusFault,
-                    this.Characteristic.StatusFault.NO_FAULT,
+                    this.Characteristic.StatusFault.NO_FAULT
                 );
             }
         }

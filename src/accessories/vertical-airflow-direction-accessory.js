@@ -1,42 +1,36 @@
-"use strict";
+'use strict';
 
-const Accessory = require("./accessory");
-const airstage = require("./../airstage");
+const Accessory = require('./accessory');
+const airstage = require('./../airstage');
 
 class VerticalAirflowDirectionAccessory extends Accessory {
+
     constructor(platform, accessory) {
         super(platform, accessory);
 
         // Ideally we'd use the Slats service for this, but it's not supported
         // by Apple Home currently. Let's use the Fanv2 service instead
-        this.service =
+        this.service = (
             this.accessory.getService(this.Service.Fanv2) ||
-            this.accessory.addService(this.Service.Fanv2);
+            this.accessory.addService(this.Service.Fanv2)
+        );
 
         this.dynamicServiceCharacteristics.push(this.Characteristic.Active);
-        this.service
-            .getCharacteristic(this.Characteristic.Active)
-            .on("get", this.getActive.bind(this))
-            .on("set", this.setActive.bind(this));
+        this.service.getCharacteristic(this.Characteristic.Active)
+            .on('get', this.getActive.bind(this))
+            .on('set', this.setActive.bind(this))
 
-        this.dynamicServiceCharacteristics.push(
-            this.Characteristic.CurrentFanState,
-        );
-        this.service
-            .getCharacteristic(this.Characteristic.CurrentFanState)
-            .on("get", this.getCurrentFanState.bind(this));
+        this.dynamicServiceCharacteristics.push(this.Characteristic.CurrentFanState);
+        this.service.getCharacteristic(this.Characteristic.CurrentFanState)
+            .on('get', this.getCurrentFanState.bind(this));
 
-        this.service
-            .getCharacteristic(this.Characteristic.Name)
-            .on("get", this.getName.bind(this));
+        this.service.getCharacteristic(this.Characteristic.Name)
+            .on('get', this.getName.bind(this));
 
-        this.dynamicServiceCharacteristics.push(
-            this.Characteristic.RotationSpeed,
-        );
-        this.service
-            .getCharacteristic(this.Characteristic.RotationSpeed)
-            .on("get", this.getRotationSpeed.bind(this))
-            .on("set", this.setRotationSpeed.bind(this));
+        this.dynamicServiceCharacteristics.push(this.Characteristic.RotationSpeed);
+        this.service.getCharacteristic(this.Characteristic.RotationSpeed)
+            .on('get', this.getRotationSpeed.bind(this))
+            .on('set', this.setRotationSpeed.bind(this));
 
         this._setAirflowVerticalDirectionHandle = null;
     }
@@ -48,7 +42,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -65,31 +59,25 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
                 this.airstageClient.getAirflowVerticalSwingState(
                     this.deviceId,
-                    function (error, swingState) {
+                    (function(error, swingState) {
                         let value = null;
 
                         if (error) {
-                            return this._handleError(
-                                methodName,
-                                error,
-                                callback,
-                            );
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (swingState === airstage.constants.TOGGLE_ON) {
                             value = this.Characteristic.Active.INACTIVE;
-                        } else if (
-                            swingState === airstage.constants.TOGGLE_OFF
-                        ) {
+                        } else if (swingState === airstage.constants.TOGGLE_OFF) {
                             value = this.Characteristic.Active.ACTIVE;
                         }
 
                         this._logMethodCallResult(methodName, null, value);
 
                         callback(null, value);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -108,7 +96,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -119,31 +107,26 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                     this.airstageClient.setPowerState(
                         this.deviceId,
                         airstage.constants.TOGGLE_ON,
-                        function (error) {
+                        (function(error) {
                             if (error) {
-                                return this._handleError(
-                                    methodName,
-                                    error,
-                                    callback,
-                                    false,
-                                );
+                                return this._handleError(methodName, error, callback, false);
                             }
 
                             this._setAirflowVerticalSwingState(
                                 methodName,
                                 swingState,
-                                callback,
+                                callback
                             );
-                        }.bind(this),
+                        }).bind(this)
                     );
                 } else {
                     this._setAirflowVerticalSwingState(
                         methodName,
                         swingState,
-                        callback,
+                        callback
                     );
                 }
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -154,7 +137,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -171,30 +154,23 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
                 this.airstageClient.getAirflowVerticalSwingState(
                     this.deviceId,
-                    function (error, swingState) {
+                    (function(error, swingState) {
                         if (error) {
-                            return this._handleError(
-                                methodName,
-                                error,
-                                callback,
-                            );
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (swingState === airstage.constants.TOGGLE_ON) {
                             value = this.Characteristic.CurrentFanState.IDLE;
-                        } else if (
-                            swingState === airstage.constants.TOGGLE_OFF
-                        ) {
-                            value =
-                                this.Characteristic.CurrentFanState.BLOWING_AIR;
+                        } else if (swingState === airstage.constants.TOGGLE_OFF) {
+                            value = this.Characteristic.CurrentFanState.BLOWING_AIR;
                         }
 
                         this._logMethodCallResult(methodName, null, value);
 
                         callback(null, value);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -205,17 +181,17 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         this.airstageClient.getName(
             this.deviceId,
-            function (error, name) {
+            (function(error, name) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
 
-                const value = name + " Vertical Airflow Direction";
+                const value = name + ' Vertical Airflow Direction';
 
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -228,7 +204,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
@@ -243,13 +219,9 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
                 this.airstageClient.getAirflowVerticalDirection(
                     this.deviceId,
-                    function (error, airflowVerticalDirection) {
+                    (function(error, airflowVerticalDirection) {
                         if (error) {
-                            return this._handleError(
-                                methodName,
-                                error,
-                                callback,
-                            );
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (airflowVerticalDirection === 1) {
@@ -257,7 +229,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                         } else if (airflowVerticalDirection === 2) {
                             value = 50;
                         } else if (airflowVerticalDirection === 3) {
-                            value = 75;
+                            value = 75
                         } else if (airflowVerticalDirection === 4) {
                             value = 100;
                         }
@@ -265,9 +237,9 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                         this._logMethodCallResult(methodName, null, value);
 
                         callback(null, value);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -295,13 +267,13 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             }
 
             this._setAirflowVerticalDirectionHandle = setTimeout(
-                function () {
+                (function() {
                     this._setAirflowVerticalDirection(
                         methodName,
-                        airflowVerticalDirection,
+                        airflowVerticalDirection
                     );
-                }.bind(this),
-                500,
+                }).bind(this),
+                500
             );
 
             callback(null);
@@ -309,7 +281,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             this._setAirflowVerticalDirection(
                 methodName,
                 airflowVerticalDirection,
-                callback,
+                callback
             );
         }
     }
@@ -318,14 +290,9 @@ class VerticalAirflowDirectionAccessory extends Accessory {
         this.airstageClient.setAirflowVerticalSwingState(
             this.deviceId,
             swingState,
-            function (error) {
+            (function(error) {
                 if (error) {
-                    return this._handleError(
-                        methodName,
-                        error,
-                        callback,
-                        false,
-                    );
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);
@@ -334,19 +301,15 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
-            }.bind(this),
+            }).bind(this)
         );
     }
 
-    _setAirflowVerticalDirection(
-        methodName,
-        airflowVerticalDirection,
-        callback = null,
-    ) {
+    _setAirflowVerticalDirection(methodName, airflowVerticalDirection, callback = null) {
         this.airstageClient.setAirflowVerticalDirection(
             this.deviceId,
             airflowVerticalDirection,
-            function (error) {
+            (function(error) {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
@@ -366,38 +329,22 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 if (callback !== null) {
                     callback(null);
                 }
-            }.bind(this),
+            }).bind(this)
         );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
-        accessoryManager.refreshThermostatAccessoryCharacteristics(
-            this.deviceId,
-        );
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
+        accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshFanModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

@@ -1,26 +1,26 @@
-"use strict";
+'use strict';
 
-const Accessory = require("./accessory");
-const airstage = require("./../airstage");
+const Accessory = require('./accessory');
+const airstage = require('./../airstage');
 
 class FanModeSwitchAccessory extends Accessory {
+
     constructor(platform, accessory) {
         super(platform, accessory);
 
         this.lastKnownFanSpeed = null;
 
-        this.service =
+        this.service = (
             this.accessory.getService(this.Service.Switch) ||
-            this.accessory.addService(this.Service.Switch);
+            this.accessory.addService(this.Service.Switch)
+        );
 
-        this.service
-            .getCharacteristic(this.Characteristic.On)
-            .on("get", this.getOn.bind(this))
-            .on("set", this.setOn.bind(this));
+        this.service.getCharacteristic(this.Characteristic.On)
+            .on('get', this.getOn.bind(this))
+            .on('set', this.setOn.bind(this));
 
-        this.service
-            .getCharacteristic(this.Characteristic.Name)
-            .on("get", this.getName.bind(this));
+        this.service.getCharacteristic(this.Characteristic.Name)
+            .on('get', this.getName.bind(this));
     }
 
     getOn(callback) {
@@ -30,7 +30,7 @@ class FanModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -47,25 +47,21 @@ class FanModeSwitchAccessory extends Accessory {
 
                 this.airstageClient.getFanSpeed(
                     this.deviceId,
-                    function (error, fanSpeed) {
+                    (function(error, fanSpeed) {
                         let value = null;
 
                         if (error) {
-                            return this._handleError(
-                                methodName,
-                                error,
-                                callback,
-                            );
+                            return this._handleError(methodName, error, callback);
                         }
 
-                        value = fanSpeed === airstage.constants.FAN_SPEED_AUTO;
+                        value = (fanSpeed === airstage.constants.FAN_SPEED_AUTO);
 
                         this._logMethodCallResult(methodName, null, value);
 
                         callback(null, value);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -88,7 +84,7 @@ class FanModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getPowerState(
             this.deviceId,
-            function (error, powerState) {
+            (function(error, powerState) {
                 let value = null;
 
                 if (error) {
@@ -99,23 +95,26 @@ class FanModeSwitchAccessory extends Accessory {
                     this.airstageClient.setPowerState(
                         this.deviceId,
                         airstage.constants.TOGGLE_ON,
-                        function (error) {
+                        (function(error) {
                             if (error) {
-                                return this._handleError(
-                                    methodName,
-                                    error,
-                                    callback,
-                                    false,
-                                );
+                                return this._handleError(methodName, error, callback, false);
                             }
 
-                            this._setFanSpeed(methodName, fanSpeed, callback);
-                        }.bind(this),
+                            this._setFanSpeed(
+                                methodName,
+                                fanSpeed,
+                                callback
+                            );
+                        }).bind(this)
                     );
                 } else {
-                    this._setFanSpeed(methodName, fanSpeed, callback);
+                    this._setFanSpeed(
+                        methodName,
+                        fanSpeed,
+                        callback
+                    );
                 }
-            }.bind(this),
+            }).bind(this)
         );
     }
 
@@ -126,24 +125,24 @@ class FanModeSwitchAccessory extends Accessory {
 
         this.airstageClient.getName(
             this.deviceId,
-            function (error, name) {
+            (function(error, name) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
 
-                const value = name + " Auto Fan Speed Switch";
+                const value = name + ' Auto Fan Speed Switch';
 
                 this._logMethodCallResult(methodName, null, value);
 
                 callback(null, value);
-            }.bind(this),
+            }).bind(this)
         );
     }
 
     _setFanSpeed(methodName, fanSpeed, callback) {
         this.airstageClient.getFanSpeed(
             this.deviceId,
-            function (error, currentFanSpeed) {
+            (function(error, currentFanSpeed) {
                 if (error) {
                     return this._handleError(methodName, error, callback);
                 }
@@ -153,14 +152,9 @@ class FanModeSwitchAccessory extends Accessory {
                 this.airstageClient.setFanSpeed(
                     this.deviceId,
                     fanSpeed,
-                    function (error) {
+                    (function(error) {
                         if (error) {
-                            return this._handleError(
-                                methodName,
-                                error,
-                                callback,
-                                false,
-                            );
+                            return this._handleError(methodName, error, callback, false);
                         }
 
                         this._logMethodCallResult(methodName, null, null);
@@ -168,37 +162,23 @@ class FanModeSwitchAccessory extends Accessory {
                         this._refreshRelatedAccessoryCharacteristics();
 
                         callback(null);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
-        accessoryManager.refreshThermostatAccessoryCharacteristics(
-            this.deviceId,
-        );
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
-        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(
-            this.deviceId,
-        );
+        accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEconomySwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshEnergySavingFanSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshMinimumHeatModeSwitchAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshPowerfulSwitchAccessoryCharacteristics(this.deviceId);
     }
 }
 

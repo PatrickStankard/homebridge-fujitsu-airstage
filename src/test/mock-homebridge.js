@@ -1,17 +1,21 @@
-"use strict";
+'use strict';
 
-const { mock } = require("node:test");
-const hap = require("hap-nodejs");
-const PlatformAccessoryManager = require("../platform-accessory-manager");
-const airstage = require("../airstage");
+const { mock } = require('node:test');
+const hap = require('hap-nodejs');
+const PlatformAccessoryManager = require('../platform-accessory-manager');
+const airstage = require('../airstage');
 
-const airstageClient = new airstage.Client("us", "United States", "en");
+const airstageClient = new airstage.Client(
+    'us',
+    'United States',
+    'en'
+);
 
 class MockPlatformAccessory {
     context = {
-        deviceId: "testDeviceId",
-        model: "Test Model",
-        airstageClient: airstageClient,
+        'deviceId': 'testDeviceId',
+        'model': 'Test Model',
+        'airstageClient': airstageClient
     };
 
     constructor(name, uuid) {
@@ -30,66 +34,68 @@ class MockPlatformAccessory {
 }
 
 const mockCharacteristic = {
-    on: mock.fn((event, listener) => {
+    'on': mock.fn((event, listener) => {
         return mockCharacteristic;
     }),
-    emit: mock.fn((event, listener) => {
+    'emit': mock.fn((event, listener) => {
         return mockCharacteristic;
     }),
-    setProps: mock.fn((props) => {
+    'setProps': mock.fn((props) => {
         return mockCharacteristic;
     }),
-    updateValue: mock.fn((value) => {
+    'updateValue': mock.fn((value) => {
         return mockCharacteristic;
-    }),
+    })
 };
 
 const mockService = {
-    setCharacteristic: mock.fn((name, value) => {
+    'setCharacteristic': mock.fn((name, value) => {
         return mockService;
     }),
-    getCharacteristic: mock.fn((name, value) => {
+    'getCharacteristic': mock.fn((name, value) => {
         return mockCharacteristic;
-    }),
+    })
 };
 
 const mockPlatform = {
-    Characteristic: hap.Characteristic,
-    Service: hap.Service,
-    airstageClient: airstageClient,
-    accessories: [],
-    api: {
-        hap: hap,
-        platformAccessory: MockPlatformAccessory,
-        user: {
-            configPath: mock.fn(() => {
-                return "/test/path";
+    'Characteristic': hap.Characteristic,
+    'Service': hap.Service,
+    'airstageClient': airstageClient,
+    'accessories': [],
+    'api': {
+        'hap': hap,
+        'platformAccessory': MockPlatformAccessory,
+        'user': {
+            'configPath': mock.fn(() => {
+                return '/test/path';
             }),
-            persistPath: mock.fn(() => {
-                return "/test/path";
-            }),
+            'persistPath': mock.fn(() => {
+                return '/test/path';
+            })
         },
-        updatePlatformAccessories: mock.fn((accessories) => {}),
-        registerPlatformAccessories: mock.fn(
-            (pluginName, platformName, accessories) => {},
+        'updatePlatformAccessories': mock.fn(
+            (accessories) => {}
         ),
-        unregisterPlatformAccessories: mock.fn(
-            (pluginName, platformName, accessories) => {},
+        'registerPlatformAccessories': mock.fn(
+            (pluginName, platformName, accessories) => {}
         ),
-        on: mock.fn((event, listener) => {
+        'unregisterPlatformAccessories': mock.fn(
+            (pluginName, platformName, accessories) => {}
+        ),
+        'on': mock.fn((event, listener) => {
             return mockPlatform.api;
-        }),
+        })
     },
-    log: {
-        debug: mock.fn(() => {}),
-        error: mock.fn(() => {}),
-        info: mock.fn(() => {}),
-        warn: mock.fn(() => {}),
-        success: mock.fn(() => {}),
-    },
+    'log': {
+        'debug': mock.fn(() => {}),
+        'error': mock.fn(() => {}),
+        'info': mock.fn(() => {}),
+        'warn': mock.fn(() => {}),
+        'success': mock.fn(() => {})
+    }
 };
 
-mockPlatform["accessoryManager"] = new PlatformAccessoryManager(mockPlatform);
+mockPlatform['accessoryManager'] = new PlatformAccessoryManager(mockPlatform);
 
 class MockHomebridge {
     characteristic = mockCharacteristic;

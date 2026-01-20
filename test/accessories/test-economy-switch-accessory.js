@@ -1,99 +1,99 @@
-"use strict";
+'use strict';
 
-const assert = require("node:assert");
-const { mock, test } = require("node:test");
-const EconomySwitchAccessory = require("../../src/accessories/economy-switch-accessory");
-const MockHomebridge = require("../../src/test/mock-homebridge");
-const airstage = require("../../src/airstage");
+const assert = require('node:assert');
+const { mock, test } = require('node:test');
+const EconomySwitchAccessory = require('../../src/accessories/economy-switch-accessory');
+const MockHomebridge = require('../../src/test/mock-homebridge');
+const airstage = require('../../src/airstage');
 
 const mockHomebridge = new MockHomebridge();
 const platformAccessory = new mockHomebridge.platform.api.platformAccessory(
-    "test-name",
-    "test-uuid",
+    'test-name',
+    'test-uuid'
 );
 
-test("EconomySwitchAccessory#constructor registers accessory", (context) => {
-    context.mock.method(platformAccessory, "getService");
+test('EconomySwitchAccessory#constructor registers accessory', (context) => {
+    context.mock.method(
+        platformAccessory,
+        'getService'
+    );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
     assert.strictEqual(platformAccessory.getService.mock.calls.length, 2);
     assert.strictEqual(
         platformAccessory.getService.mock.calls[0].arguments[0],
-        mockHomebridge.platform.Service.AccessoryInformation,
+        mockHomebridge.platform.Service.AccessoryInformation
     );
     assert.strictEqual(
         platformAccessory.getService.mock.calls[1].arguments[0],
-        mockHomebridge.platform.Service.Switch,
+        mockHomebridge.platform.Service.Switch
     );
 
     mockHomebridge.resetMocks();
 });
 
-test("EconomySwitchAccessory#constructor configures event listeners", (context) => {
+test('EconomySwitchAccessory#constructor configures event listeners', (context) => {
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    assert.strictEqual(
-        mockHomebridge.service.getCharacteristic.mock.calls.length,
-        2,
-    );
+    assert.strictEqual(mockHomebridge.service.getCharacteristic.mock.calls.length, 2);
     assert.strictEqual(
         mockHomebridge.service.getCharacteristic.mock.calls[0].arguments[0],
-        mockHomebridge.platform.Characteristic.On,
+        mockHomebridge.platform.Characteristic.On
     );
     assert.strictEqual(
         mockHomebridge.service.getCharacteristic.mock.calls[1].arguments[0],
-        mockHomebridge.platform.Characteristic.Name,
+        mockHomebridge.platform.Characteristic.Name
     );
     assert.strictEqual(mockHomebridge.characteristic.on.mock.calls.length, 3);
     assert.strictEqual(
         mockHomebridge.characteristic.on.mock.calls[0].arguments[0],
-        "get",
+        'get'
     );
     assert.strictEqual(
         mockHomebridge.characteristic.on.mock.calls[0].arguments[1].name,
-        economySwitchAccessory.getOn.bind(economySwitchAccessory).name,
+        economySwitchAccessory.getOn.bind(economySwitchAccessory).name
     );
     assert.strictEqual(
         mockHomebridge.characteristic.on.mock.calls[1].arguments[0],
-        "set",
+        'set'
     );
     assert.strictEqual(
         mockHomebridge.characteristic.on.mock.calls[1].arguments[1].name,
-        economySwitchAccessory.setOn.bind(economySwitchAccessory).name,
+        economySwitchAccessory.setOn.bind(economySwitchAccessory).name
     );
     assert.strictEqual(
         mockHomebridge.characteristic.on.mock.calls[2].arguments[0],
-        "get",
+        'get'
     );
     assert.strictEqual(
         mockHomebridge.characteristic.on.mock.calls[2].arguments[1].name,
-        economySwitchAccessory.getName.bind(economySwitchAccessory).name,
+        economySwitchAccessory.getName.bind(economySwitchAccessory).name
     );
 
     mockHomebridge.resetMocks();
 });
 
-test("EconomySwitchAccessory#getOn when getPowerState returns error", (context, done) => {
+test('EconomySwitchAccessory#getOn when getPowerState returns error', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
-            callback("getPowerState error", null);
-        },
+            callback('getPowerState error', null);
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getOn(function (error, value) {
-        assert.strictEqual(error, "getPowerState error");
+    economySwitchAccessory.getOn(function(error, value) {
+        assert.strictEqual(error, 'getPowerState error');
         assert.strictEqual(value, null);
 
         mockHomebridge.resetMocks();
@@ -102,20 +102,20 @@ test("EconomySwitchAccessory#getOn when getPowerState returns error", (context, 
     });
 });
 
-test("EconomySwitchAccessory#getOn when getPowerState returns OFF", (context, done) => {
+test('EconomySwitchAccessory#getOn when getPowerState returns OFF', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_OFF);
-        },
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getOn(function (error, value) {
+    economySwitchAccessory.getOn(function(error, value) {
         assert.strictEqual(error, null);
         assert.strictEqual(value, false);
 
@@ -125,28 +125,28 @@ test("EconomySwitchAccessory#getOn when getPowerState returns OFF", (context, do
     });
 });
 
-test("EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyState returns error", (context, done) => {
+test('EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyState returns error', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_ON);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getEconomyState",
+        'getEconomyState',
         (deviceId, callback) => {
-            callback("getEconomyState error", null);
-        },
+            callback('getEconomyState error', null);
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getOn(function (error, value) {
-        assert.strictEqual(error, "getEconomyState error");
+    economySwitchAccessory.getOn(function(error, value) {
+        assert.strictEqual(error, 'getEconomyState error');
         assert.strictEqual(value, null);
 
         mockHomebridge.resetMocks();
@@ -155,27 +155,27 @@ test("EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyS
     });
 });
 
-test("EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyState returns ON", (context, done) => {
+test('EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyState returns ON', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_ON);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getEconomyState",
+        'getEconomyState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_ON);
-        },
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getOn(function (error, value) {
+    economySwitchAccessory.getOn(function(error, value) {
         assert.strictEqual(error, null);
         assert.strictEqual(value, true);
 
@@ -185,27 +185,27 @@ test("EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyS
     });
 });
 
-test("EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyState returns OFF", (context, done) => {
+test('EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyState returns OFF', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_ON);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getEconomyState",
+        'getEconomyState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_OFF);
-        },
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getOn(function (error, value) {
+    economySwitchAccessory.getOn(function(error, value) {
         assert.strictEqual(error, null);
         assert.strictEqual(value, false);
 
@@ -215,21 +215,21 @@ test("EconomySwitchAccessory#getOn when getPowerState returns ON and getEconomyS
     });
 });
 
-test("EconomySwitchAccessory#setOn when getPowerState returns error", (context, done) => {
+test('EconomySwitchAccessory#setOn when getPowerState returns error', (context, done) => {
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
-            callback("getPowerState error", null);
-        },
+            callback('getPowerState error', null);
+        }
     );
 
-    economySwitchAccessory.setOn(true, function (error) {
-        assert.strictEqual(error, "getPowerState error");
+    economySwitchAccessory.setOn(true, function(error) {
+        assert.strictEqual(error, 'getPowerState error');
 
         mockHomebridge.resetMocks();
 
@@ -237,28 +237,28 @@ test("EconomySwitchAccessory#setOn when getPowerState returns error", (context, 
     });
 });
 
-test("EconomySwitchAccessory#setOn when getPowerState returns ON and setEconomyState returns error", (context, done) => {
+test('EconomySwitchAccessory#setOn when getPowerState returns ON and setEconomyState returns error', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_ON);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setEconomyState",
+        'setEconomyState',
         (deviceId, economyState, callback) => {
-            callback("setEconomyState error");
-        },
+            callback('setEconomyState error');
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.setOn(true, function (error) {
-        assert.strictEqual(error, "setEconomyState error");
+    economySwitchAccessory.setOn(true, function(error) {
+        assert.strictEqual(error, 'setEconomyState error');
 
         mockHomebridge.resetMocks();
 
@@ -266,29 +266,29 @@ test("EconomySwitchAccessory#setOn when getPowerState returns ON and setEconomyS
     });
 });
 
-test("EconomySwitchAccessory#setOn when getPowerState returns ON", (context, done) => {
+test('EconomySwitchAccessory#setOn when getPowerState returns ON', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_ON);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setEconomyState",
+        'setEconomyState',
         (deviceId, economyState, callback) => {
             assert.strictEqual(economyState, airstage.constants.TOGGLE_ON);
 
             callback(null);
-        },
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.setOn(true, function (error) {
+    economySwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
 
         mockHomebridge.resetMocks();
@@ -297,28 +297,28 @@ test("EconomySwitchAccessory#setOn when getPowerState returns ON", (context, don
     });
 });
 
-test("EconomySwitchAccessory#setOn when getPowerState returns OFF and setPowerState returns error", (context, done) => {
+test('EconomySwitchAccessory#setOn when getPowerState returns OFF and setPowerState returns error', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_OFF);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setPowerState",
+        'setPowerState',
         (deviceId, powerState, callback) => {
-            callback("setPowerState error");
-        },
+            callback('setPowerState error');
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.setOn(true, function (error) {
-        assert.strictEqual(error, "setPowerState error");
+    economySwitchAccessory.setOn(true, function(error) {
+        assert.strictEqual(error, 'setPowerState error');
 
         mockHomebridge.resetMocks();
 
@@ -326,35 +326,35 @@ test("EconomySwitchAccessory#setOn when getPowerState returns OFF and setPowerSt
     });
 });
 
-test("EconomySwitchAccessory#setOn when getPowerState returns OFF and setEconomyState returns error", (context, done) => {
+test('EconomySwitchAccessory#setOn when getPowerState returns OFF and setEconomyState returns error', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_OFF);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setPowerState",
+        'setPowerState',
         (deviceId, powerState, callback) => {
             callback(null);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setEconomyState",
+        'setEconomyState',
         (deviceId, economyState, callback) => {
-            callback("setEconomyState error");
-        },
+            callback('setEconomyState error');
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.setOn(true, function (error) {
-        assert.strictEqual(error, "setEconomyState error");
+    economySwitchAccessory.setOn(true, function(error) {
+        assert.strictEqual(error, 'setEconomyState error');
 
         mockHomebridge.resetMocks();
 
@@ -362,38 +362,38 @@ test("EconomySwitchAccessory#setOn when getPowerState returns OFF and setEconomy
     });
 });
 
-test("EconomySwitchAccessory#setOn when getPowerState returns OFF", (context, done) => {
+test('EconomySwitchAccessory#setOn when getPowerState returns OFF', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getPowerState",
+        'getPowerState',
         (deviceId, callback) => {
             callback(null, airstage.constants.TOGGLE_OFF);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setPowerState",
+        'setPowerState',
         (deviceId, powerState, callback) => {
             assert.strictEqual(powerState, airstage.constants.TOGGLE_ON);
 
             callback(null);
-        },
+        }
     );
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "setEconomyState",
+        'setEconomyState',
         (deviceId, economyState, callback) => {
             assert.strictEqual(economyState, airstage.constants.TOGGLE_ON);
 
             callback(null);
-        },
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.setOn(true, function (error) {
+    economySwitchAccessory.setOn(true, function(error) {
         assert.strictEqual(error, null);
 
         mockHomebridge.resetMocks();
@@ -402,21 +402,21 @@ test("EconomySwitchAccessory#setOn when getPowerState returns OFF", (context, do
     });
 });
 
-test("EconomySwitchAccessory#getName when getName returns error", (context, done) => {
+test('EconomySwitchAccessory#getName when getName returns error', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getName",
+        'getName',
         (deviceId, callback) => {
-            callback("getName error", null);
-        },
+            callback('getName error', null);
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getName(function (error, name) {
-        assert.strictEqual(error, "getName error");
+    economySwitchAccessory.getName(function(error, name) {
+        assert.strictEqual(error, 'getName error');
         assert.strictEqual(name, null);
 
         mockHomebridge.resetMocks();
@@ -425,22 +425,22 @@ test("EconomySwitchAccessory#getName when getName returns error", (context, done
     });
 });
 
-test("EconomySwitchAccessory#getName returns name with expected suffix", (context, done) => {
+test('EconomySwitchAccessory#getName returns name with expected suffix', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
-        "getName",
+        'getName',
         (deviceId, callback) => {
-            callback(null, "Test Device");
-        },
+            callback(null, 'Test Device');
+        }
     );
     const economySwitchAccessory = new EconomySwitchAccessory(
         mockHomebridge.platform,
-        platformAccessory,
+        platformAccessory
     );
 
-    economySwitchAccessory.getName(function (error, name) {
+    economySwitchAccessory.getName(function(error, name) {
         assert.strictEqual(error, null);
-        assert.strictEqual(name, "Test Device Economy Switch");
+        assert.strictEqual(name, 'Test Device Economy Switch');
 
         mockHomebridge.resetMocks();
 

@@ -1,11 +1,11 @@
-"use strict";
+'use strict';
 
-const ConfigManager = require("./config-manager");
-const PlatformAccessoryManager = require("./platform-accessory-manager");
-const LocalConfigValidator = require("./utils/local-config-validator");
-const accessories = require("./accessories");
-const airstage = require("./airstage");
-const settings = require("./settings");
+const ConfigManager = require('./config-manager');
+const PlatformAccessoryManager = require('./platform-accessory-manager');
+const LocalConfigValidator = require('./utils/local-config-validator');
+const accessories = require('./accessories');
+const airstage = require('./airstage');
+const settings = require('./settings');
 
 class Platform {
     accessories = [];
@@ -32,28 +32,26 @@ class Platform {
         this.accessoryManager = new PlatformAccessoryManager(this);
 
         // Determine connection mode (defaults to cloud for backward compatibility)
-        const connectionMode = this.config.connectionMode || "cloud";
+        const connectionMode = this.config.connectionMode || 'cloud';
 
-        if (connectionMode === "local") {
+        if (connectionMode === 'local') {
             // Store initialization promise to await in discoverDevices
             this._initPromise = this._initLocalMode(withSetInterval);
         } else {
             this._initCloudMode(withSetInterval);
         }
 
-        this.api.on("didFinishLaunching", this.discoverDevices.bind(this));
+        this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
     }
 
     async _initLocalMode(withSetInterval) {
-        this.log.info("Initializing Local LAN mode");
-        this.connectionMode = "local";
+        this.log.info('Initializing Local LAN mode');
+        this.connectionMode = 'local';
 
         const device = this.config.localDevice;
 
         if (!device) {
-            this.log.warn(
-                "No local device configured. Please add localDevice to your config.",
-            );
+            this.log.warn('No local device configured. Please add localDevice to your config.');
             return;
         }
 
@@ -62,56 +60,39 @@ class Platform {
             return;
         }
 
-        this.log.info(
-            `Validating device: ${device.name} (${device.ipAddress})`,
-        );
+        this.log.info(`Validating device: ${device.name} (${device.ipAddress})`);
 
         // Validate IPv4 format
         if (!LocalConfigValidator.isValidIpv4Format(device.ipAddress)) {
-            this.log.warn(
-                `✗ ${device.name} has invalid IPv4 address format: ${device.ipAddress}`,
-            );
-            this.log.warn(
-                `  Expected format: xxx.xxx.xxx.xxx (e.g., 192.168.1.100)`,
-            );
+            this.log.warn(`✗ ${device.name} has invalid IPv4 address format: ${device.ipAddress}`);
+            this.log.warn(`  Expected format: xxx.xxx.xxx.xxx (e.g., 192.168.1.100)`);
             return;
         }
 
         // Check HTTP connectivity (populates ARP table)
         this.log.info(`Checking connectivity to ${device.name}...`);
-        const connectivityCheck =
-            await LocalConfigValidator.checkHttpConnectivity(device.ipAddress);
+        const connectivityCheck = await LocalConfigValidator.checkHttpConnectivity(device.ipAddress);
 
         if (!connectivityCheck.success) {
-            this.log.warn(
-                `✗ Cannot reach ${device.name} at ${device.ipAddress}`,
-            );
+            this.log.warn(`✗ Cannot reach ${device.name} at ${device.ipAddress}`);
             this.log.warn(`  Error: ${connectivityCheck.error}`);
             this.log.warn(`  Troubleshooting:`);
-            this.log.warn(
-                `    • Verify device is powered on and connected to network`,
-            );
+            this.log.warn(`    • Verify device is powered on and connected to network`);
             this.log.warn(`    • Check that IP address is correct`);
             this.log.warn(`    • Ensure device is on the same network/subnet`);
             this.log.warn(`    • Verify no firewall is blocking HTTP traffic`);
             return;
         }
 
-        this.log.success(
-            `✓ Device is reachable via HTTP (status: ${connectivityCheck.statusCode})`,
-        );
+        this.log.success(`✓ Device is reachable via HTTP (status: ${connectivityCheck.statusCode})`);
 
         // Auto-detect device ID if not provided or normalize to UPPERCASE
         let deviceId = device.deviceId;
 
         if (!deviceId) {
-            this.log.info(
-                `Auto-detecting device ID for ${device.name} at ${device.ipAddress}...`,
-            );
+            this.log.info(`Auto-detecting device ID for ${device.name} at ${device.ipAddress}...`);
 
-            const detection = await LocalConfigValidator.detectDeviceId(
-                device.ipAddress,
-            );
+            const detection = await LocalConfigValidator.detectDeviceId(device.ipAddress);
 
             if (detection.success) {
                 deviceId = detection.deviceId;
@@ -120,16 +101,12 @@ class Platform {
                 // Update in-memory config so it's available during the session
                 device.deviceId = deviceId;
             } else {
-                this.log.warn(
-                    `✗ Auto-detection failed for ${device.name} (${device.ipAddress})`,
-                );
+                this.log.warn(`✗ Auto-detection failed for ${device.name} (${device.ipAddress})`);
                 this.log.warn(`  Error: ${detection.error}`);
                 if (detection.details) {
                     this.log.warn(`  ${detection.details}`);
                 }
-                this.log.warn(
-                    `  Solution: Manually add device ID to config (12-character MAC without colons)`,
-                );
+                this.log.warn(`  Solution: Manually add device ID to config (12-character MAC without colons)`);
                 this.log.warn(`  Example: "deviceId": "A0B1C2D3E4F5"`);
                 return;
             }
@@ -138,15 +115,9 @@ class Platform {
             deviceId = LocalConfigValidator.normalizeDeviceId(deviceId);
 
             if (!LocalConfigValidator.isValidDeviceIdFormat(deviceId)) {
-                this.log.warn(
-                    `✗ Invalid device ID format for ${device.name}: ${device.deviceId}`,
-                );
-                this.log.warn(
-                    `  Device ID must be 12 hexadecimal characters (MAC without colons)`,
-                );
-                this.log.warn(
-                    `  Example: "A0B1C2D3E4F5" or "a0:b1:c2:d3:e4:f5"`,
-                );
+                this.log.warn(`✗ Invalid device ID format for ${device.name}: ${device.deviceId}`);
+                this.log.warn(`  Device ID must be 12 hexadecimal characters (MAC without colons)`);
+                this.log.warn(`  Example: "A0B1C2D3E4F5" or "a0:b1:c2:d3:e4:f5"`);
                 return;
             }
         }
@@ -155,16 +126,12 @@ class Platform {
         const validation = await LocalConfigValidator.validateDeviceConfig(
             device.ipAddress,
             deviceId,
-            device.deviceSubId || 0,
+            device.deviceSubId || 0
         );
 
         if (!validation.success) {
-            this.log.warn(
-                `✗ ${device.name} validation failed: ${validation.error}`,
-            );
-            this.log.warn(
-                `  Check IP address, network connectivity, and device power`,
-            );
+            this.log.warn(`✗ ${device.name} validation failed: ${validation.error}`);
+            this.log.warn(`  Check IP address, network connectivity, and device power`);
             return;
         }
 
@@ -174,44 +141,34 @@ class Platform {
         const validatedDevice = {
             name: device.name,
             ipAddress: device.ipAddress,
-            deviceId: deviceId, // UPPERCASE
-            deviceSubId: device.deviceSubId || 0,
+            deviceId: deviceId,  // UPPERCASE
+            deviceSubId: device.deviceSubId || 0
         };
 
         // Create local client with single device (pass as array for client compatibility)
-        this.airstageClient = new airstage.local.Client(
-            [validatedDevice],
-            this.log,
-            this.configManager,
-        );
+        this.airstageClient = new airstage.local.Client([validatedDevice], this.log, this.configManager);
 
-        this.log.success(
-            `✓ Local LAN mode initialized with device: ${device.name}`,
-        );
+        this.log.success(`✓ Local LAN mode initialized with device: ${device.name}`);
 
         // Set up periodic polling for local mode
         if (withSetInterval) {
             const pollingInterval = (device.localPollingInterval || 120) * 1000; // Default: 120 seconds
 
             if (pollingInterval > 0) {
-                this.log.info(
-                    `Setting up local device polling every ${pollingInterval / 1000} seconds`,
-                );
+                this.log.info(`Setting up local device polling every ${pollingInterval / 1000} seconds`);
                 setInterval(
                     this._refreshLocalDeviceState.bind(this),
-                    pollingInterval,
+                    pollingInterval
                 );
             } else {
-                this.log.info(
-                    "Local device polling disabled (localPollingInterval set to 0)",
-                );
+                this.log.info('Local device polling disabled (localPollingInterval set to 0)');
             }
         }
     }
 
     _initCloudMode(withSetInterval) {
-        this.log.info("Initializing Cloud API mode");
-        this.connectionMode = "cloud";
+        this.log.info('Initializing Cloud API mode');
+        this.connectionMode = 'cloud';
 
         let tokens = this.configManager.getTokens();
 
@@ -226,19 +183,19 @@ class Platform {
             tokens.accessToken || null,
             tokens.accessTokenExpiry || null,
             tokens.refreshToken || null,
-            this.log,
+            this.log
         );
 
         // Only set up cache refresh intervals for cloud mode
         if (withSetInterval) {
             setInterval(
                 this._refreshAirstageClientCache.bind(this),
-                5 * 60 * 1000, // 5 minutes
+                (5 * 60 * 1000) // 5 minutes
             );
 
             setInterval(
                 this._refreshAirstageClientTokenOrAuthenticate.bind(this),
-                50 * 60 * 1000, // 50 minutes
+                (50 * 60 * 1000) // 50 minutes
             );
         }
     }
@@ -248,7 +205,7 @@ class Platform {
     }
 
     discoverDevices(callback = null) {
-        if (this.connectionMode === "local") {
+        if (this.connectionMode === 'local') {
             this._discoverLocalDevices(callback);
         } else {
             this._discoverCloudDevices(callback);
@@ -256,17 +213,14 @@ class Platform {
     }
 
     async _discoverLocalDevices(callback = null) {
-        this.log.info("Discovering local LAN devices");
+        this.log.info('Discovering local LAN devices');
 
         // Wait for initialization to complete if it's still pending
         if (this._initPromise) {
             try {
                 await this._initPromise;
             } catch (error) {
-                this.log.error(
-                    "Local mode initialization failed:",
-                    error.message,
-                );
+                this.log.error('Local mode initialization failed:', error.message);
                 if (callback !== null) {
                     callback(error);
                 }
@@ -276,11 +230,9 @@ class Platform {
 
         // Check if client was successfully initialized
         if (!this.airstageClient || !this.airstageClient.devices) {
-            this.log.error(
-                "Local Airstage client not initialized - device validation may have failed",
-            );
+            this.log.error('Local Airstage client not initialized - device validation may have failed');
             if (callback !== null) {
-                callback(new Error("Local client not initialized"));
+                callback(new Error('Local client not initialized'));
             }
             return;
         }
@@ -291,7 +243,7 @@ class Platform {
             this._configureAirstageDevice(
                 deviceId,
                 device.name,
-                "Airstage", // Model will be queried from device if needed
+                'Airstage'  // Model will be queried from device if needed
             );
         });
 
@@ -301,36 +253,31 @@ class Platform {
     }
 
     _discoverCloudDevices(callback = null) {
-        this.log.info("Discovering cloud devices");
+        this.log.info('Discovering cloud devices');
 
-        this.airstageClient.refreshTokenOrAuthenticate(
-            function (error) {
-                if (error) {
-                    if (callback !== null) {
-                        callback(error);
-                    }
-
-                    if (error === "Invalid access token") {
-                        this._unsetAccessTokenInConfig();
-                    }
-
-                    return this.log.error(
-                        "Error when attempting to authenticate with Airstage:",
-                        error,
-                    );
+        this.airstageClient.refreshTokenOrAuthenticate((function(error) {
+            if (error) {
+                if (callback !== null) {
+                    callback(error);
                 }
 
-                this._updateConfigWithAccessToken();
-                this._configureAirstageDevices(callback);
-            }.bind(this),
-        );
+                if (error === 'Invalid access token') {
+                    this._unsetAccessTokenInConfig();
+                }
+
+                return this.log.error('Error when attempting to authenticate with Airstage:', error);
+            }
+
+            this._updateConfigWithAccessToken();
+            this._configureAirstageDevices(callback);
+        }).bind(this));
     }
 
     _updateConfigWithAccessToken() {
         this.configManager.saveTokens(
             this.airstageClient.getAccessToken(),
             this.airstageClient.getAccessTokenExpiry(),
-            this.airstageClient.getRefreshToken(),
+            this.airstageClient.getRefreshToken()
         );
     }
 
@@ -339,73 +286,62 @@ class Platform {
     }
 
     _configureAirstageDevices(callback) {
-        this.airstageClient.getUserMetadata(
-            function (error) {
+        this.airstageClient.getUserMetadata((function(error) {
+            if (error) {
+                if (callback !== null) {
+                    callback(error);
+                }
+
+                return this.log.error('Error when attempting to communicate with Airstage:', error);
+            }
+
+            this.airstageClient.getDevices(null, (function(error, devices) {
                 if (error) {
                     if (callback !== null) {
                         callback(error);
                     }
 
-                    return this.log.error(
-                        "Error when attempting to communicate with Airstage:",
-                        error,
-                    );
+                    return this.log.error('Error when attempting to communicate with Airstage:', error);
                 }
 
-                this.airstageClient.getDevices(
-                    null,
-                    function (error, devices) {
-                        if (error) {
-                            if (callback !== null) {
-                                callback(error);
-                            }
+                const deviceIds = Object.keys(devices.metadata);
 
-                            return this.log.error(
-                                "Error when attempting to communicate with Airstage:",
-                                error,
-                            );
-                        }
+                deviceIds.forEach(function(deviceId) {
+                    const deviceMetadata = devices.metadata[deviceId];
+                    const deviceParameters = devices.parameters[deviceId];
+                    const deviceName = deviceMetadata.deviceName;
+                    const model = deviceParameters[airstage.apiv1.constants.PARAMETER_MODEL] || 'Airstage';
 
-                        const deviceIds = Object.keys(devices.metadata);
+                    this._configureAirstageDevice(
+                        deviceId,
+                        deviceName,
+                        model
+                    );
+                }, this);
 
-                        deviceIds.forEach(function (deviceId) {
-                            const deviceMetadata = devices.metadata[deviceId];
-                            const deviceParameters =
-                                devices.parameters[deviceId];
-                            const deviceName = deviceMetadata.deviceName;
-                            const model =
-                                deviceParameters[
-                                    airstage.apiv1.constants.PARAMETER_MODEL
-                                ] || "Airstage";
-
-                            this._configureAirstageDevice(
-                                deviceId,
-                                deviceName,
-                                model,
-                            );
-                        }, this);
-
-                        if (callback !== null) {
-                            callback(null);
-                        }
-                    }.bind(this),
-                );
-            }.bind(this),
-        );
+                if (callback !== null) {
+                    callback(null);
+                }
+            }).bind(this));
+        }).bind(this));
     }
 
-    _configureAirstageDevice(deviceId, deviceName, model) {
+    _configureAirstageDevice(
+        deviceId,
+        deviceName,
+        model
+    ) {
         // Thermostat
         if (this.config.enableThermostat) {
             this.accessoryManager.registerThermostatAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterThermostatAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -414,17 +350,20 @@ class Platform {
             this.accessoryManager.registerFanAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
-            this.accessoryManager.unregisterFanAccessory(deviceId, deviceName);
+            this.accessoryManager.unregisterFanAccessory(
+                deviceId,
+                deviceName
+            );
         }
 
         // Deprecated: the VerticalSlatsAccessory was replaced by the
         // VerticalAirflowDirectionAccessory
         this.accessoryManager.unregisterVerticalSlatsAccessory(
             deviceId,
-            deviceName,
+            deviceName
         );
 
         // Vertical airflow direction
@@ -432,12 +371,12 @@ class Platform {
             this.accessoryManager.registerVerticalAirflowDirectionAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterVerticalAirflowDirectionAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -446,12 +385,12 @@ class Platform {
             this.accessoryManager.registerAutoFanSpeedSwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterAutoFanSpeedSwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -460,12 +399,12 @@ class Platform {
             this.accessoryManager.registerDryModeSwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterDryModeSwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -474,12 +413,12 @@ class Platform {
             this.accessoryManager.registerEconomySwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterEconomySwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -488,12 +427,12 @@ class Platform {
             this.accessoryManager.registerEnergySavingFanSwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterEnergySavingFanSwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -502,12 +441,12 @@ class Platform {
             this.accessoryManager.registerFanModeSwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterFanModeSwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -516,12 +455,12 @@ class Platform {
             this.accessoryManager.registerMinimumHeatModeSwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterMinimumHeatModeSwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
 
@@ -530,84 +469,67 @@ class Platform {
             this.accessoryManager.registerPowerfulSwitchAccessory(
                 deviceId,
                 deviceName,
-                model,
+                model
             );
         } else {
             this.accessoryManager.unregisterPowerfulSwitchAccessory(
                 deviceId,
-                deviceName,
+                deviceName
             );
         }
     }
 
     _refreshAirstageClientTokenOrAuthenticate() {
-        this.airstageClient.refreshTokenOrAuthenticate(
-            function (error) {
-                if (error) {
-                    if (error === "Invalid access token") {
-                        this._unsetAccessTokenInConfig();
-                    }
-
-                    return this.log.error(
-                        "Error when attempting to authenticate with Airstage:",
-                        error,
-                    );
+        this.airstageClient.refreshTokenOrAuthenticate((function(error) {
+            if (error) {
+                if (error === 'Invalid access token') {
+                    this._unsetAccessTokenInConfig();
                 }
 
-                this._updateConfigWithAccessToken();
+                return this.log.error('Error when attempting to authenticate with Airstage:', error);
+            }
 
-                this.log.debug("Refreshed Airstage authentication");
-            }.bind(this),
-        );
+            this._updateConfigWithAccessToken();
+
+            this.log.debug('Refreshed Airstage authentication');
+        }).bind(this));
     }
 
     _refreshAirstageClientCache() {
         this.airstageClient.refreshUserMetadataCache(
-            function (error) {
+            (function(error) {
                 if (error) {
-                    return this.log.error(
-                        "Error when attempting to communicate with Airstage:",
-                        error,
-                    );
+                    return this.log.error('Error when attempting to communicate with Airstage:', error);
                 }
 
-                this.log.debug("Refreshed Airstage client user metadata cache");
+                this.log.debug('Refreshed Airstage client user metadata cache');
 
                 this.airstageClient.refreshDeviceCache(
-                    function (error, devices) {
+                    (function(error, devices) {
                         if (error) {
-                            return this.log.error(
-                                "Error when attempting to communicate with Airstage:",
-                                error,
-                            );
+                            return this.log.error('Error when attempting to communicate with Airstage:', error);
                         }
 
-                        this.log.debug(
-                            "Refreshed Airstage client device cache",
-                        );
+                        this.log.debug('Refreshed Airstage client device cache');
 
                         const deviceIds = Object.keys(devices.metadata);
 
-                        deviceIds.forEach(function (deviceId) {
-                            this.accessoryManager.refreshAllAccessoryCharacteristics(
-                                deviceId,
-                            );
+                        deviceIds.forEach(function(deviceId) {
+                            this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId);
                         }, this);
-                    }.bind(this),
+                    }).bind(this)
                 );
-            }.bind(this),
+            }).bind(this)
         );
     }
 
     _refreshLocalDeviceState() {
-        this.log.debug("Polling local device state");
+        this.log.debug('Polling local device state');
 
         // Get the device ID from the local device config
         const device = this.config.localDevice;
         if (!device || !device.deviceId) {
-            this.log.error(
-                "Cannot refresh local device state: device ID not available",
-            );
+            this.log.error('Cannot refresh local device state: device ID not available');
             return;
         }
 
@@ -615,10 +537,7 @@ class Platform {
 
         // Refresh all accessory characteristics with change detection enabled
         // onlyNotifyOnChange = true ensures we only push to HomeKit when values actually change
-        this.accessoryManager.refreshAllAccessoryCharacteristics(
-            deviceId,
-            true,
-        );
+        this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId, true);
     }
 }
 
