@@ -32,7 +32,6 @@ installed and configured this plugin:
             "language": "en",
             "email": "test@example.com",
             "password": "test1234",
-            "rememberEmailAndPassword": false,
             "enableThermostat": true,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,
@@ -47,18 +46,6 @@ installed and configured this plugin:
     ]
 }
 ```
-
-If the `rememberEmailAndPassword` option is disabled, the `email` and `password`
-values will only be set until authentication with the Airstage API has been
-completed successfully. At that point, they will be set to `null`. This is the
-default behavior, in order to prevent your Airstage credentials from being
-stored in plaintext in the Homebridge config.
-
-If the `rememberEmailAndPassword` option is enabled, the `email` and `password`
-values will continue to be set after authentication with the Airstage API has
-been completed successfully. This is useful for when the access token can't be
-refreshed for whatever reason, and you need to re-authenticate with the
-Airstage API.
 
 ## Accessories
 
