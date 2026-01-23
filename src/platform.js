@@ -46,10 +46,14 @@ class Platform {
         );
 
         if (withSetInterval) {
-            setInterval(
-                this._refreshAirstageClientCache.bind(this),
-                (5 * 60 * 1000) // 5 minutes
-            );
+            const apiPollingInterval = ((this.config.apiPollingInterval * 1000) * 60);
+
+            if (apiPollingInterval > 0) {
+                setInterval(
+                    this._refreshAirstageClientCache.bind(this),
+                    apiPollingInterval
+                );
+            }
 
             setInterval(
                 this._refreshAirstageClientTokenOrAuthenticate.bind(this),
