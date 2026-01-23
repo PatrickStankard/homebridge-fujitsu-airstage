@@ -32,6 +32,7 @@ installed and configured this plugin:
             "language": "en",
             "email": "test@example.com",
             "password": "test1234",
+            "apiPollingInterval": 30,
             "enableThermostat": true,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,

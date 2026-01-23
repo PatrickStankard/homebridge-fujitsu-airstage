@@ -56,6 +56,12 @@
                 "default": "",
                 "description": "The password for your Airstage account."
             },
+            "apiPollingInterval": {
+                "title": "Airstage API Polling Interval",
+                "type": "integer",
+                "default": 30,
+                "description": "The polling interval for getting updates from the Airstage API, in minutes. WARNING: setting this too low may result in getting your IP banned from accessing the Airstage API! Set to '0' to disable polling completely."
+            },
             "enableThermostat": {
                 "title": "Enable thermostat control",
                 "type": "boolean",
