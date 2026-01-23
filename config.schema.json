@@ -56,12 +56,6 @@
                 "default": "",
                 "description": "The password for your Airstage account."
             },
-            "rememberEmailAndPassword": {
-                "title": "Remember Airstage Email and Password",
-                "type": "boolean",
-                "default": false,
-                "description": "If enabled, the Airstage email and password will be stored in the config after a successful authentication with the Airstage API."
-            },
             "enableThermostat": {
                 "title": "Enable thermostat control",
                 "type": "boolean",
