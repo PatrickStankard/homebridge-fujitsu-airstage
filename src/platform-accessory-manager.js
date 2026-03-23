@@ -11,6 +11,18 @@ class PlatformAccessoryManager {
 
         this.Service = this.platform.Service;
         this.Characteristic = this.platform.Characteristic;
+
+        // WeakMap to store accessory wrapper references (not persisted to disk)
+        // Maps: PlatformAccessory -> AccessoryWrapper (e.g., ThermostatAccessory)
+        this.accessoryWrappers = new WeakMap();
+    }
+
+    registerAccessoryWrapper(accessory, wrapper) {
+        this.accessoryWrappers.set(accessory, wrapper);
+    }
+
+    getAccessoryWrapper(accessory) {
+        return this.accessoryWrappers.get(accessory) || null;
     }
 
     registerThermostatAccessory(deviceId, deviceName, model) {
@@ -301,20 +313,20 @@ class PlatformAccessoryManager {
         this._unregisterAccessory(deviceId, deviceName, suffix);
     }
 
-    refreshAllAccessoryCharacteristics(deviceId) {
-        this.refreshThermostatAccessoryCharacteristics(deviceId);
-        this.refreshFanAccessoryCharacteristics(deviceId);
-        this.refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId);
-        this.refreshAutoFanSpeedSwitchAccessoryCharacteristics(deviceId);
-        this.refreshDryModeSwitchAccessoryCharacteristics(deviceId);
-        this.refreshEconomySwitchAccessoryCharacteristics(deviceId);
-        this.refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId);
-        this.refreshFanModeSwitchAccessoryCharacteristics(deviceId);
-        this.refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId);
-        this.refreshPowerfulSwitchAccessoryCharacteristics(deviceId);
+    refreshAllAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
+        this.refreshThermostatAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshFanAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshAutoFanSpeedSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshDryModeSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshEconomySwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshFanModeSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
+        this.refreshPowerfulSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange);
     }
 
-    refreshThermostatAccessoryCharacteristics(deviceId) {
+    refreshThermostatAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_THERMOSTAT;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -330,11 +342,12 @@ class PlatformAccessoryManager {
                 this.Characteristic.CurrentTemperature,
                 this.Characteristic.TargetTemperature,
                 this.Characteristic.TemperatureDisplayUnits
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshFanAccessoryCharacteristics(deviceId) {
+    refreshFanAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_FAN;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -350,11 +363,12 @@ class PlatformAccessoryManager {
                 this.Characteristic.TargetFanState,
                 this.Characteristic.RotationSpeed,
                 this.Characteristic.SwingMode
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId) {
+    refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_VERTICAL_AIRFLOW_DIRECTION;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -368,11 +382,12 @@ class PlatformAccessoryManager {
                 this.Characteristic.Active,
                 this.Characteristic.CurrentFanState,
                 this.Characteristic.RotationSpeed
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshAutoFanSpeedSwitchAccessoryCharacteristics(deviceId) {
+    refreshAutoFanSpeedSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_AUTO_FAN_SPEED_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -384,11 +399,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshDryModeSwitchAccessoryCharacteristics(deviceId) {
+    refreshDryModeSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_DRY_MODE_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -400,11 +416,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshEconomySwitchAccessoryCharacteristics(deviceId) {
+    refreshEconomySwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_ECONOMY_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -416,11 +433,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId) {
+    refreshEnergySavingFanSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_ENERGY_SAVING_FAN_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -432,11 +450,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshFanModeSwitchAccessoryCharacteristics(deviceId) {
+    refreshFanModeSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_FAN_MODE_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -448,11 +467,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId) {
+    refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_MINIMUM_HEAT_MODE_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -464,11 +484,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshPowerfulSwitchAccessoryCharacteristics(deviceId) {
+    refreshPowerfulSwitchAccessoryCharacteristics(deviceId, onlyNotifyOnChange = false) {
         const suffix = constants.ACCESSORY_SUFFIX_POWERFUL_SWITCH;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
@@ -480,11 +501,12 @@ class PlatformAccessoryManager {
             accessory,
             [
                 this.Characteristic.On
-            ]
+            ],
+            onlyNotifyOnChange
         );
     }
 
-    refreshServiceCharacteristics(service, characteristicClasses) {
+    refreshServiceCharacteristics(service, characteristicClasses, onlyNotifyOnChange = false, accessoryWrapper = null) {
         characteristicClasses.forEach(function(characteristicClass) {
             const characteristic = service.getCharacteristic(characteristicClass);
             let logMessage = '[' + service.constructor.name + '][' + characteristic.constructor.name + '] Refreshing characteristic';
@@ -495,7 +517,29 @@ class PlatformAccessoryManager {
                 'get',
                 (function(error, value) {
                     if (error === null) {
-                        characteristic.sendEventNotification(value);
+                        // If change detection is enabled and we have an accessory wrapper
+                        if (onlyNotifyOnChange && accessoryWrapper) {
+                            // Check if value has changed
+                            if (accessoryWrapper._hasValueChanged(characteristic, value)) {
+                                this.platform.log.debug(
+                                    logMessage + ' - value changed, notifying HomeKit with new value: ' + value
+                                );
+                                characteristic.sendEventNotification(value);
+                                accessoryWrapper._setLastKnownValue(characteristic, value);
+                            } else {
+                                this.platform.log.debug(
+                                    logMessage + ' - value unchanged, skipping notification'
+                                );
+                            }
+                        } else {
+                            // Always notify when change detection is disabled
+                            characteristic.sendEventNotification(value);
+
+                            // Update cached state if we have an accessory wrapper
+                            if (accessoryWrapper) {
+                                accessoryWrapper._setLastKnownValue(characteristic, value);
+                            }
+                        }
                     } else {
                         logMessage = logMessage + ' failed with error: ' + error;
                         this.platform.log.error(logMessage);
@@ -584,7 +628,7 @@ class PlatformAccessoryManager {
         ) || null;
     }
 
-    _refreshAccessoryCharacteristics(accessory, characteristicClasses) {
+    _refreshAccessoryCharacteristics(accessory, characteristicClasses, onlyNotifyOnChange = false) {
         const service = accessory.services.find(
             service => (service instanceof this.Service.AccessoryInformation) === false
         ) || null;
@@ -593,9 +637,14 @@ class PlatformAccessoryManager {
             return false;
         }
 
+        // Get the accessory wrapper from WeakMap for state management
+        const accessoryWrapper = this.getAccessoryWrapper(accessory);
+
         return this.refreshServiceCharacteristics(
             service,
-            characteristicClasses
+            characteristicClasses,
+            onlyNotifyOnChange,
+            accessoryWrapper
         );
     }
 

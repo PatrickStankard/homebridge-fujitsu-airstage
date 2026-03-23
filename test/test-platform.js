@@ -26,7 +26,8 @@ test('Platform#constructor configures classes using platform config', (context) 
         false
     );
 
-    assert.strictEqual(mockHomebridge.platform.log.success, mockHomebridge.platform.log.info);
+    // Success method now exists in mock logger (no polyfill needed)
+    assert.ok(typeof mockHomebridge.platform.log.success === 'function');
     assert.strictEqual(platform.airstageClient.email, platformConfig.email);
     assert.strictEqual(platform.airstageClient.password, platformConfig.password);
     assert.strictEqual(platform.airstageClient._apiClient.region, platformConfig.region);

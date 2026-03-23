@@ -40,5 +40,8 @@
       "name": "patrickstankard",
       "email": "me@patrickstankard.com"
     }
-  ]
+  ],
+  "dependencies": {
+    "node-arp": "^1.0.6"
+  }
 }

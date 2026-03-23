@@ -2,6 +2,7 @@
 
 const ConfigManager = require('./config-manager');
 const PlatformAccessoryManager = require('./platform-accessory-manager');
+const LocalConfigValidator = require('./utils/local-config-validator');
 const accessories = require('./accessories');
 const airstage = require('./airstage');
 const settings = require('./settings');
@@ -30,6 +31,145 @@ class Platform {
         this.configManager = new ConfigManager(this.config, this.api);
         this.accessoryManager = new PlatformAccessoryManager(this);
 
+        // Determine connection mode (defaults to cloud for backward compatibility)
+        const connectionMode = this.config.connectionMode || 'cloud';
+
+        if (connectionMode === 'local') {
+            // Store initialization promise to await in discoverDevices
+            this._initPromise = this._initLocalMode(withSetInterval);
+        } else {
+            this._initCloudMode(withSetInterval);
+        }
+
+        this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
+    }
+
+    async _initLocalMode(withSetInterval) {
+        this.log.info('Initializing Local LAN mode');
+        this.connectionMode = 'local';
+
+        const device = this.config.localDevice;
+
+        if (!device) {
+            this.log.warn('No local device configured. Please add localDevice to your config.');
+            return;
+        }
+
+        if (!device.ipAddress) {
+            this.log.warn(`Device "${device.name}" is missing IP address`);
+            return;
+        }
+
+        this.log.info(`Validating device: ${device.name} (${device.ipAddress})`);
+
+        // Validate IPv4 format
+        if (!LocalConfigValidator.isValidIpv4Format(device.ipAddress)) {
+            this.log.warn(`✗ ${device.name} has invalid IPv4 address format: ${device.ipAddress}`);
+            this.log.warn(`  Expected format: xxx.xxx.xxx.xxx (e.g., 192.168.1.100)`);
+            return;
+        }
+
+        // Check HTTP connectivity (populates ARP table)
+        this.log.info(`Checking connectivity to ${device.name}...`);
+        const connectivityCheck = await LocalConfigValidator.checkHttpConnectivity(device.ipAddress);
+
+        if (!connectivityCheck.success) {
+            this.log.warn(`✗ Cannot reach ${device.name} at ${device.ipAddress}`);
+            this.log.warn(`  Error: ${connectivityCheck.error}`);
+            this.log.warn(`  Troubleshooting:`);
+            this.log.warn(`    • Verify device is powered on and connected to network`);
+            this.log.warn(`    • Check that IP address is correct`);
+            this.log.warn(`    • Ensure device is on the same network/subnet`);
+            this.log.warn(`    • Verify no firewall is blocking HTTP traffic`);
+            return;
+        }
+
+        this.log.success(`✓ Device is reachable via HTTP (status: ${connectivityCheck.statusCode})`);
+
+        // Auto-detect device ID if not provided or normalize to UPPERCASE
+        let deviceId = device.deviceId;
+
+        if (!deviceId) {
+            this.log.info(`Auto-detecting device ID for ${device.name} at ${device.ipAddress}...`);
+
+            const detection = await LocalConfigValidator.detectDeviceId(device.ipAddress);
+
+            if (detection.success) {
+                deviceId = detection.deviceId;
+                this.log.success(`✓ Auto-detected device ID: ${deviceId}`);
+
+                // Update in-memory config so it's available during the session
+                device.deviceId = deviceId;
+            } else {
+                this.log.warn(`✗ Auto-detection failed for ${device.name} (${device.ipAddress})`);
+                this.log.warn(`  Error: ${detection.error}`);
+                if (detection.details) {
+                    this.log.warn(`  ${detection.details}`);
+                }
+                this.log.warn(`  Solution: Manually add device ID to config (12-character MAC without colons)`);
+                this.log.warn(`  Example: "deviceId": "A0B1C2D3E4F5"`);
+                return;
+            }
+        } else {
+            // Normalize provided device ID to UPPERCASE
+            deviceId = LocalConfigValidator.normalizeDeviceId(deviceId);
+
+            if (!LocalConfigValidator.isValidDeviceIdFormat(deviceId)) {
+                this.log.warn(`✗ Invalid device ID format for ${device.name}: ${device.deviceId}`);
+                this.log.warn(`  Device ID must be 12 hexadecimal characters (MAC without colons)`);
+                this.log.warn(`  Example: "A0B1C2D3E4F5" or "a0:b1:c2:d3:e4:f5"`);
+                return;
+            }
+        }
+
+        // Validate connectivity
+        const validation = await LocalConfigValidator.validateDeviceConfig(
+            device.ipAddress,
+            deviceId,
+            device.deviceSubId || 0
+        );
+
+        if (!validation.success) {
+            this.log.warn(`✗ ${device.name} validation failed: ${validation.error}`);
+            this.log.warn(`  Check IP address, network connectivity, and device power`);
+            return;
+        }
+
+        this.log.success(`✓ ${device.name} validated successfully`);
+
+        // Create validated device object
+        const validatedDevice = {
+            name: device.name,
+            ipAddress: device.ipAddress,
+            deviceId: deviceId,  // UPPERCASE
+            deviceSubId: device.deviceSubId || 0
+        };
+
+        // Create local client with single device (pass as array for client compatibility)
+        this.airstageClient = new airstage.local.Client([validatedDevice], this.log, this.configManager);
+
+        this.log.success(`✓ Local LAN mode initialized with device: ${device.name}`);
+
+        // Set up periodic polling for local mode
+        if (withSetInterval) {
+            const pollingInterval = (device.localPollingInterval || 120) * 1000; // Default: 120 seconds
+
+            if (pollingInterval > 0) {
+                this.log.info(`Setting up local device polling every ${pollingInterval / 1000} seconds`);
+                setInterval(
+                    this._refreshLocalDeviceState.bind(this),
+                    pollingInterval
+                );
+            } else {
+                this.log.info('Local device polling disabled (localPollingInterval set to 0)');
+            }
+        }
+    }
+
+    _initCloudMode(withSetInterval) {
+        this.log.info('Initializing Cloud API mode');
+        this.connectionMode = 'cloud';
+
         let tokens = this.configManager.getTokens();
 
         this.airstageClient = new airstage.Client(
@@ -42,9 +182,11 @@ class Platform {
             null,
             tokens.accessToken || null,
             tokens.accessTokenExpiry || null,
-            tokens.refreshToken || null
+            tokens.refreshToken || null,
+            this.log
         );
 
+        // Only set up cache refresh intervals for cloud mode
         if (withSetInterval) {
             const apiPollingInterval = ((this.config.apiPollingInterval * 1000) * 60);
 
@@ -60,8 +202,6 @@ class Platform {
                 (50 * 60 * 1000) // 50 minutes
             );
         }
-
-        this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
     }
 
     configureAccessory(accessory) {
@@ -69,6 +209,56 @@ class Platform {
     }
 
     discoverDevices(callback = null) {
+        if (this.connectionMode === 'local') {
+            this._discoverLocalDevices(callback);
+        } else {
+            this._discoverCloudDevices(callback);
+        }
+    }
+
+    async _discoverLocalDevices(callback = null) {
+        this.log.info('Discovering local LAN devices');
+
+        // Wait for initialization to complete if it's still pending
+        if (this._initPromise) {
+            try {
+                await this._initPromise;
+            } catch (error) {
+                this.log.error('Local mode initialization failed:', error.message);
+                if (callback !== null) {
+                    callback(error);
+                }
+                return;
+            }
+        }
+
+        // Check if client was successfully initialized
+        if (!this.airstageClient || !this.airstageClient.devices) {
+            this.log.error('Local Airstage client not initialized - device validation may have failed');
+            if (callback !== null) {
+                callback(new Error('Local client not initialized'));
+            }
+            return;
+        }
+
+        // Configure accessories for each validated local device
+        this.airstageClient.devices.forEach((device, deviceId) => {
+            this.log.info(`Configuring device: ${device.name} (${deviceId})`);
+            this._configureAirstageDevice(
+                deviceId,
+                device.name,
+                'Airstage'  // Model will be queried from device if needed
+            );
+        });
+
+        if (callback !== null) {
+            callback(null);
+        }
+    }
+
+    _discoverCloudDevices(callback = null) {
+        this.log.info('Discovering cloud devices');
+
         this.airstageClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
                 if (callback !== null) {
@@ -335,6 +525,23 @@ class Platform {
                 );
             }).bind(this)
         );
+    }
+
+    _refreshLocalDeviceState() {
+        this.log.debug('Polling local device state');
+
+        // Get the device ID from the local device config
+        const device = this.config.localDevice;
+        if (!device || !device.deviceId) {
+            this.log.error('Cannot refresh local device state: device ID not available');
+            return;
+        }
+
+        const deviceId = device.deviceId;
+
+        // Refresh all accessory characteristics with change detection enabled
+        // onlyNotifyOnChange = true ensures we only push to HomeKit when values actually change
+        this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId, true);
     }
 }
 
