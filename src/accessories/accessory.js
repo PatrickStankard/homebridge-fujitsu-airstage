@@ -1,6 +1,7 @@
 'use strict';
 
 const airstage = require('./../airstage');
+const settings = require('./../settings');
 
 class Accessory {
 
@@ -18,7 +19,8 @@ class Accessory {
         this.accessory.getService(this.Service.AccessoryInformation)
             .setCharacteristic(this.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
             .setCharacteristic(this.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.Characteristic.SerialNumber, this.accessory.context.deviceId);
+            .setCharacteristic(this.Characteristic.SerialNumber, this.accessory.context.deviceId)
+            .setCharacteristic(this.Characteristic.FirmwareRevision, settings.PLUGIN_VERSION);
     }
 
     _refreshDynamicServiceCharacteristics() {
