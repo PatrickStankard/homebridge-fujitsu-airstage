@@ -46,9 +46,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -65,9 +63,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                         let value = null;
 
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (swingState === airstage.constants.TOGGLE_ON) {
@@ -104,9 +100,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -115,9 +109,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                         airstage.constants.TOGGLE_ON,
                         (function(error) {
                             if (error) {
-                                this._logMethodCallResult(methodName, error);
-
-                                return callback(error);
+                                return this._handleError(methodName, error, callback, false);
                             }
 
                             this._setAirflowVerticalSwingState(
@@ -149,9 +141,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -166,9 +156,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                     this.deviceId,
                     (function(error, swingState) {
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (swingState === airstage.constants.TOGGLE_ON) {
@@ -195,9 +183,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Vertical Airflow Direction';
@@ -220,9 +206,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -237,9 +221,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                     this.deviceId,
                     (function(error, airflowVerticalDirection) {
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (airflowVerticalDirection === 1) {
@@ -310,9 +292,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
             swingState,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);

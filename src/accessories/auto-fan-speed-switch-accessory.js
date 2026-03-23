@@ -34,9 +34,7 @@ class FanModeSwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -53,9 +51,7 @@ class FanModeSwitchAccessory extends Accessory {
                         let value = null;
 
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         value = (fanSpeed === airstage.constants.FAN_SPEED_AUTO);
@@ -92,9 +88,7 @@ class FanModeSwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -103,9 +97,7 @@ class FanModeSwitchAccessory extends Accessory {
                         airstage.constants.TOGGLE_ON,
                         (function(error) {
                             if (error) {
-                                this._logMethodCallResult(methodName, error);
-
-                                return callback(error);
+                                return this._handleError(methodName, error, callback, false);
                             }
 
                             this._setFanSpeed(
@@ -135,9 +127,7 @@ class FanModeSwitchAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Auto Fan Speed Switch';
@@ -154,9 +144,7 @@ class FanModeSwitchAccessory extends Accessory {
             this.deviceId,
             (function(error, currentFanSpeed) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 this.lastKnownFanSpeed = currentFanSpeed;
@@ -166,9 +154,7 @@ class FanModeSwitchAccessory extends Accessory {
                     fanSpeed,
                     (function(error) {
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error);
+                            return this._handleError(methodName, error, callback, false);
                         }
 
                         this._logMethodCallResult(methodName, null, null);

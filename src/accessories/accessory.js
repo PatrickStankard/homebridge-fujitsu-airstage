@@ -18,7 +18,8 @@ class Accessory {
         this.accessory.getService(this.Service.AccessoryInformation)
             .setCharacteristic(this.Characteristic.Manufacturer, airstage.constants.MANUFACTURER_FUJITSU)
             .setCharacteristic(this.Characteristic.Model, this.accessory.context.model)
-            .setCharacteristic(this.Characteristic.SerialNumber, this.accessory.context.deviceId);
+            .setCharacteristic(this.Characteristic.SerialNumber, this.accessory.context.deviceId)
+            .setCharacteristic(this.Characteristic.StatusFault, this.Characteristic.StatusFault.NO_FAULT);
     }
 
     _refreshDynamicServiceCharacteristics() {
@@ -51,6 +52,49 @@ class Accessory {
             }
 
             this.platform.log.debug(logMessage);
+        }
+    }
+    _handleError(methodName, error, callback, includeNull = true) {
+        this._logMethodCallResult(methodName, error);
+
+        // Check if error indicates device is unreachable
+        const errorMessage = error?.message || '';
+        const isUnreachableError = errorMessage.includes('unreachable') ||
+                                   errorMessage.includes('timeout') ||
+                                   errorMessage.includes('ECONNREFUSED') ||
+                                   errorMessage.includes('EHOSTUNREACH') ||
+                                   errorMessage.includes('ETIMEDOUT') ||
+                                   errorMessage.includes('ENETUNREACH');
+
+        if (isUnreachableError) {
+            // Update StatusFault to indicate device problem
+            const infoService = this.accessory.getService(this.Service.AccessoryInformation);
+            if (infoService) {
+                infoService.setCharacteristic(
+                    this.Characteristic.StatusFault,
+                    this.Characteristic.StatusFault.GENERAL_FAULT
+                );
+            }
+
+            this.platform.log.warn(
+                `[${this.constructor.name}] Device ${this.deviceId} appears unreachable: ${errorMessage}`
+            );
+        } else {
+            // For non-unreachable errors, ensure StatusFault is cleared
+            const infoService = this.accessory.getService(this.Service.AccessoryInformation);
+            if (infoService) {
+                infoService.setCharacteristic(
+                    this.Characteristic.StatusFault,
+                    this.Characteristic.StatusFault.NO_FAULT
+                );
+            }
+        }
+
+        // Support both callback(error, null) and callback(error) patterns
+        if (includeNull) {
+            callback(error, null);
+        } else {
+            callback(error);
         }
     }
 }
