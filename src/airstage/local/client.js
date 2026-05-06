@@ -120,7 +120,11 @@ class LocalClient {
         const { resolve, reject, fn } = this.requestQueue.shift();
         this.activeRequests++;
 
-        fn()
+        // Wrap fn() in Promise.resolve() so a synchronous throw becomes a
+        // rejected promise. Without this, a sync throw bypasses .catch and
+        // leaves activeRequests permanently incremented (queue deadlock).
+        Promise.resolve()
+            .then(() => fn())
             .then(result => {
                 this.activeRequests--;
                 resolve(result);
@@ -185,12 +189,23 @@ class LocalClient {
                 this.logger?.debug(`[Local] Response status: ${res.statusCode}`);
                 this.logger?.debug(`[Local] Response headers: ${JSON.stringify(res.headers)}`);
                 let data = '';
+                let aborted = false;
 
                 res.on('data', (chunk) => {
+                    if (aborted) return;
+                    if (data.length + chunk.length > localConstants.MAX_RESPONSE_BYTES) {
+                        aborted = true;
+                        req.destroy();
+                        reject(new Error(
+                            `Response exceeded ${localConstants.MAX_RESPONSE_BYTES} byte cap from ${device.name} (${device.ipAddress})`
+                        ));
+                        return;
+                    }
                     data += chunk;
                 });
 
                 res.on('end', () => {
+                    if (aborted) return;
                     this.logger?.debug(`[Local] Response complete, body length: ${data.length} bytes`);
                     try {
                         const response = JSON.parse(data);

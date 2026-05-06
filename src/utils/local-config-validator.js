@@ -167,14 +167,27 @@ class LocalConfigValidator {
                 timeout: 5000
             };
 
+            const MAX_RESPONSE_BYTES = 65536; // 64 KB cap on accumulated response body
             const req = http.request(options, (res) => {
                 let data = '';
+                let aborted = false;
 
                 res.on('data', (chunk) => {
+                    if (aborted) return;
+                    if (data.length + chunk.length > MAX_RESPONSE_BYTES) {
+                        aborted = true;
+                        req.destroy();
+                        resolve({
+                            success: false,
+                            error: `Response exceeded ${MAX_RESPONSE_BYTES} byte cap`
+                        });
+                        return;
+                    }
                     data += chunk;
                 });
 
                 res.on('end', () => {
+                    if (aborted) return;
                     try {
                         const response = JSON.parse(data);
 

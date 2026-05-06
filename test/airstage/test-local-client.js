@@ -507,3 +507,115 @@ test('LocalClient#setTemperatureScale saves scale for all devices', (context, do
         done();
     });
 });
+
+// ===================================================================
+// Circuit Breaker Tests
+// ===================================================================
+
+test('LocalClient#_updateDeviceHealth resets failures on success', () => {
+    const client = new LocalClient(mockDevices);
+    client._updateDeviceHealth('A0B1C2D3E4F5', false, new Error('boom'));
+    client._updateDeviceHealth('A0B1C2D3E4F5', false, new Error('boom'));
+    const dev = client.devices.get('A0B1C2D3E4F5');
+    assert.strictEqual(dev.consecutiveFailures, 2);
+    client._updateDeviceHealth('A0B1C2D3E4F5', true);
+    assert.strictEqual(dev.consecutiveFailures, 0);
+    assert.strictEqual(dev.isReachable, true);
+    assert.strictEqual(dev.lastError, null);
+});
+
+test('LocalClient#_updateDeviceHealth marks UNREACHABLE after 3 consecutive failures', () => {
+    const client = new LocalClient(mockDevices);
+    const dev = client.devices.get('A0B1C2D3E4F5');
+    assert.strictEqual(dev.isReachable, true);
+    client._updateDeviceHealth('A0B1C2D3E4F5', false, new Error('e1'));
+    client._updateDeviceHealth('A0B1C2D3E4F5', false, new Error('e2'));
+    assert.strictEqual(dev.isReachable, true, 'still reachable after 2 failures');
+    client._updateDeviceHealth('A0B1C2D3E4F5', false, new Error('e3'));
+    assert.strictEqual(dev.isReachable, false, 'unreachable after 3 failures');
+    assert.strictEqual(dev.consecutiveFailures, 3);
+    assert.strictEqual(dev.lastError, 'e3');
+});
+
+test('LocalClient#_canMakeRequest blocks while circuit is open', () => {
+    const client = new LocalClient(mockDevices);
+    const dev = client.devices.get('A0B1C2D3E4F5');
+    dev.isReachable = false;
+    dev.lastFailureTime = Date.now();
+    assert.strictEqual(client._canMakeRequest('A0B1C2D3E4F5'), false);
+});
+
+test('LocalClient#_canMakeRequest allows retry after 60-second cooldown', () => {
+    const client = new LocalClient(mockDevices);
+    const dev = client.devices.get('A0B1C2D3E4F5');
+    dev.isReachable = false;
+    dev.lastFailureTime = Date.now() - 61000; // 61 s ago
+    assert.strictEqual(client._canMakeRequest('A0B1C2D3E4F5'), true);
+});
+
+test('LocalClient#_canMakeRequest returns false for unknown device', () => {
+    const client = new LocalClient(mockDevices);
+    assert.strictEqual(client._canMakeRequest('UNKNOWN'), false);
+});
+
+test('LocalClient#_makeRequest rejects with retry hint when circuit is open', async () => {
+    const client = new LocalClient(mockDevices);
+    const dev = client.devices.get('A0B1C2D3E4F5');
+    dev.isReachable = false;
+    dev.lastFailureTime = Date.now();
+    dev.lastError = 'connection refused';
+    await assert.rejects(
+        () => client._makeRequest('A0B1C2D3E4F5', '/GetParam', {}),
+        /currently unreachable/
+    );
+});
+
+test('LocalClient#_processQueue does not deadlock if queued fn throws synchronously', async () => {
+    // Regression guard: a sync throw inside the queued fn must not leave
+    // activeRequests permanently incremented and stall subsequent requests.
+    const client = new LocalClient(mockDevices);
+    await assert.rejects(
+        () => client._queueRequest(() => { throw new Error('sync boom'); }),
+        /sync boom/
+    );
+    assert.strictEqual(client.activeRequests, 0, 'activeRequests must be released after sync throw');
+    // Subsequent request should be processable.
+    const result = await client._queueRequest(() => Promise.resolve('ok'));
+    assert.strictEqual(result, 'ok');
+});
+
+test('LocalClient#_makeRawRequest aborts when response exceeds MAX_RESPONSE_BYTES', (context, done) => {
+    const client = new LocalClient(mockDevices);
+    const http = require('http');
+    const origRequest = http.request;
+    const localConstants = require('../../src/airstage/local/constants');
+
+    let destroyed = false;
+    http.request = (options, callback) => {
+        const mockResponse = {
+            on: (event, handler) => {
+                if (event === 'data') {
+                    // Send a chunk larger than the cap to trigger the abort path.
+                    handler('x'.repeat(localConstants.MAX_RESPONSE_BYTES + 1));
+                } else if (event === 'end') {
+                    // end fires after destroy in real Node; the guard ignores it.
+                }
+            }
+        };
+        setTimeout(() => callback(mockResponse), 0);
+        return {
+            on: () => {},
+            write: () => {},
+            end: () => {},
+            destroy: () => { destroyed = true; }
+        };
+    };
+
+    client.getPowerState('A0B1C2D3E4F5', (error) => {
+        http.request = origRequest;
+        assert.ok(error, 'error must be reported when response exceeds cap');
+        assert.strictEqual(destroyed, true, 'socket should be destroyed when cap exceeded');
+        done();
+    });
+});
+

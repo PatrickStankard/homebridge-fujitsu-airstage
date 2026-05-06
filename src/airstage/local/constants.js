@@ -10,6 +10,7 @@ module.exports = {
   // Connection settings
   DEFAULT_PORT: 80,
   DEFAULT_TIMEOUT: 5000,
+  MAX_RESPONSE_BYTES: 65536, // 64 KB cap on accumulated response body
 
   // Set level values
   SET_LEVEL_GET: '03',

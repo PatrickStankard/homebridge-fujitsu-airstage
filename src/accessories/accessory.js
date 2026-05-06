@@ -88,14 +88,16 @@ class Accessory {
     _handleError(methodName, error, callback, includeNull = true) {
         this._logMethodCallResult(methodName, error);
 
-        // Check if error indicates device is unreachable
-        const errorMessage = error?.message || '';
-        const isUnreachableError = errorMessage.includes('unreachable') ||
-                                   errorMessage.includes('timeout') ||
-                                   errorMessage.includes('ECONNREFUSED') ||
-                                   errorMessage.includes('EHOSTUNREACH') ||
-                                   errorMessage.includes('ETIMEDOUT') ||
-                                   errorMessage.includes('ENETUNREACH');
+        // Prefer the Node errno code (unambiguous). Fall back to a
+        // word-boundary message match so substrings like "timeout" inside
+        // unrelated API error text don't trigger false positives.
+        const unreachableCodes = new Set([
+            'ECONNREFUSED', 'EHOSTUNREACH', 'ETIMEDOUT', 'ENETUNREACH', 'ENOTFOUND', 'ECONNRESET'
+        ]);
+        const errorCode = (error && typeof error === 'object' && error.code) || '';
+        const errorMessage = ((error && error.message) || '').toLowerCase();
+        const isUnreachableError = unreachableCodes.has(errorCode) ||
+                                   /\b(unreachable|timed[\s-]?out|timeout)\b/.test(errorMessage);
 
         if (isUnreachableError) {
             // Update StatusFault to indicate device problem
@@ -108,7 +110,7 @@ class Accessory {
             }
 
             this.platform.log.warn(
-                `[${this.constructor.name}] Device ${this.deviceId} appears unreachable: ${errorMessage}`
+                `[${this.constructor.name}] Device ${this.deviceId} appears unreachable: ${error?.message || errorCode || error}`
             );
         } else {
             // For non-unreachable errors, ensure StatusFault is cleared
