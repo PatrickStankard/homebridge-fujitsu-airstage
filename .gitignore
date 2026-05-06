@@ -8,7 +8,7 @@ lerna-debug.log*
 .pnpm-debug.log*
 
 # Local temporary folder contents
-tmp
+tmp/
 
 # Claude Code local files
 .claude/settings.local.json
