@@ -15,10 +15,12 @@ class Client {
         userAgent = null,
         accessToken = null,
         accessTokenExpiry = null,
-        refreshToken = null
+        refreshToken = null,
+        logger = null
     ) {
         this.email = email;
         this.password = password;
+        this.logger = logger;
 
         this._apiClient = new apiv1.Client(
             region,
@@ -46,6 +48,8 @@ class Client {
     }
 
     authenticate(callback) {
+        this.logger?.info( '[Cloud] Authenticating with cloud API');
+
         this._apiClient.postUsersSignIn(
             this.email,
             this.password,
@@ -53,15 +57,18 @@ class Client {
                 let response = null;
 
                 if (this._isInvalidLoginResult(result)) {
+                    this.logger?.error( '[Cloud] Authentication failed: Invalid email or password');
                     return callback('Invalid email or password', null);
                 }
 
                 if (result.error) {
+                    this.logger?.error( `[Cloud] Authentication failed: ${result.error}`);
                     return callback(result.error, null);
                 }
 
                 if (result.response) {
                     response = result.response;
+                    this.logger?.info( '[Cloud] Authentication successful');
                 }
 
                 callback(null, response);
@@ -70,21 +77,26 @@ class Client {
     }
 
     refreshToken(callback) {
+        this.logger?.debug( '[Cloud] Refreshing access token');
+
         this._apiClient.postUsersMeRefreshToken(
             this._apiClient.refreshToken,
             (function(result) {
                 let response = null;
 
                 if (this._isInvalidTokenResult(result)) {
+                    this.logger?.error( '[Cloud] Token refresh failed: Invalid access token');
                     return callback('Invalid access token', null);
                 }
 
                 if (result.error) {
+                    this.logger?.error( `[Cloud] Token refresh failed: ${result.error}`);
                     return callback(result.error, null);
                 }
 
                 if (result.response) {
                     response = result.response;
+                    this.logger?.debug( '[Cloud] Token refresh successful');
                 }
 
                 callback(null, response);
@@ -109,6 +121,9 @@ class Client {
     }
 
     setTemperatureScale(scale, callback) {
+        const scaleLabel = scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT ? '°F' : '°C';
+        this.logger?.info( `[Cloud] Temperature display units changed to: ${scaleLabel}`);
+
         this._apiClient.putUsersMe(
             apiv1.constants.USER_TEMPERATURE_SCALE,
             scale,
@@ -117,10 +132,12 @@ class Client {
                 let userMetadataCache = null;
 
                 if (this._isInvalidTokenResult(result)) {
+                    this.logger?.error( '[Cloud] Temperature scale change failed: Invalid access token');
                     return callback('Invalid access token', null);
                 }
 
                 if (result.error) {
+                    this.logger?.error( `[Cloud] Temperature scale change failed: ${result.error}`);
                     return callback(result.error, null);
                 }
 
@@ -204,6 +221,9 @@ class Client {
     }
 
     setPowerState(deviceId, toggle, callback) {
+        const state = toggle === constants.TOGGLE_ON ? 'ON' : 'OFF';
+        this.logger?.info( `[Cloud] ${deviceId} - Power: ${state}`);
+
         const parameterValue = this._toggleToParameterValue(toggle);
 
         this.setParameter(
@@ -214,6 +234,7 @@ class Client {
                 let result = null;
 
                 if (error) {
+                    this.logger?.error( `[Cloud] ${deviceId} - Power state change failed: ${error}`);
                     return callback(error, null);
                 }
 
@@ -247,6 +268,16 @@ class Client {
     }
 
     setOperationMode(deviceId, operationMode, callback) {
+        const modeNames = {
+            [constants.OPERATION_MODE_AUTO]: 'Auto',
+            [constants.OPERATION_MODE_COOL]: 'Cool',
+            [constants.OPERATION_MODE_DRY]: 'Dry',
+            [constants.OPERATION_MODE_FAN]: 'Fan',
+            [constants.OPERATION_MODE_HEAT]: 'Heat'
+        };
+        const modeName = modeNames[operationMode] || operationMode;
+        this.logger?.info( `[Cloud] ${deviceId} - Operation Mode: ${modeName}`);
+
         const parameterValue = this._operationModeToParameterValue(operationMode);
 
         this.setParameter(
@@ -257,6 +288,7 @@ class Client {
                 let result = null;
 
                 if (error) {
+                    this.logger?.error( `[Cloud] ${deviceId} - Operation mode change failed: ${error}`);
                     return callback(error, null);
                 }
 
@@ -336,6 +368,9 @@ class Client {
     }
 
     setTargetTemperature(deviceId, temperature, scale, callback) {
+        const scaleLabel = scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT ? '°F' : '°C';
+        this.logger?.info( `[Cloud] ${deviceId} - Target Temperature: ${temperature}${scaleLabel}`);
+
         let intValue = null;
 
         if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
@@ -358,6 +393,7 @@ class Client {
                 let parameterValue = null;
 
                 if (error) {
+                    this.logger?.error( `[Cloud] ${deviceId} - Target temperature change failed: ${error}`);
                     return callback(error, null);
                 }
 
@@ -414,6 +450,16 @@ class Client {
     }
 
     setFanSpeed(deviceId, fanSpeed, callback) {
+        const speedNames = {
+            [constants.FAN_SPEED_AUTO]: 'Auto',
+            [constants.FAN_SPEED_QUIET]: 'Quiet',
+            [constants.FAN_SPEED_LOW]: 'Low',
+            [constants.FAN_SPEED_MEDIUM]: 'Medium',
+            [constants.FAN_SPEED_HIGH]: 'High'
+        };
+        const speedName = speedNames[fanSpeed] || fanSpeed;
+        this.logger?.info( `[Cloud] ${deviceId} - Fan Speed: ${speedName}`);
+
         const parameterValue = this._fanSpeedToParameterValue(fanSpeed);
 
         this.setParameter(
@@ -424,6 +470,7 @@ class Client {
                 let result = null;
 
                 if (error) {
+                    this.logger?.error( `[Cloud] ${deviceId} - Fan speed change failed: ${error}`);
                     return callback(error, null);
                 }
 

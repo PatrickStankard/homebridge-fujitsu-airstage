@@ -39,6 +39,12 @@ const mockCharacteristic = {
     }),
     'emit': mock.fn((event, listener) => {
         return mockCharacteristic;
+    }),
+    'setProps': mock.fn((props) => {
+        return mockCharacteristic;
+    }),
+    'updateValue': mock.fn((value) => {
+        return mockCharacteristic;
     })
 };
 
@@ -83,7 +89,9 @@ const mockPlatform = {
     'log': {
         'debug': mock.fn(() => {}),
         'error': mock.fn(() => {}),
-        'info': mock.fn(() => {})
+        'info': mock.fn(() => {}),
+        'warn': mock.fn(() => {}),
+        'success': mock.fn(() => {})
     }
 };
 
@@ -97,6 +105,8 @@ class MockHomebridge {
     resetMocks() {
         mockCharacteristic.on.mock.resetCalls();
         mockCharacteristic.emit.mock.resetCalls();
+        mockCharacteristic.setProps.mock.resetCalls();
+        mockCharacteristic.updateValue.mock.resetCalls();
         mockService.setCharacteristic.mock.resetCalls();
         mockService.getCharacteristic.mock.resetCalls();
         mockPlatform.api.updatePlatformAccessories.mock.resetCalls();
@@ -106,6 +116,8 @@ class MockHomebridge {
         mockPlatform.log.debug.mock.resetCalls();
         mockPlatform.log.error.mock.resetCalls();
         mockPlatform.log.info.mock.resetCalls();
+        mockPlatform.log.warn.mock.resetCalls();
+        mockPlatform.log.success.mock.resetCalls();
         mockPlatform.accessories = [];
     }
 }

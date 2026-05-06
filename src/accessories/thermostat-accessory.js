@@ -28,6 +28,11 @@ class ThermostatAccessory extends Accessory {
 
         this.dynamicServiceCharacteristics.push(this.Characteristic.TargetTemperature);
         this.service.getCharacteristic(this.Characteristic.TargetTemperature)
+            .setProps({
+                minValue: 10,
+                maxValue: 30,
+                minStep: 0.5
+            })
             .on('get', this.getTargetTemperature.bind(this))
             .on('set', this.setTargetTemperature.bind(this));
 
@@ -37,6 +42,13 @@ class ThermostatAccessory extends Accessory {
 
         this.service.getCharacteristic(this.Characteristic.Name)
             .on('get', this.getName.bind(this));
+
+        // Initialize characteristic state cache for change detection during polling
+        this._characteristicState[this.Characteristic.CurrentHeatingCoolingState.UUID] = undefined;
+        this._characteristicState[this.Characteristic.TargetHeatingCoolingState.UUID] = undefined;
+        this._characteristicState[this.Characteristic.CurrentTemperature.UUID] = undefined;
+        this._characteristicState[this.Characteristic.TargetTemperature.UUID] = undefined;
+        this._characteristicState[this.Characteristic.TemperatureDisplayUnits.UUID] = undefined;
     }
 
     getCurrentHeatingCoolingState(callback) {
@@ -48,9 +60,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -66,9 +76,7 @@ class ThermostatAccessory extends Accessory {
                         let currentHeatingCoolingState = null;
 
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
@@ -77,9 +85,7 @@ class ThermostatAccessory extends Accessory {
                                 airstage.constants.TEMPERATURE_SCALE_CELSIUS,
                                 (function(error, temperatureDelta) {
                                     if (error) {
-                                        this._logMethodCallResult(methodName, error);
-
-                                        return callback(error, null);
+                                        return this._handleError(methodName, error, callback);
                                     }
 
                                     if (temperatureDelta > 0) {
@@ -125,9 +131,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -143,9 +147,7 @@ class ThermostatAccessory extends Accessory {
                         let targetHeatingCoolingState = null;
 
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
@@ -175,22 +177,30 @@ class ThermostatAccessory extends Accessory {
         this._logMethodCall(methodName, value);
 
         let operationMode = null;
+        let modeName = 'OFF';
 
-        if (value === this.Characteristic.TargetHeatingCoolingState.COOL) {
-            operationMode = airstage.constants.OPERATION_MODE_COOL;
-        } else if (value === this.Characteristic.TargetHeatingCoolingState.HEAT) {
-            operationMode = airstage.constants.OPERATION_MODE_HEAT;
-        } else if (value === this.Characteristic.TargetHeatingCoolingState.AUTO) {
-            operationMode = airstage.constants.OPERATION_MODE_AUTO;
+        switch (value) {
+            case this.Characteristic.TargetHeatingCoolingState.COOL:
+                operationMode = airstage.constants.OPERATION_MODE_COOL;
+                modeName = 'COOL';
+                break;
+            case this.Characteristic.TargetHeatingCoolingState.HEAT:
+                operationMode = airstage.constants.OPERATION_MODE_HEAT;
+                modeName = 'HEAT';
+                break;
+            case this.Characteristic.TargetHeatingCoolingState.AUTO:
+                operationMode = airstage.constants.OPERATION_MODE_AUTO;
+                modeName = 'AUTO';
+                break;
         }
+
+        this.platform.log.info(`[Thermostat] Setting target heating/cooling state: ${modeName}`);
 
         this.airstageClient.getPowerState(
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (value === this.Characteristic.TargetHeatingCoolingState.OFF) {
@@ -200,11 +210,11 @@ class ThermostatAccessory extends Accessory {
                             airstage.constants.TOGGLE_OFF,
                             (function(error) {
                                 if (error) {
-                                    this._logMethodCallResult(methodName, error);
-
-                                    return callback(error);
+                                    this.platform.log.info(`[Thermostat] Set target heating/cooling state failed: ${error.message}`);
+                                    return this._handleError(methodName, error, callback, false);
                                 }
 
+                                this.platform.log.info(`[Thermostat] Set target heating/cooling state completed: OFF`);
                                 this._logMethodCallResult(methodName, null, null);
 
                                 this._refreshDynamicServiceCharacteristics();
@@ -214,6 +224,7 @@ class ThermostatAccessory extends Accessory {
                             }).bind(this)
                         );
                     } else if (powerState === airstage.constants.TOGGLE_OFF) {
+                        this.platform.log.info(`[Thermostat] Set target heating/cooling state completed: OFF (already off)`);
                         this._logMethodCallResult(methodName, null, null);
 
                         this._refreshDynamicServiceCharacteristics();
@@ -228,9 +239,7 @@ class ThermostatAccessory extends Accessory {
                             airstage.constants.TOGGLE_ON,
                             (function(error) {
                                 if (error) {
-                                    this._logMethodCallResult(methodName, error);
-
-                                    return callback(error);
+                                    return this._handleError(methodName, error, callback, false);
                                 }
 
                                 this._setOperationMode(
@@ -257,16 +266,17 @@ class ThermostatAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
+        this.platform.log.debug(`[Thermostat] Requesting indoor temperature with scale: ${airstage.constants.TEMPERATURE_SCALE_CELSIUS}`);
+
         this.airstageClient.getIndoorTemperature(
             this.deviceId,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
             (function (error, indoorTemperature) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
+                this.platform.log.debug(`[Thermostat] Received indoor temperature from client: ${indoorTemperature}°C`);
                 this._logMethodCallResult(methodName, null, indoorTemperature);
 
                 callback(null, indoorTemperature);
@@ -279,16 +289,17 @@ class ThermostatAccessory extends Accessory {
 
         this._logMethodCall(methodName);
 
+        this.platform.log.debug(`[Thermostat] Requesting target temperature with scale: ${airstage.constants.TEMPERATURE_SCALE_CELSIUS}`);
+
         this.airstageClient.getTargetTemperature(
             this.deviceId,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
             (function (error, targetTemperature) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
+                this.platform.log.debug(`[Thermostat] Received target temperature from client: ${targetTemperature}°C`);
                 this._logMethodCallResult(methodName, null, targetTemperature);
 
                 callback(null, targetTemperature);
@@ -301,22 +312,29 @@ class ThermostatAccessory extends Accessory {
 
         this._logMethodCall(methodName, value);
 
+        this.platform.log.info(`[Thermostat] Setting target temperature: ${value}°C`);
+
         this.airstageClient.setTargetTemperature(
             this.deviceId,
             value,
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
-            (function (error) {
+            (function (error, setTemperature) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    this.platform.log.info(`[Thermostat] Set target temperature failed: ${error.message}`);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
+                this.platform.log.info(`[Thermostat] Set target temperature completed: ${setTemperature}°C`);
                 this._logMethodCallResult(methodName, null, null);
 
-                this._refreshDynamicServiceCharacteristics();
-
                 callback(null);
+
+                // Optimistically update HomeKit with the value we just set
+                // This provides instant feedback without waiting for device confirmation
+                this.service.getCharacteristic(this.Characteristic.TargetTemperature)
+                    .updateValue(setTemperature);
+
+                this.platform.log.debug(`[Thermostat] Optimistically updated TargetTemperature characteristic to ${setTemperature}°C`);
             }).bind(this)
         );
     }
@@ -331,15 +349,17 @@ class ThermostatAccessory extends Accessory {
                 let temperatureDisplayUnits = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
+
+                this.platform.log.debug(`[Thermostat] Client temperature scale: ${temperatureScale}`);
 
                 if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_CELSIUS) {
                     temperatureDisplayUnits = this.Characteristic.TemperatureDisplayUnits.CELSIUS;
+                    this.platform.log.debug(`[Thermostat] Mapped to HomeKit: CELSIUS`);
                 } else if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
                     temperatureDisplayUnits = this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT;
+                    this.platform.log.debug(`[Thermostat] Mapped to HomeKit: FAHRENHEIT`);
                 }
 
                 this._logMethodCallResult(methodName, null, temperatureDisplayUnits);
@@ -355,22 +375,30 @@ class ThermostatAccessory extends Accessory {
         this._logMethodCall(methodName, value);
 
         let temperatureScale = null;
+        let scaleName = 'CELSIUS';
 
-        if (value === this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
-            temperatureScale = airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT;
-        } else if (value === this.Characteristic.TemperatureDisplayUnits.CELSIUS) {
-            temperatureScale = airstage.constants.TEMPERATURE_SCALE_CELSIUS;
+        switch (value) {
+            case this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT:
+                temperatureScale = airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT;
+                scaleName = 'FAHRENHEIT';
+                break;
+            case this.Characteristic.TemperatureDisplayUnits.CELSIUS:
+                temperatureScale = airstage.constants.TEMPERATURE_SCALE_CELSIUS;
+                scaleName = 'CELSIUS';
+                break;
         }
+
+        this.platform.log.info(`[Thermostat] Setting temperature display units: ${scaleName}`);
 
         this.airstageClient.setTemperatureScale(
             temperatureScale,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    this.platform.log.info(`[Thermostat] Set temperature display units failed: ${error.message}`);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
+                this.platform.log.info(`[Thermostat] Set temperature display units completed: ${scaleName}`);
                 this._logMethodCallResult(methodName, null, null);
 
                 callback(null);
@@ -387,9 +415,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Thermostat';
@@ -402,16 +428,30 @@ class ThermostatAccessory extends Accessory {
     }
 
     _setOperationMode(methodName, operationMode, callback) {
+        // Map operation mode to readable name for logging
+        let modeName = 'UNKNOWN';
+        switch (operationMode) {
+            case airstage.constants.OPERATION_MODE_COOL:
+                modeName = 'COOL';
+                break;
+            case airstage.constants.OPERATION_MODE_HEAT:
+                modeName = 'HEAT';
+                break;
+            case airstage.constants.OPERATION_MODE_AUTO:
+                modeName = 'AUTO';
+                break;
+        }
+
         this.airstageClient.setOperationMode(
             this.deviceId,
             operationMode,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    this.platform.log.info(`[Thermostat] Set target heating/cooling state failed: ${error.message}`);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
+                this.platform.log.info(`[Thermostat] Set target heating/cooling state completed: ${modeName}`);
                 this._logMethodCallResult(methodName, null, null);
 
                 this._refreshDynamicServiceCharacteristics();

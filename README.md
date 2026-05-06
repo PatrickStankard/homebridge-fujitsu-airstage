@@ -4,22 +4,49 @@
 [![npm version](https://img.shields.io/npm/v/homebridge-fujitsu-airstage?style=flat-square)](https://www.npmjs.com/package/homebridge-fujitsu-airstage)
 
 A [Homebridge](https://github.com/homebridge/homebridge) plugin to control
-devices that use the
-[Fujitsu Airstage API](https://www.fujitsugeneral.com/us/airstage-mobile/index.html).
+Fujitsu Airstage air conditioning and heat pump devices.
+
+This plugin supports two connection modes:
+
+- **Cloud API** - Connect via Fujitsu's cloud service (requires Airstage account)
+- **Local LAN** - Connect directly to devices on your local network (no account required)
+
+See the [Connectivity Guide](CONNECTIVITY.md) for detailed information on choosing the right mode for your setup.
 
 ## Prerequisites
 
-Before using this, you should have already installed the
+### For Cloud API Mode (Internet)
+
+Before using Cloud API mode, you should have already installed the
 [Airstage app](https://www.fujitsugeneral.com/us/airstage-mobile/setup.html) on
 your iOS or Android device, signed up for an account, and configured your devices.
+
+### For Local LAN Mode (Direct)
+
+For Local LAN mode, you need:
+
+- Your AirStage WiFi adapter already set up using the AirStage mobile app
+- The adapter connected to the **same WiFi network** as your Homebridge host
+- Your device's local IP address (found in your router or via network scanner)
+- A static IP or DHCP reservation for your device (recommended)
+
+**Note:** You must complete the initial WiFi adapter setup using the AirStage mobile app first. Once connected to your network, you can then control it via Local LAN mode without needing cloud access.
 
 ## Configuration
 
 The easiest way to configure this plugin is to use
 [Homebridge UI](https://github.com/homebridge/homebridge-config-ui-x).
 
-Here is an example of what you'll see in your Homebridge config once you've
-installed and configured this plugin:
+### Connection Mode Selection
+
+When configuring the plugin, you'll first choose a **Connection Mode**:
+
+- **Cloud API (Internet)** - Uses Fujitsu's cloud service (Warning: Fujitsu's API may ban your IP for excessive requests)
+- **Local LAN (Direct)** - Connects directly to devices on your local network (faster, more reliable)
+
+See the [Connectivity Guide](CONNECTIVITY.md) for detailed setup instructions, troubleshooting, and help choosing the right mode.
+
+### Cloud API Configuration Example
 
 ```json
 {
@@ -27,6 +54,7 @@ installed and configured this plugin:
         {
             "name": "Airstage Platform",
             "platform": "fujitsu-airstage",
+            "connectionMode": "cloud",
             "region": "us",
             "country": "United States",
             "language": "en",
@@ -48,11 +76,49 @@ installed and configured this plugin:
 }
 ```
 
+### Local LAN Configuration Example
+
+```json
+{
+    "platforms": [
+        {
+            "name": "Airstage Platform",
+            "platform": "fujitsu-airstage",
+            "connectionMode": "local",
+            "localDevice": {
+                "name": "Living Room AC",
+                "ipAddress": "192.168.1.100",
+                "deviceId": "",
+                "deviceSubId": 0
+            },
+            "enableThermostat": true,
+            "enableFan": true,
+            "enableVerticalAirflowDirection": false,
+            "enableAutoFanSpeedSwitch": false,
+            "enableDryModeSwitch": false,
+            "enableEconomySwitch": false,
+            "enableEnergySavingFanSwitch": false,
+            "enableFanModeSwitch": false,
+            "enableMinimumHeatModeSwitch": false,
+            "enablePowerfulSwitch": false
+        }
+    ]
+}
+```
+
+**Notes for Local LAN mode:**
+
+- The AirStage WiFi adapter must be set up and connected to your network first (use the AirStage mobile app)
+- The device must be on the **same local network** as your Homebridge host
+- `deviceId` can be left empty for automatic detection via ARP
+- `deviceSubId` should be `0` for single-zone systems, or `1-15` for multi-zone systems
+- You should configure a static IP or DHCP reservation for your device
+- See the [Connectivity Guide](CONNECTIVITY.md) for detailed setup instructions
+
 ## Accessories
 
-For each device in your Airstage account, this plugin offers several
-accessories that you can use in order to control them. You can enable these
-accessories for your devices in the plugin config.
+For each device, this plugin offers several accessories that you can use to
+control them. You can enable these accessories in the plugin configuration.
 
 ### Thermostat
 

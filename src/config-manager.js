@@ -9,6 +9,7 @@ class ConfigManager {
         this.api = api;
         this.config = config;
         this.persistFile = path.join(this.api.user.persistPath(), 'airstage-tokens.json');
+        this.temperatureScaleFile = path.join(this.api.user.persistPath(), 'airstage-temperature-scales.json');
     }
 
     // Persists the access token, access token expiry, and refresh token to storage
@@ -63,6 +64,40 @@ class ConfigManager {
         this.saveTokens(tokens.accessToken, tokens.accessTokenExpiry, tokens.refreshToken);
 
         return tokens;
+    }
+
+    // Persists temperature scale preference for a specific device
+    saveTemperatureScale(deviceId, scale) {
+        try {
+            const scales = this.getTemperatureScales();
+            scales[deviceId] = scale;
+            fs.writeFileSync(this.temperatureScaleFile, JSON.stringify(scales, null, 2), { mode: 0o600 });
+        } catch (err) {
+            if (this.api && this.api.logger) {
+                this.api.logger.error('Failed to write temperature scales to persistPath:', err.message);
+            }
+        }
+    }
+
+    // Retrieves all saved temperature scale preferences
+    getTemperatureScales() {
+        try {
+            if (fs.existsSync(this.temperatureScaleFile)) {
+                const data = fs.readFileSync(this.temperatureScaleFile, 'utf8');
+                return JSON.parse(data);
+            }
+        } catch (err) {
+            if (this.api && this.api.logger) {
+                this.api.logger.error('Failed to read temperature scales from persistPath:', err.message);
+            }
+        }
+        return {};
+    }
+
+    // Retrieves temperature scale for a specific device (returns null if not set)
+    getTemperatureScale(deviceId) {
+        const scales = this.getTemperatureScales();
+        return scales[deviceId] || null;
     }
 }
 

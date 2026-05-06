@@ -1,7 +1,8 @@
 'use strict';
 
 const apiv1 = require('./apiv1');
+const local = require('./local');
 const Client = require('./client');
 const constants = require('./constants');
 
-module.exports = { apiv1, Client, constants };
+module.exports = { apiv1, local, Client, constants };
