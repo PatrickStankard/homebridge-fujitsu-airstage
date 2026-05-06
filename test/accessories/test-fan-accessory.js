@@ -35,6 +35,24 @@ test('FanAccessory#constructor registers accessory', (context) => {
     mockHomebridge.resetMocks();
 });
 
+test('FanAccessory#constructor sets FirmwareRevision to plugin version', (context) => {
+    const settings = require('../../src/settings');
+    new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    const firmwareCall = mockHomebridge.service.setCharacteristic.mock.calls.find(
+        (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.FirmwareRevision
+    );
+
+    assert.notStrictEqual(firmwareCall, undefined, 'FirmwareRevision should be set');
+    assert.strictEqual(firmwareCall.arguments[1], settings.PLUGIN_VERSION);
+    assert.ok(typeof settings.PLUGIN_VERSION === 'string' && settings.PLUGIN_VERSION.length > 0);
+
+    mockHomebridge.resetMocks();
+});
+
 test('FanAccessory#constructor configures event listeners', (context) => {
     const fanAccessory = new FanAccessory(
         mockHomebridge.platform,
