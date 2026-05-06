@@ -174,6 +174,155 @@ test('FanAccessory#getActive when getPowerState returns error', (context, done) 
     });
 });
 
+test('Accessory#_handleError sets StatusFault.NO_FAULT on construction', (context) => {
+    new FanAccessory(mockHomebridge.platform, platformAccessory);
+
+    const noFaultCalls = mockHomebridge.service.setCharacteristic.mock.calls.filter(
+        (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.StatusFault &&
+                  call.arguments[1] === mockHomebridge.platform.Characteristic.StatusFault.NO_FAULT
+    );
+    assert.ok(noFaultCalls.length >= 1, 'StatusFault.NO_FAULT should be set at least once on construction');
+
+    mockHomebridge.resetMocks();
+});
+
+test('Accessory#_handleError sets GENERAL_FAULT on errno-coded unreachable error', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            const err = new Error('connect ECONNREFUSED 192.168.1.50:80');
+            err.code = 'ECONNREFUSED';
+            callback(err, null);
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getActive(function(error, value) {
+        const faultCalls = mockHomebridge.service.setCharacteristic.mock.calls.filter(
+            (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.StatusFault &&
+                      call.arguments[1] === mockHomebridge.platform.Characteristic.StatusFault.GENERAL_FAULT
+        );
+        assert.ok(faultCalls.length >= 1, 'GENERAL_FAULT should be set on ECONNREFUSED');
+        assert.ok(mockHomebridge.platform.log.warn.mock.calls.length >= 1, 'warn should be logged for unreachable');
+
+        mockHomebridge.resetMocks();
+        done();
+    });
+});
+
+test('Accessory#_handleError sets GENERAL_FAULT on EHOSTUNREACH errno', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            const err = new Error('host unreachable');
+            err.code = 'EHOSTUNREACH';
+            callback(err, null);
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getActive(function() {
+        const faultCalls = mockHomebridge.service.setCharacteristic.mock.calls.filter(
+            (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.StatusFault &&
+                      call.arguments[1] === mockHomebridge.platform.Characteristic.StatusFault.GENERAL_FAULT
+        );
+        assert.ok(faultCalls.length >= 1, 'GENERAL_FAULT should be set on EHOSTUNREACH');
+
+        mockHomebridge.resetMocks();
+        done();
+    });
+});
+
+test('Accessory#_handleError keeps NO_FAULT for non-network errors', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            const err = new Error('Invalid access token');
+            callback(err, null);
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getActive(function() {
+        const faultCalls = mockHomebridge.service.setCharacteristic.mock.calls.filter(
+            (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.StatusFault &&
+                      call.arguments[1] === mockHomebridge.platform.Characteristic.StatusFault.GENERAL_FAULT
+        );
+        assert.strictEqual(faultCalls.length, 0, 'GENERAL_FAULT must not be set for auth errors');
+        assert.strictEqual(mockHomebridge.platform.log.warn.mock.calls.length, 0, 'warn must not be logged for non-network errors');
+
+        mockHomebridge.resetMocks();
+        done();
+    });
+});
+
+test('Accessory#_handleError does not false-positive on "timeout" inside non-network message', (context, done) => {
+    // Regression guard: substring match on "timeout" used to produce false positives.
+    // A word-boundary regex still matches the bare word, but messages like
+    // "TimeoutPolicyValidator" (camelCased identifier) should NOT match.
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            const err = new Error('TimeoutPolicyValidator: invalid configuration value');
+            callback(err, null);
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getActive(function() {
+        const faultCalls = mockHomebridge.service.setCharacteristic.mock.calls.filter(
+            (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.StatusFault &&
+                      call.arguments[1] === mockHomebridge.platform.Characteristic.StatusFault.GENERAL_FAULT
+        );
+        assert.strictEqual(faultCalls.length, 0, 'TimeoutPolicyValidator must not be classified as unreachable');
+
+        mockHomebridge.resetMocks();
+        done();
+    });
+});
+
+test('Accessory#_handleError matches "Connection Timeout" case-insensitively', (context, done) => {
+    context.mock.method(
+        platformAccessory.context.airstageClient,
+        'getPowerState',
+        (deviceId, callback) => {
+            const err = new Error('Connection Timeout while contacting device');
+            callback(err, null);
+        }
+    );
+    const fanAccessory = new FanAccessory(
+        mockHomebridge.platform,
+        platformAccessory
+    );
+
+    fanAccessory.getActive(function() {
+        const faultCalls = mockHomebridge.service.setCharacteristic.mock.calls.filter(
+            (call) => call.arguments[0] === mockHomebridge.platform.Characteristic.StatusFault &&
+                      call.arguments[1] === mockHomebridge.platform.Characteristic.StatusFault.GENERAL_FAULT
+        );
+        assert.ok(faultCalls.length >= 1, 'Mixed-case "Timeout" should be classified as unreachable');
+
+        mockHomebridge.resetMocks();
+        done();
+    });
+});
+
 test('FanAccessory#getActive when getPowerState returns ON', (context, done) => {
     context.mock.method(
         platformAccessory.context.airstageClient,
