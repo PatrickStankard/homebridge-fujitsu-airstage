@@ -172,7 +172,7 @@ class Client {
     getModel(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_MODEL,
+            constants.PARAMETER_MODEL,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -188,7 +188,7 @@ class Client {
     getPowerState(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_ON_OFF,
+            constants.PARAMETER_ON_OFF,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -208,7 +208,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_ON_OFF,
+            constants.PARAMETER_ON_OFF,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -219,7 +219,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_ON_OFF]
+                        device.parameters[constants.PARAMETER_ON_OFF]
                     );
                 }
 
@@ -231,7 +231,7 @@ class Client {
     getOperationMode(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_OPERATION_MODE,
+            constants.PARAMETER_OPERATION_MODE,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -251,7 +251,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_OPERATION_MODE,
+            constants.PARAMETER_OPERATION_MODE,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -270,8 +270,8 @@ class Client {
                         {
                             'parameters': [
                                 {
-                                    'name': apiv1.constants.PARAMETER_FAN_SPEED,
-                                    'value': apiv1.constants.PARAMETER_FAN_SPEED_AUTO
+                                    'name': constants.PARAMETER_FAN_SPEED,
+                                    'value': constants.PARAMETER_FAN_SPEED_AUTO
                                 }
                             ]
                         }
@@ -280,7 +280,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToOperationMode(
-                        device.parameters[apiv1.constants.PARAMETER_OPERATION_MODE]
+                        device.parameters[constants.PARAMETER_OPERATION_MODE]
                     );
                 }
 
@@ -292,7 +292,7 @@ class Client {
     getIndoorTemperature(deviceId, scale, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_INDOOR_TEMPERATURE,
+            constants.PARAMETER_INDOOR_TEMPERATURE,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -303,7 +303,7 @@ class Client {
                 if (parameterValue !== null) {
                     result = this._indoorIntValueToTemperature(parameterValue);
 
-                    if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+                    if (scale === constants.TEMPERATURE_SCALE_FAHRENHEIT) {
                         result = this._celsiusToFahrenheit(result);
                     }
                 }
@@ -316,7 +316,7 @@ class Client {
     getTargetTemperature(deviceId, scale, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_SET_TEMPERATURE,
+            constants.PARAMETER_SET_TEMPERATURE,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -326,7 +326,7 @@ class Client {
 
                 result = this._intValueToTemperature(parameterValue);
 
-                if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+                if (scale === constants.TEMPERATURE_SCALE_FAHRENHEIT) {
                     result = this._celsiusToFahrenheit(result);
                 }
 
@@ -338,12 +338,12 @@ class Client {
     setTargetTemperature(deviceId, temperature, scale, callback) {
         let intValue = null;
 
-        if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+        if (scale === constants.TEMPERATURE_SCALE_FAHRENHEIT) {
             temperature = this._fahrenheitToCelsius(temperature);
-        } else if (scale === apiv1.constants.TEMPERATURE_SCALE_CELSIUS) {
+        } else if (scale === constants.TEMPERATURE_SCALE_CELSIUS) {
             temperature = this._getClosestValidTemperature(
                 temperature,
-                apiv1.constants.TEMPERATURE_SCALE_CELSIUS
+                constants.TEMPERATURE_SCALE_CELSIUS
             );
         }
 
@@ -351,7 +351,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_SET_TEMPERATURE,
+            constants.PARAMETER_SET_TEMPERATURE,
             intValue.toString(),
             (function(error, device) {
                 let result = null;
@@ -362,10 +362,10 @@ class Client {
                 }
 
                 if (device.parameters) {
-                    parameterValue = device.parameters[apiv1.constants.PARAMETER_SET_TEMPERATURE];
+                    parameterValue = device.parameters[constants.PARAMETER_SET_TEMPERATURE];
                     result = this._intValueToTemperature(parameterValue);
 
-                    if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+                    if (scale === constants.TEMPERATURE_SCALE_FAHRENHEIT) {
                         result = this._celsiusToFahrenheit(result);
                     }
                 }
@@ -398,7 +398,7 @@ class Client {
     getFanSpeed(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_FAN_SPEED,
+            constants.PARAMETER_FAN_SPEED,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -418,7 +418,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_FAN_SPEED,
+            constants.PARAMETER_FAN_SPEED,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -429,7 +429,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToFanSpeed(
-                        device.parameters[apiv1.constants.PARAMETER_FAN_SPEED]
+                        device.parameters[constants.PARAMETER_FAN_SPEED]
                     );
                 }
 
@@ -441,7 +441,7 @@ class Client {
     getAirflowVerticalDirection(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
+            constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -463,7 +463,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
+            constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -474,7 +474,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._validateAirflowVerticalDirectionValue(
-                        parseInt(device.parameters[apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION])
+                        parseInt(device.parameters[constants.PARAMETER_AIRFLOW_VERTICAL_DIRECTION])
                     );
                 }
 
@@ -486,7 +486,7 @@ class Client {
     getAirflowVerticalSwingState(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING,
+            constants.PARAMETER_AIRFLOW_VERTICAL_SWING,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -506,7 +506,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING,
+            constants.PARAMETER_AIRFLOW_VERTICAL_SWING,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -517,7 +517,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_AIRFLOW_VERTICAL_SWING]
+                        device.parameters[constants.PARAMETER_AIRFLOW_VERTICAL_SWING]
                     );
                 }
 
@@ -529,7 +529,7 @@ class Client {
     getPowerfulState(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_POWERFUL,
+            constants.PARAMETER_POWERFUL,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -549,7 +549,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_POWERFUL,
+            constants.PARAMETER_POWERFUL,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -560,7 +560,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_POWERFUL]
+                        device.parameters[constants.PARAMETER_POWERFUL]
                     );
                 }
 
@@ -572,7 +572,7 @@ class Client {
     getEconomyState(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_ECONOMY,
+            constants.PARAMETER_ECONOMY,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -592,7 +592,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_ECONOMY,
+            constants.PARAMETER_ECONOMY,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -603,7 +603,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_ECONOMY]
+                        device.parameters[constants.PARAMETER_ECONOMY]
                     );
                 }
 
@@ -615,7 +615,7 @@ class Client {
     getEnergySavingFanState(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_ENERGY_SAVING_FAN,
+            constants.PARAMETER_ENERGY_SAVING_FAN,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -635,7 +635,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_ENERGY_SAVING_FAN,
+            constants.PARAMETER_ENERGY_SAVING_FAN,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -646,7 +646,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_ENERGY_SAVING_FAN]
+                        device.parameters[constants.PARAMETER_ENERGY_SAVING_FAN]
                     );
                 }
 
@@ -658,7 +658,7 @@ class Client {
     getMinimumHeatState(deviceId, callback) {
         this.getParameter(
             deviceId,
-            apiv1.constants.PARAMETER_MINIMUM_HEAT,
+            constants.PARAMETER_MINIMUM_HEAT,
             (function(error, parameterValue) {
                 let result = null;
 
@@ -678,7 +678,7 @@ class Client {
 
         this.setParameter(
             deviceId,
-            apiv1.constants.PARAMETER_MINIMUM_HEAT,
+            constants.PARAMETER_MINIMUM_HEAT,
             parameterValue,
             (function(error, device) {
                 let result = null;
@@ -700,19 +700,19 @@ class Client {
                         {
                             'parameters': [
                                 {
-                                    'name': apiv1.constants.PARAMETER_ON_OFF,
-                                    'value': apiv1.constants.PARAMETER_ON
+                                    'name': constants.PARAMETER_ON_OFF,
+                                    'value': constants.PARAMETER_ON
                                 },
                                 {
-                                    'name': apiv1.constants.PARAMETER_FAN_SPEED,
-                                    'value': apiv1.constants.PARAMETER_FAN_SPEED_AUTO
+                                    'name': constants.PARAMETER_FAN_SPEED,
+                                    'value': constants.PARAMETER_FAN_SPEED_AUTO
                                 },
                                 {
-                                    'name': apiv1.constants.PARAMETER_OPERATION_MODE,
-                                    'value': apiv1.constants.PARAMETER_OPERATION_MODE_HEAT
+                                    'name': constants.PARAMETER_OPERATION_MODE,
+                                    'value': constants.PARAMETER_OPERATION_MODE_HEAT
                                 },
                                 {
-                                    'name': apiv1.constants.PARAMETER_SET_TEMPERATURE,
+                                    'name': constants.PARAMETER_SET_TEMPERATURE,
                                     'value': '100'
                                 }
                             ]
@@ -728,8 +728,8 @@ class Client {
                         {
                             'parameters': [
                                 {
-                                    'name': apiv1.constants.PARAMETER_ON_OFF,
-                                    'value': apiv1.constants.PARAMETER_OFF
+                                    'name': constants.PARAMETER_ON_OFF,
+                                    'value': constants.PARAMETER_OFF
                                 }
                             ]
                         }
@@ -738,7 +738,7 @@ class Client {
 
                 if (device.parameters) {
                     result = this._parameterValueToToggle(
-                        device.parameters[apiv1.constants.PARAMETER_MINIMUM_HEAT]
+                        device.parameters[constants.PARAMETER_MINIMUM_HEAT]
                     );
                 }
 
@@ -1057,7 +1057,7 @@ class Client {
                     parameterName = parameter.name;
                 }
 
-                if (parameter.value !== apiv1.constants.PARAMETER_NOT_AVAILABLE) {
+                if (parameter.value !== constants.PARAMETER_NOT_AVAILABLE) {
                     parameterValue = parameter.value;
                 }
 
@@ -1175,11 +1175,11 @@ class Client {
     _getClosestValidTemperature(temperature, scale) {
         let closestTemperature = null;
 
-        if (scale === apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT) {
+        if (scale === constants.TEMPERATURE_SCALE_FAHRENHEIT) {
             closestTemperature = constants.VALID_FAHRENHEIT_VALUES.reduce(function(x, y) {
                 return (Math.abs(y - temperature) < Math.abs(x - temperature) ? y : x);
             });
-        } else if (scale === apiv1.constants.TEMPERATURE_SCALE_CELSIUS) {
+        } else if (scale === constants.TEMPERATURE_SCALE_CELSIUS) {
             closestTemperature = constants.VALID_CELSIUS_VALUES.reduce(function(x, y) {
                 return (Math.abs(y - temperature) < Math.abs(x - temperature) ? y : x);
             });
@@ -1203,7 +1203,7 @@ class Client {
     _fahrenheitToCelsius(fahrenheit) {
         const closestFahrenheit = this._getClosestValidTemperature(
             fahrenheit,
-            apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT
+            constants.TEMPERATURE_SCALE_FAHRENHEIT
         );
 
         return constants.FAHRENHEIT_TO_CELSIUS_MAP[closestFahrenheit];
@@ -1212,7 +1212,7 @@ class Client {
     _celsiusToFahrenheit(celsius) {
         const closestCelsius = this._getClosestValidTemperature(
             celsius,
-            apiv1.constants.TEMPERATURE_SCALE_CELSIUS
+            constants.TEMPERATURE_SCALE_CELSIUS
         );
 
         return constants.CELSIUS_TO_FAHRENHEIT_MAP[closestCelsius];

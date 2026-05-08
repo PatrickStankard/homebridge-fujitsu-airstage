@@ -124,7 +124,7 @@ class Platform {
                     const deviceMetadata = devices.metadata[deviceId];
                     const deviceParameters = devices.parameters[deviceId];
                     const deviceName = deviceMetadata.deviceName;
-                    const model = deviceParameters[airstage.cloud.apiv1.constants.PARAMETER_MODEL] || 'Airstage';
+                    const model = deviceParameters[airstage.constants.PARAMETER_MODEL] || 'Airstage';
 
                     this._configureAirstageDevice(
                         deviceId,
