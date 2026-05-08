@@ -1,7 +1,7 @@
 'use strict';
 
 const apiv1 = require('./apiv1');
-const constants = require('./constants');
+const constants = require('./../constants');
 
 class Client {
 

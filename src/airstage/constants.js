@@ -1,6 +1,6 @@
 'use strict';
 
-const apiv1 = require('./apiv1');
+const apiv1 = require('./cloud/apiv1');
 
 // Manufacturer
 module.exports.MANUFACTURER_FUJITSU = 'Fujitsu';

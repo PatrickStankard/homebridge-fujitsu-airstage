@@ -2,9 +2,9 @@
 
 const assert = require('node:assert');
 const { mock, test } = require('node:test');
-const airstage = require('./../../src/airstage');
+const airstage = require('./../../../src/airstage');
 
-const clientWithAccessToken = new airstage.Client(
+const clientWithAccessToken = new airstage.cloud.Client(
     'us',
     'United States',
     'en',
@@ -16,7 +16,7 @@ const clientWithAccessToken = new airstage.Client(
     '2099-01-01',
     'existingRefreshToken'
 );
-const clientWithoutAccessToken = new airstage.Client(
+const clientWithoutAccessToken = new airstage.cloud.Client(
     'us',
     'United States',
     'en',
@@ -24,7 +24,7 @@ const clientWithoutAccessToken = new airstage.Client(
     'password'
 );
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with success', (context, done) => {
+test('airstage.cloud.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with success', (context, done) => {
     const expectedResponse = {
         'accessToken': 'testAccessToken',
         'expiresIn': 3600,
@@ -52,7 +52,7 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRef
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with error', (context, done) => {
+test('airstage.cloud.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRefreshToken with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -76,7 +76,7 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersMeRef
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with success', (context, done) => {
+test('airstage.cloud.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with success', (context, done) => {
     const expectedResponse = {
         'accessToken': 'testAccessToken',
         'expiresIn': 3600,
@@ -105,7 +105,7 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignI
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
+test('airstage.cloud.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithoutAccessToken._apiClient,
@@ -130,8 +130,8 @@ test('airstage.Client#refreshTokenOrAuthenticate calls _apiClient.postUsersSignI
     });
 });
 
-test('airstage.Client#refreshTokenOrAuthenticate returns error', (context, done) => {
-    const client = new airstage.Client(
+test('airstage.cloud.Client#refreshTokenOrAuthenticate returns error', (context, done) => {
+    const client = new airstage.cloud.Client(
         'us',
         'United States',
         'en'
@@ -160,7 +160,7 @@ test('airstage.Client#refreshTokenOrAuthenticate returns error', (context, done)
     });
 });
 
-test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with success', (context, done) => {
+test('airstage.cloud.Client#authenticate calls _apiClient.postUsersSignIn with success', (context, done) => {
     const expectedResponse = {
         'accessToken': 'testAccessToken',
         'expiresIn': 3600,
@@ -189,7 +189,7 @@ test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with success
     });
 });
 
-test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
+test('airstage.cloud.Client#authenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -214,7 +214,7 @@ test('airstage.Client#authenticate calls _apiClient.postUsersSignIn with error',
     });
 });
 
-test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with success', (context, done) => {
+test('airstage.cloud.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with success', (context, done) => {
     const expectedResponse = {
         'accessToken': 'testAccessToken',
         'expiresIn': 3600,
@@ -242,7 +242,7 @@ test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with
     });
 });
 
-test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with error', (context, done) => {
+test('airstage.cloud.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -266,7 +266,7 @@ test('airstage.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with
     });
 });
 
-test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with success', (context, done) => {
+test('airstage.cloud.Client#getTemperatureScale calls _apiClient.getUsersMe with success', (context, done) => {
     const expectedResponse = {
         'tempUnit': 'F'
     };
@@ -293,7 +293,7 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with succe
     });
 });
 
-test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error', (context, done) => {
+test('airstage.cloud.Client#getTemperatureScale calls _apiClient.getUsersMe with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -318,7 +318,7 @@ test('airstage.Client#getTemperatureScale calls _apiClient.getUsersMe with error
     });
 });
 
-test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with success', (context, done) => {
+test('airstage.cloud.Client#setTemperatureScale calls _apiClient.putUsersMe with success', (context, done) => {
     const expectedResponse = {
         'tempUnit': 'F'
     };
@@ -347,7 +347,7 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with succe
     });
 });
 
-test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error', (context, done) => {
+test('airstage.cloud.Client#setTemperatureScale calls _apiClient.putUsersMe with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -377,7 +377,7 @@ test('airstage.Client#setTemperatureScale calls _apiClient.putUsersMe with error
     });
 });
 
-test('airstage.Client#getName calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getName calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'deviceName': 'My Device'
     };
@@ -405,7 +405,7 @@ test('airstage.Client#getName calls _apiClient.getDevice with success', (context
     });
 });
 
-test('airstage.Client#getName calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getName calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -431,7 +431,7 @@ test('airstage.Client#getName calls _apiClient.getDevice with error', (context, 
     });
 });
 
-test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getConnectionStatus calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'connectionStatus': 'Online'
     };
@@ -459,7 +459,7 @@ test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with succes
     });
 });
 
-test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getConnectionStatus calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -485,7 +485,7 @@ test('airstage.Client#getConnectionStatus calls _apiClient.getDevice with error'
     });
 });
 
-test('airstage.Client#getModel calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getModel calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -518,7 +518,7 @@ test('airstage.Client#getModel calls _apiClient.getDevice with success', (contex
     });
 });
 
-test('airstage.Client#getModel calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getModel calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -544,7 +544,7 @@ test('airstage.Client#getModel calls _apiClient.getDevice with error', (context,
     });
 });
 
-test('airstage.Client#getPowerState calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getPowerState calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -577,7 +577,7 @@ test('airstage.Client#getPowerState calls _apiClient.getDevice with success', (c
     });
 });
 
-test('airstage.Client#getPowerState calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getPowerState calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -603,7 +603,7 @@ test('airstage.Client#getPowerState calls _apiClient.getDevice with error', (con
     });
 });
 
-test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -649,7 +649,7 @@ test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersReq
     });
 });
 
-test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setPowerState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -678,7 +678,7 @@ test('airstage.Client#setPowerState calls _apiClient.postDevicesSetParametersReq
     });
 });
 
-test('airstage.Client#getOperationMode calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getOperationMode calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -711,7 +711,7 @@ test('airstage.Client#getOperationMode calls _apiClient.getDevice with success',
     });
 });
 
-test('airstage.Client#getOperationMode calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getOperationMode calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -737,7 +737,7 @@ test('airstage.Client#getOperationMode calls _apiClient.getDevice with error', (
     });
 });
 
-test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -783,7 +783,7 @@ test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParameters
     });
 });
 
-test('airstage.Client#setOperationMode updates fan speed in device cache to AUTO when DRY with success', (context, done) => {
+test('airstage.cloud.Client#setOperationMode updates fan speed in device cache to AUTO when DRY with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -834,7 +834,7 @@ test('airstage.Client#setOperationMode updates fan speed in device cache to AUTO
     });
 });
 
-test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setOperationMode calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -863,7 +863,7 @@ test('airstage.Client#setOperationMode calls _apiClient.postDevicesSetParameters
     });
 });
 
-test('airstage.Client#getIndoorTemperature calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getIndoorTemperature calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -896,7 +896,7 @@ test('airstage.Client#getIndoorTemperature calls _apiClient.getDevice with succe
     });
 });
 
-test('airstage.Client#getIndoorTemperature calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getIndoorTemperature calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -922,7 +922,7 @@ test('airstage.Client#getIndoorTemperature calls _apiClient.getDevice with error
     });
 });
 
-test('airstage.Client#getTargetTemperature calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getTargetTemperature calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -955,7 +955,7 @@ test('airstage.Client#getTargetTemperature calls _apiClient.getDevice with succe
     });
 });
 
-test('airstage.Client#getTargetTemperature calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getTargetTemperature calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -981,7 +981,7 @@ test('airstage.Client#getTargetTemperature calls _apiClient.getDevice with error
     });
 });
 
-test('airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1027,7 +1027,7 @@ test('airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParame
     });
 });
 
-test('airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setTargetTemperature calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1056,7 +1056,7 @@ test('airstage.Client#setTargetTemperature calls _apiClient.postDevicesSetParame
     });
 });
 
-test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getTemperatureDelta calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1093,7 +1093,7 @@ test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with succes
     });
 });
 
-test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getTemperatureDelta calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1119,7 +1119,7 @@ test('airstage.Client#getTemperatureDelta calls _apiClient.getDevice with error'
     });
 });
 
-test('airstage.Client#getFanSpeed calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getFanSpeed calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1152,7 +1152,7 @@ test('airstage.Client#getFanSpeed calls _apiClient.getDevice with success', (con
     });
 });
 
-test('airstage.Client#getFanSpeed calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getFanSpeed calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1178,7 +1178,7 @@ test('airstage.Client#getFanSpeed calls _apiClient.getDevice with error', (conte
     });
 });
 
-test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1224,7 +1224,7 @@ test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersReque
     });
 });
 
-test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setFanSpeed calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1253,7 +1253,7 @@ test('airstage.Client#setFanSpeed calls _apiClient.postDevicesSetParametersReque
     });
 });
 
-test('airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getAirflowVerticalDirection calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1286,7 +1286,7 @@ test('airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice wit
     });
 });
 
-test('airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getAirflowVerticalDirection calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1312,7 +1312,7 @@ test('airstage.Client#getAirflowVerticalDirection calls _apiClient.getDevice wit
     });
 });
 
-test('airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1358,7 +1358,7 @@ test('airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSe
     });
 });
 
-test('airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1387,7 +1387,7 @@ test('airstage.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSe
     });
 });
 
-test('airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1420,7 +1420,7 @@ test('airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice wi
     });
 });
 
-test('airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getAirflowVerticalSwingState calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1446,7 +1446,7 @@ test('airstage.Client#getAirflowVerticalSwingState calls _apiClient.getDevice wi
     });
 });
 
-test('airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1492,7 +1492,7 @@ test('airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesS
     });
 });
 
-test('airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1521,7 +1521,7 @@ test('airstage.Client#setAirflowVerticalSwingState calls _apiClient.postDevicesS
     });
 });
 
-test('airstage.Client#getPowerfulState calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getPowerfulState calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1554,7 +1554,7 @@ test('airstage.Client#getPowerfulState calls _apiClient.getDevice with success',
     });
 });
 
-test('airstage.Client#getPowerfulState calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getPowerfulState calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1580,7 +1580,7 @@ test('airstage.Client#getPowerfulState calls _apiClient.getDevice with error', (
     });
 });
 
-test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1626,7 +1626,7 @@ test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParameters
     });
 });
 
-test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setPowerfulState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1655,7 +1655,7 @@ test('airstage.Client#setPowerfulState calls _apiClient.postDevicesSetParameters
     });
 });
 
-test('airstage.Client#getEconomyState calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getEconomyState calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1688,7 +1688,7 @@ test('airstage.Client#getEconomyState calls _apiClient.getDevice with success', 
     });
 });
 
-test('airstage.Client#getEconomyState calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getEconomyState calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1714,7 +1714,7 @@ test('airstage.Client#getEconomyState calls _apiClient.getDevice with error', (c
     });
 });
 
-test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1760,7 +1760,7 @@ test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersR
     });
 });
 
-test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setEconomyState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1789,7 +1789,7 @@ test('airstage.Client#setEconomyState calls _apiClient.postDevicesSetParametersR
     });
 });
 
-test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getEnergySavingFanState calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1822,7 +1822,7 @@ test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with su
     });
 });
 
-test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getEnergySavingFanState calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1848,7 +1848,7 @@ test('airstage.Client#getEnergySavingFanState calls _apiClient.getDevice with er
     });
 });
 
-test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1894,7 +1894,7 @@ test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetPar
     });
 });
 
-test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setEnergySavingFanState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1923,7 +1923,7 @@ test('airstage.Client#setEnergySavingFanState calls _apiClient.postDevicesSetPar
     });
 });
 
-test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with success', (context, done) => {
+test('airstage.cloud.Client#getMinimumHeatState calls _apiClient.getDevice with success', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -1956,7 +1956,7 @@ test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with succes
     });
 });
 
-test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with error', (context, done) => {
+test('airstage.cloud.Client#getMinimumHeatState calls _apiClient.getDevice with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -1982,7 +1982,7 @@ test('airstage.Client#getMinimumHeatState calls _apiClient.getDevice with error'
     });
 });
 
-test('airstage.Client#setMinimumHeatState with "ON" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setMinimumHeatState with "ON" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -2048,7 +2048,7 @@ test('airstage.Client#setMinimumHeatState with "ON" calls _apiClient.postDevices
     });
 });
 
-test('airstage.Client#setMinimumHeatState with "OFF" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setMinimumHeatState with "OFF" calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -2099,7 +2099,7 @@ test('airstage.Client#setMinimumHeatState with "OFF" calls _apiClient.postDevice
     });
 });
 
-test('airstage.Client#setMinimumHeatState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
+test('airstage.cloud.Client#setMinimumHeatState calls _apiClient.postDevicesSetParametersRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken._apiClient,
@@ -2128,25 +2128,25 @@ test('airstage.Client#setMinimumHeatState calls _apiClient.postDevicesSetParamet
     });
 });
 
-test('airstage.Client#getAccessToken returns access token', (context) => {
+test('airstage.cloud.Client#getAccessToken returns access token', (context) => {
     const accessToken = clientWithAccessToken.getAccessToken();
 
     assert.strictEqual(accessToken, 'existingAccessToken');
 });
 
-test('airstage.Client#getAccessTokenExpiry returns access token expiry', (context) => {
+test('airstage.cloud.Client#getAccessTokenExpiry returns access token expiry', (context) => {
     const accessTokenExpiry = clientWithAccessToken.getAccessTokenExpiry();
 
     assert.strictEqual(accessTokenExpiry.toISOString(), '2099-01-01T00:00:00.000Z');
 });
 
-test('airstage.Client#getRefreshToken returns access token', (context) => {
+test('airstage.cloud.Client#getRefreshToken returns access token', (context) => {
     const refreshToken = clientWithAccessToken.getRefreshToken();
 
     assert.strictEqual(refreshToken, 'existingRefreshToken');
 });
 
-test('airstage.Client#getParameter calls _apiClient.getDevice with "Parameter not available" error', (context, done) => {
+test('airstage.cloud.Client#getParameter calls _apiClient.getDevice with "Parameter not available" error', (context, done) => {
     const expectedResponse = {
         'parameters': [
             {
@@ -2179,8 +2179,8 @@ test('airstage.Client#getParameter calls _apiClient.getDevice with "Parameter no
     });
 });
 
-test('airstage.Client#getParameter with "Could not determine hostname" error', (context, done) => {
-    const clientWithInvalidRegion = new airstage.Client(
+test('airstage.cloud.Client#getParameter with "Could not determine hostname" error', (context, done) => {
+    const clientWithInvalidRegion = new airstage.cloud.Client(
         'cn',
         'China',
         'en',
@@ -2201,7 +2201,7 @@ test('airstage.Client#getParameter with "Could not determine hostname" error', (
     });
 });
 
-test('airstage.Client#getParameter with "Access token not set" error', (context, done) => {
+test('airstage.cloud.Client#getParameter with "Access token not set" error', (context, done) => {
     clientWithoutAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
         assert.strictEqual(error, 'Access token not set');
         assert.strictEqual(result, null);
