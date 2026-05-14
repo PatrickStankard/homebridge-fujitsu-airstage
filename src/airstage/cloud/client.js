@@ -1243,10 +1243,10 @@ class Client {
     }
 
     _validateAirflowVerticalDirectionValue(value) {
-        if (value < constants.MIN_VERTICAL_DIRECTION) {
-            value = constants.MIN_VERTICAL_DIRECTION;
-        } else if (value > constants.MAX_VERTICAL_DIRECTION) {
-            value = constants.MAX_VERTICAL_DIRECTION;
+        if (value < constants.MIN_AIRFLOW_VERTICAL_DIRECTION) {
+            value = constants.MIN_AIRFLOW_VERTICAL_DIRECTION;
+        } else if (value > constants.MAX_AIRFLOW_VERTICAL_DIRECTION) {
+            value = constants.MAX_AIRFLOW_VERTICAL_DIRECTION;
         }
 
         return value;

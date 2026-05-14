@@ -189,6 +189,37 @@ test('airstage.cloud.Client#authenticate calls _apiClient.postUsersSignIn with s
     });
 });
 
+test('airstage.cloud.Client#authenticate calls _apiClient.postUsersSignIn with "Invalid email or password" error', (context, done) => {
+    const expectedError = 'Invalid email or password';
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postUsersSignIn',
+        (email, password, callback) => {
+            callback({
+                'statusCode': 401,
+                'error': null,
+                'response': {
+                    'messageCode': 'AIRSTAGE_POST_USERS_SIGNIN_EMAIL_PASSWORD_INVALID'
+                }
+            });
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postUsersSignIn.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'example@example.com');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'password');
+    });
+
+    clientWithAccessToken.authenticate((error, result) => {
+        assert.strictEqual(error, expectedError);
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
 test('airstage.cloud.Client#authenticate calls _apiClient.postUsersSignIn with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
@@ -237,6 +268,36 @@ test('airstage.cloud.Client#refreshToken calls _apiClient.postUsersMeRefreshToke
     clientWithAccessToken.refreshToken((error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, expectedResponse);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#refreshToken calls _apiClient.postUsersMeRefreshToken with "Invalid access token" error', (context, done) => {
+    const expectedError = 'Invalid access token';
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postUsersMeRefreshToken',
+        (refreshToken, callback) => {
+            callback({
+                'statusCode': 403,
+                'error': null,
+                'response': {
+                    'messageCode': 'AIRSTAGE_COMMON_TOKEN_INVALID'
+                }
+            });
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postUsersMeRefreshToken.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'existingRefreshToken');
+    });
+
+    clientWithAccessToken.refreshToken((error, result) => {
+        assert.strictEqual(error, expectedError);
+        assert.strictEqual(result, null);
 
         done();
     });
@@ -342,6 +403,39 @@ test('airstage.cloud.Client#setTemperatureScale calls _apiClient.putUsersMe with
     clientWithAccessToken.setTemperatureScale('F', (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, expectedResponse.tempUnit);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#setTemperatureScale calls _apiClient.putUsersMe with "Invalid access token" error', (context, done) => {
+    const expectedError = 'Invalid access token';
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'putUsersMe',
+        (parameterName, parameterValue, callback) => {
+            callback({
+                'statusCode': 403,
+                'error': null,
+                'response': {
+                    'messageCode': 'AIRSTAGE_COMMON_TOKEN_INVALID'
+                }
+            });
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.putUsersMe.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 3);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], 'tempUnit');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], 'F');
+    });
+    clientWithAccessToken.resetUserMetadataCache();
+
+    clientWithAccessToken.setTemperatureScale('F', (error, result) => {
+        assert.strictEqual(error, expectedError);
+        assert.strictEqual(result, null);
 
         done();
     });
@@ -1312,7 +1406,53 @@ test('airstage.cloud.Client#getAirflowVerticalDirection calls _apiClient.getDevi
     });
 });
 
-test('airstage.cloud.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setAirflowVerticalDirection with 0 calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_af_dir_vrt',
+                'value': '1'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_dir_vrt');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setAirflowVerticalDirection('12345', 0, (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 1);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#setAirflowVerticalDirection with 1 calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1353,6 +1493,52 @@ test('airstage.cloud.Client#setAirflowVerticalDirection calls _apiClient.postDev
     clientWithAccessToken.setAirflowVerticalDirection('12345', 1, (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, 1);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#setAirflowVerticalDirection with 5 calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_af_dir_vrt',
+                'value': '4'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_dir_vrt');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '4');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setAirflowVerticalDirection('12345', 5, (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 4);
 
         done();
     });
@@ -2204,6 +2390,41 @@ test('airstage.cloud.Client#getParameter with "Could not determine hostname" err
 test('airstage.cloud.Client#getParameter with "Access token not set" error', (context, done) => {
     clientWithoutAccessToken.getParameter('12345', 'iu_indoor_tmp', (error, result) => {
         assert.strictEqual(error, 'Access token not set');
+        assert.strictEqual(result, null);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#setParameter calls _apiClient.postDevicesSetParametersRequest with "Invalid access token" error', (context, done) => {
+    const expectedError = 'Invalid access token';
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, name, value, callback) => {
+            callback({
+                'statusCode': 403,
+                'error': null,
+                'response': {
+                    'messageCode': 'AIRSTAGE_COMMON_TOKEN_INVALID'
+                }
+            });
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_onoff');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setParameter('12345', 'iu_onoff', '1', (error, result) => {
+        assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
         done();
