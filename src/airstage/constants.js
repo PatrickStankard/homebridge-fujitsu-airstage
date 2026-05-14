@@ -1,9 +1,53 @@
 'use strict';
 
-const apiv1 = require('./cloud/apiv1');
-
 // Manufacturer
 module.exports.MANUFACTURER_FUJITSU = 'Fujitsu';
+
+// Parameter names
+module.exports.PARAMETER_MODEL = 'iu_model';
+module.exports.PARAMETER_FAN_SPEED = 'iu_fan_spd';
+module.exports.PARAMETER_ON_OFF = 'iu_onoff'
+module.exports.PARAMETER_SET_TEMPERATURE = 'iu_set_tmp';
+module.exports.PARAMETER_INDOOR_TEMPERATURE = 'iu_indoor_tmp';
+module.exports.PARAMETER_OPERATION_MODE = 'iu_op_mode';
+module.exports.PARAMETER_FAN_SPEED = 'iu_fan_spd';
+module.exports.PARAMETER_AIRFLOW_VERTICAL_DIRECTION = 'iu_af_dir_vrt';
+module.exports.PARAMETER_AIRFLOW_VERTICAL_SWING = 'iu_af_swg_vrt';
+module.exports.PARAMETER_POWERFUL = 'iu_powerful';
+module.exports.PARAMETER_ECONOMY = 'iu_economy';
+module.exports.PARAMETER_ENERGY_SAVING_FAN = 'iu_fan_ctrl';
+module.exports.PARAMETER_MINIMUM_HEAT = 'iu_min_heat';
+
+module.exports.ALL_PARAMETERS = [
+    module.exports.PARAMETER_MODEL,
+    module.exports.PARAMETER_FAN_SPEED,
+    module.exports.PARAMETER_ON_OFF,
+    module.exports.PARAMETER_SET_TEMPERATURE,
+    module.exports.PARAMETER_INDOOR_TEMPERATURE,
+    module.exports.PARAMETER_OPERATION_MODE,
+    module.exports.PARAMETER_FAN_SPEED,
+    module.exports.PARAMETER_AIRFLOW_VERTICAL_DIRECTION,
+    module.exports.PARAMETER_AIRFLOW_VERTICAL_SWING,
+    module.exports.PARAMETER_POWERFUL,
+    module.exports.PARAMETER_ECONOMY,
+    module.exports.PARAMETER_ENERGY_SAVING_FAN,
+    module.exports.PARAMETER_MINIMUM_HEAT
+];
+
+// Parameter values
+module.exports.PARAMETER_ON = '1';
+module.exports.PARAMETER_OFF = '0';
+module.exports.PARAMETER_NOT_AVAILABLE = '65535';
+module.exports.PARAMETER_OPERATION_MODE_AUTO = '0';
+module.exports.PARAMETER_OPERATION_MODE_COOL = '1';
+module.exports.PARAMETER_OPERATION_MODE_DRY = '2';
+module.exports.PARAMETER_OPERATION_MODE_FAN = '3';
+module.exports.PARAMETER_OPERATION_MODE_HEAT = '4';
+module.exports.PARAMETER_FAN_SPEED_AUTO = '0';
+module.exports.PARAMETER_FAN_SPEED_QUIET = '2';
+module.exports.PARAMETER_FAN_SPEED_LOW = '5';
+module.exports.PARAMETER_FAN_SPEED_MEDIUM = '8';
+module.exports.PARAMETER_FAN_SPEED_HIGH = '11';
 
 // Operation modes
 module.exports.OPERATION_MODE_AUTO = 'AUTO';
@@ -21,18 +65,18 @@ module.exports.OPERATION_MODES = [
 ];
 
 module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP = {};
-module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_AUTO] = apiv1.constants.PARAMETER_OPERATION_MODE_AUTO;
-module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_COOL] = apiv1.constants.PARAMETER_OPERATION_MODE_COOL;
-module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_DRY] = apiv1.constants.PARAMETER_OPERATION_MODE_DRY;
-module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_FAN] = apiv1.constants.PARAMETER_OPERATION_MODE_FAN;
-module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_HEAT] = apiv1.constants.PARAMETER_OPERATION_MODE_HEAT;
+module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_AUTO] = module.exports.PARAMETER_OPERATION_MODE_AUTO;
+module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_COOL] = module.exports.PARAMETER_OPERATION_MODE_COOL;
+module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_DRY] = module.exports.PARAMETER_OPERATION_MODE_DRY;
+module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_FAN] = module.exports.PARAMETER_OPERATION_MODE_FAN;
+module.exports.OPERATION_MODE_TO_PARAMETER_VALUE_MAP[module.exports.OPERATION_MODE_HEAT] = module.exports.PARAMETER_OPERATION_MODE_HEAT;
 
 module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP = {};
-module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[apiv1.constants.PARAMETER_OPERATION_MODE_AUTO] = module.exports.OPERATION_MODE_AUTO;
-module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[apiv1.constants.PARAMETER_OPERATION_MODE_COOL] = module.exports.OPERATION_MODE_COOL;
-module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[apiv1.constants.PARAMETER_OPERATION_MODE_DRY] = module.exports.OPERATION_MODE_DRY;
-module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[apiv1.constants.PARAMETER_OPERATION_MODE_FAN] = module.exports.OPERATION_MODE_FAN;
-module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[apiv1.constants.PARAMETER_OPERATION_MODE_HEAT] = module.exports.OPERATION_MODE_HEAT;
+module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[module.exports.PARAMETER_OPERATION_MODE_AUTO] = module.exports.OPERATION_MODE_AUTO;
+module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[module.exports.PARAMETER_OPERATION_MODE_COOL] = module.exports.OPERATION_MODE_COOL;
+module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[module.exports.PARAMETER_OPERATION_MODE_DRY] = module.exports.OPERATION_MODE_DRY;
+module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[module.exports.PARAMETER_OPERATION_MODE_FAN] = module.exports.OPERATION_MODE_FAN;
+module.exports.PARAMETER_VALUE_TO_OPERATION_MODE_MAP[module.exports.PARAMETER_OPERATION_MODE_HEAT] = module.exports.OPERATION_MODE_HEAT;
 
 // Fan speeds
 module.exports.FAN_SPEED_AUTO = 'AUTO';
@@ -50,18 +94,18 @@ module.exports.FAN_SPEEDS = [
 ];
 
 module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP = {};
-module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_AUTO] = apiv1.constants.PARAMETER_FAN_SPEED_AUTO;
-module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_QUIET] = apiv1.constants.PARAMETER_FAN_SPEED_QUIET;
-module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_LOW] = apiv1.constants.PARAMETER_FAN_SPEED_LOW;
-module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_MEDIUM] = apiv1.constants.PARAMETER_FAN_SPEED_MEDIUM;
-module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_HIGH] = apiv1.constants.PARAMETER_FAN_SPEED_HIGH;
+module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_AUTO] = module.exports.PARAMETER_FAN_SPEED_AUTO;
+module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_QUIET] = module.exports.PARAMETER_FAN_SPEED_QUIET;
+module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_LOW] = module.exports.PARAMETER_FAN_SPEED_LOW;
+module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_MEDIUM] = module.exports.PARAMETER_FAN_SPEED_MEDIUM;
+module.exports.FAN_SPEED_TO_PARAMETER_VALUE_MAP[module.exports.FAN_SPEED_HIGH] = module.exports.PARAMETER_FAN_SPEED_HIGH;
 
 module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP = {};
-module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[apiv1.constants.PARAMETER_FAN_SPEED_AUTO] = module.exports.FAN_SPEED_AUTO;
-module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[apiv1.constants.PARAMETER_FAN_SPEED_QUIET] = module.exports.FAN_SPEED_QUIET;
-module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[apiv1.constants.PARAMETER_FAN_SPEED_LOW] = module.exports.FAN_SPEED_LOW;
-module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[apiv1.constants.PARAMETER_FAN_SPEED_MEDIUM] = module.exports.FAN_SPEED_MEDIUM;
-module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[apiv1.constants.PARAMETER_FAN_SPEED_HIGH] = module.exports.FAN_SPEED_HIGH;
+module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[module.exports.PARAMETER_FAN_SPEED_AUTO] = module.exports.FAN_SPEED_AUTO;
+module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[module.exports.PARAMETER_FAN_SPEED_QUIET] = module.exports.FAN_SPEED_QUIET;
+module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[module.exports.PARAMETER_FAN_SPEED_LOW] = module.exports.FAN_SPEED_LOW;
+module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[module.exports.PARAMETER_FAN_SPEED_MEDIUM] = module.exports.FAN_SPEED_MEDIUM;
+module.exports.PARAMETER_VALUE_TO_FAN_SPEED_MAP[module.exports.PARAMETER_FAN_SPEED_HIGH] = module.exports.FAN_SPEED_HIGH;
 
 // Toggle values
 module.exports.TOGGLE_ON = 'ON';
@@ -73,20 +117,25 @@ module.exports.TOGGLE_VALUES = [
 ];
 
 module.exports.TOGGLE_TO_PARAMETER_VALUE_MAP = {};
-module.exports.TOGGLE_TO_PARAMETER_VALUE_MAP[module.exports.TOGGLE_ON] = apiv1.constants.PARAMETER_ON;
-module.exports.TOGGLE_TO_PARAMETER_VALUE_MAP[module.exports.TOGGLE_OFF] = apiv1.constants.PARAMETER_OFF;
+module.exports.TOGGLE_TO_PARAMETER_VALUE_MAP[module.exports.TOGGLE_ON] = module.exports.PARAMETER_ON;
+module.exports.TOGGLE_TO_PARAMETER_VALUE_MAP[module.exports.TOGGLE_OFF] = module.exports.PARAMETER_OFF;
 
 module.exports.PARAMETER_VALUE_TO_TOGGLE_MAP = {};
-module.exports.PARAMETER_VALUE_TO_TOGGLE_MAP[apiv1.constants.PARAMETER_ON] = module.exports.TOGGLE_ON;
-module.exports.PARAMETER_VALUE_TO_TOGGLE_MAP[apiv1.constants.PARAMETER_OFF] = module.exports.TOGGLE_OFF;
+module.exports.PARAMETER_VALUE_TO_TOGGLE_MAP[module.exports.PARAMETER_ON] = module.exports.TOGGLE_ON;
+module.exports.PARAMETER_VALUE_TO_TOGGLE_MAP[module.exports.PARAMETER_OFF] = module.exports.TOGGLE_OFF;
 
 // Airflow vertical directions
 module.exports.MIN_AIRFLOW_VERTICAL_DIRECTION = 1;
 module.exports.MAX_AIRFLOW_VERTICAL_DIRECTION = 4;
 
 // Temperatures
-module.exports.TEMPERATURE_SCALE_FAHRENHEIT = apiv1.constants.TEMPERATURE_SCALE_FAHRENHEIT;
-module.exports.TEMPERATURE_SCALE_CELSIUS = apiv1.constants.TEMPERATURE_SCALE_CELSIUS;
+module.exports.TEMPERATURE_SCALE_CELSIUS = 'C';
+module.exports.TEMPERATURE_SCALE_FAHRENHEIT = 'F';
+
+module.exports.TEMPERATURE_SCALES = [
+    module.exports.TEMPERATURE_SCALE_CELSIUS,
+    module.exports.TEMPERATURE_SCALE_FAHRENHEIT
+];
 
 module.exports.FAHRENHEIT_TO_CELSIUS_MAP = {
     50: 10.0,

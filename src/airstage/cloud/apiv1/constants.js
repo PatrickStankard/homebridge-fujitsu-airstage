@@ -44,36 +44,6 @@ module.exports.METADATA_KEYS = [
     module.exports.METADATA_DEVICE_NAME
 ];
 
-// Parameter names
-module.exports.PARAMETER_MODEL = 'iu_model';
-module.exports.PARAMETER_FAN_SPEED = 'iu_fan_spd';
-module.exports.PARAMETER_ON_OFF = 'iu_onoff'
-module.exports.PARAMETER_SET_TEMPERATURE = 'iu_set_tmp';
-module.exports.PARAMETER_INDOOR_TEMPERATURE = 'iu_indoor_tmp';
-module.exports.PARAMETER_OPERATION_MODE = 'iu_op_mode';
-module.exports.PARAMETER_FAN_SPEED = 'iu_fan_spd';
-module.exports.PARAMETER_AIRFLOW_VERTICAL_DIRECTION = 'iu_af_dir_vrt';
-module.exports.PARAMETER_AIRFLOW_VERTICAL_SWING = 'iu_af_swg_vrt';
-module.exports.PARAMETER_POWERFUL = 'iu_powerful';
-module.exports.PARAMETER_ECONOMY = 'iu_economy';
-module.exports.PARAMETER_ENERGY_SAVING_FAN = 'iu_fan_ctrl';
-module.exports.PARAMETER_MINIMUM_HEAT = 'iu_min_heat';
-
-// Parameter values
-module.exports.PARAMETER_ON = '1';
-module.exports.PARAMETER_OFF = '0';
-module.exports.PARAMETER_NOT_AVAILABLE = '65535';
-module.exports.PARAMETER_OPERATION_MODE_AUTO = '0';
-module.exports.PARAMETER_OPERATION_MODE_COOL = '1';
-module.exports.PARAMETER_OPERATION_MODE_DRY = '2';
-module.exports.PARAMETER_OPERATION_MODE_FAN = '3';
-module.exports.PARAMETER_OPERATION_MODE_HEAT = '4';
-module.exports.PARAMETER_FAN_SPEED_AUTO = '0';
-module.exports.PARAMETER_FAN_SPEED_QUIET = '2';
-module.exports.PARAMETER_FAN_SPEED_LOW = '5';
-module.exports.PARAMETER_FAN_SPEED_MEDIUM = '8';
-module.exports.PARAMETER_FAN_SPEED_HIGH = '11';
-
 // Parameter statuses
 module.exports.PARAMETER_STATUS_WAITING = 'waiting';
 module.exports.PARAMETER_STATUS_COMPLETE = 'complete';
@@ -87,10 +57,6 @@ module.exports.USER_TEMPERATURE_SCALE = 'tempUnit';
 // Message codes
 module.exports.MESSAGE_CODE_INVALID_LOGIN = 'AIRSTAGE_POST_USERS_SIGNIN_EMAIL_PASSWORD_INVALID';
 module.exports.MESSAGE_CODE_INVALID_TOKEN = 'AIRSTAGE_COMMON_TOKEN_INVALID';
-
-// Temperature scales
-module.exports.TEMPERATURE_SCALE_FAHRENHEIT = 'F';
-module.exports.TEMPERATURE_SCALE_CELSIUS = 'C';
 
 // Request header templates
 module.exports.REQUEST_HEADERS_POST_PUT = {
