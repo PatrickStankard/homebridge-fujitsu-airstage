@@ -5,7 +5,7 @@ const hap = require('hap-nodejs');
 const PlatformAccessoryManager = require('../platform-accessory-manager');
 const airstage = require('../airstage');
 
-const airstageClient = new airstage.Client(
+const airstageClient = new airstage.cloud.Client(
     'us',
     'United States',
     'en'

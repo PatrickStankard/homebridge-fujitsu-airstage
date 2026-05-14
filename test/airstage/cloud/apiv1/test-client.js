@@ -2,9 +2,9 @@
 
 const assert = require('node:assert');
 const { mock, test } = require('node:test');
-const airstage = require('./../../../src/airstage');
+const airstage = require('./../../../../src/airstage');
 
-const clientWithAccessToken = new airstage.apiv1.Client(
+const clientWithAccessToken = new airstage.cloud.apiv1.Client(
     'us',
     'United States',
     'en',
@@ -14,13 +14,13 @@ const clientWithAccessToken = new airstage.apiv1.Client(
     '2099-01-01',
     'existingRefreshToken'
 );
-const clientWithoutAccessToken = new airstage.apiv1.Client(
+const clientWithoutAccessToken = new airstage.cloud.apiv1.Client(
     'us',
     'United States',
     'en'
 );
 
-test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {
         'accessToken': 'testAccessToken',
         'expiresIn': 3600,
@@ -30,7 +30,7 @@ test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with success
         clientWithoutAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -62,13 +62,13 @@ test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with success
     });
 });
 
-test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithoutAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -96,8 +96,8 @@ test('airstage.apiv1.Client#postUsersSignIn calls _makeHttpsRequest with error',
     });
 });
 
-test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with success', (context, done) => {
-    const clientWithRefreshToken = new airstage.apiv1.Client(
+test('airstage.cloud.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with success', (context, done) => {
+    const clientWithRefreshToken = new airstage.cloud.apiv1.Client(
         'us',
         'United States',
         'en',
@@ -116,7 +116,7 @@ test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with
         clientWithRefreshToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -142,8 +142,8 @@ test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with
     });
 });
 
-test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with error', (context, done) => {
-    const clientWithRefreshToken = new airstage.apiv1.Client(
+test('airstage.cloud.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with error', (context, done) => {
+    const clientWithRefreshToken = new airstage.cloud.apiv1.Client(
         'us',
         'United States',
         'en',
@@ -158,7 +158,7 @@ test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with
         clientWithRefreshToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -184,7 +184,7 @@ test('airstage.apiv1.Client#postUsersMeRefreshToken calls _makeHttpsRequest with
     });
 });
 
-test('airstage.apiv1.Client#getUsersMe calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getUsersMe calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {
         'tempUnit': 'F'
     };
@@ -192,7 +192,7 @@ test('airstage.apiv1.Client#getUsersMe calls _makeHttpsRequest with success', (c
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -216,13 +216,13 @@ test('airstage.apiv1.Client#getUsersMe calls _makeHttpsRequest with success', (c
     });
 });
 
-test('airstage.apiv1.Client#getUsersMe calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getUsersMe calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -246,7 +246,7 @@ test('airstage.apiv1.Client#getUsersMe calls _makeHttpsRequest with error', (con
     });
 });
 
-test('airstage.apiv1.Client#putUsersMe calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#putUsersMe calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {
         'tempUnit': 'F'
     };
@@ -254,7 +254,7 @@ test('airstage.apiv1.Client#putUsersMe calls _makeHttpsRequest with success', (c
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -280,13 +280,13 @@ test('airstage.apiv1.Client#putUsersMe calls _makeHttpsRequest with success', (c
     });
 });
 
-test('airstage.apiv1.Client#putUsersMe calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#putUsersMe calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -312,7 +312,7 @@ test('airstage.apiv1.Client#putUsersMe calls _makeHttpsRequest with error', (con
     });
 });
 
-test('airstage.apiv1.Client#getDevicesAll calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesAll calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {
         'devices': []
     };
@@ -320,7 +320,7 @@ test('airstage.apiv1.Client#getDevicesAll calls _makeHttpsRequest with success',
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -344,13 +344,13 @@ test('airstage.apiv1.Client#getDevicesAll calls _makeHttpsRequest with success',
     });
 });
 
-test('airstage.apiv1.Client#getDevicesAll calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesAll calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -374,13 +374,13 @@ test('airstage.apiv1.Client#getDevicesAll calls _makeHttpsRequest with error', (
     });
 });
 
-test('airstage.apiv1.Client#getDevicesAllAuthorizeRequestType calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesAllAuthorizeRequestType calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = '';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -404,13 +404,13 @@ test('airstage.apiv1.Client#getDevicesAllAuthorizeRequestType calls _makeHttpsRe
     });
 });
 
-test('airstage.apiv1.Client#getDevicesAllAuthorizeRequestType calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesAllAuthorizeRequestType calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -434,7 +434,7 @@ test('airstage.apiv1.Client#getDevicesAllAuthorizeRequestType calls _makeHttpsRe
     });
 });
 
-test('airstage.apiv1.Client#getDevice calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevice calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {
         'deviceName': 'My Device'
     };
@@ -443,7 +443,7 @@ test('airstage.apiv1.Client#getDevice calls _makeHttpsRequest with success', (co
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -467,14 +467,14 @@ test('airstage.apiv1.Client#getDevice calls _makeHttpsRequest with success', (co
     });
 });
 
-test('airstage.apiv1.Client#getDevice calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevice calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
 
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -498,13 +498,13 @@ test('airstage.apiv1.Client#getDevice calls _makeHttpsRequest with error', (cont
     });
 });
 
-test('airstage.apiv1.Client#postDevicesSetParametersRequest calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#postDevicesSetParametersRequest calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -532,13 +532,13 @@ test('airstage.apiv1.Client#postDevicesSetParametersRequest calls _makeHttpsRequ
     });
 });
 
-test('airstage.apiv1.Client#postDevicesSetParametersRequest calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#postDevicesSetParametersRequest calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -566,13 +566,13 @@ test('airstage.apiv1.Client#postDevicesSetParametersRequest calls _makeHttpsRequ
     });
 });
 
-test('airstage.apiv1.Client#getDevicesRequests calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesRequests calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = '';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -596,13 +596,13 @@ test('airstage.apiv1.Client#getDevicesRequests calls _makeHttpsRequest with succ
     });
 });
 
-test('airstage.apiv1.Client#getDevicesRequests calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesRequests calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -626,7 +626,7 @@ test('airstage.apiv1.Client#getDevicesRequests calls _makeHttpsRequest with erro
     });
 });
 
-test('airstage.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = {
         'status': 'complete',
         'result': 'success',
@@ -641,7 +641,7 @@ test('airstage.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with succe
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -665,13 +665,13 @@ test('airstage.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with succe
     });
 });
 
-test('airstage.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -695,13 +695,13 @@ test('airstage.apiv1.Client#getDevicesRequest calls _makeHttpsRequest with error
     });
 });
 
-test('airstage.apiv1.Client#getGroups calls _makeHttpsRequest with success', (context, done) => {
+test('airstage.cloud.apiv1.Client#getGroups calls _makeHttpsRequest with success', (context, done) => {
     const expectedResponse = '';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.response = expectedResponse;
 
             callback(result);
@@ -725,13 +725,13 @@ test('airstage.apiv1.Client#getGroups calls _makeHttpsRequest with success', (co
     });
 });
 
-test('airstage.apiv1.Client#getGroups calls _makeHttpsRequest with error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getGroups calls _makeHttpsRequest with error', (context, done) => {
     const expectedError = 'Error';
     context.mock.method(
         clientWithAccessToken,
         '_makeHttpsRequest',
         (requestOptions, requestBodyJson, callback) => {
-            let result = structuredClone(airstage.apiv1.constants.REQUEST_RESULT);
+            let result = structuredClone(airstage.cloud.apiv1.constants.REQUEST_RESULT);
             result.error = expectedError;
 
             callback(result);
@@ -755,8 +755,8 @@ test('airstage.apiv1.Client#getGroups calls _makeHttpsRequest with error', (cont
     });
 });
 
-test('airstage.apiv1.Client#getGroups with "Could not determine hostname" error', (context, done) => {
-    const clientWithInvalidRegion = new airstage.apiv1.Client(
+test('airstage.cloud.apiv1.Client#getGroups with "Could not determine hostname" error', (context, done) => {
+    const clientWithInvalidRegion = new airstage.cloud.apiv1.Client(
         'cn',
         'China',
         'en',
@@ -775,7 +775,7 @@ test('airstage.apiv1.Client#getGroups with "Could not determine hostname" error'
     });
 });
 
-test('airstage.apiv1.Client#getGroups with "Access token not set" error', (context, done) => {
+test('airstage.cloud.apiv1.Client#getGroups with "Access token not set" error', (context, done) => {
     clientWithoutAccessToken.getGroups((result) => {
         assert.strictEqual(result.error, 'Access token not set');
         assert.strictEqual(result.response, '');
