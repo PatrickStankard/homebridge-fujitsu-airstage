@@ -1406,7 +1406,53 @@ test('airstage.cloud.Client#getAirflowVerticalDirection calls _apiClient.getDevi
     });
 });
 
-test('airstage.cloud.Client#setAirflowVerticalDirection calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+test('airstage.cloud.Client#setAirflowVerticalDirection with 0 calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_af_dir_vrt',
+                'value': '1'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_dir_vrt');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '1');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setAirflowVerticalDirection('12345', 0, (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 1);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#setAirflowVerticalDirection with 1 calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
     const expectedResponse = {'reqId': '54321'};
     const expectedGetDevicesRequestResponse = {
         'status': 'complete',
@@ -1447,6 +1493,52 @@ test('airstage.cloud.Client#setAirflowVerticalDirection calls _apiClient.postDev
     clientWithAccessToken.setAirflowVerticalDirection('12345', 1, (error, result) => {
         assert.strictEqual(error, null);
         assert.strictEqual(result, 1);
+
+        done();
+    });
+});
+
+test('airstage.cloud.Client#setAirflowVerticalDirection with 5 calls _apiClient.postDevicesSetParametersRequest with success', (context, done) => {
+    const expectedResponse = {'reqId': '54321'};
+    const expectedGetDevicesRequestResponse = {
+        'status': 'complete',
+        'result': 'success',
+        'parameters': [
+            {
+                'name': 'iu_af_dir_vrt',
+                'value': '4'
+            }
+        ]
+    };
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'postDevicesSetParametersRequest',
+        (deviceId, deviceSubId, parameterName, parameterValue, callback) => {
+            callback({'error': null, 'response': expectedResponse});
+        }
+    );
+    context.mock.method(
+        clientWithAccessToken._apiClient,
+        'getDevicesRequest',
+        (deviceId, requestId, callback) => {
+            callback({'error': null, 'response': expectedGetDevicesRequestResponse});
+        }
+    );
+    context.after(() => {
+        const mockedMethod = clientWithAccessToken._apiClient.postDevicesSetParametersRequest.mock;
+
+        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '12345');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], 'iu_af_dir_vrt');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], '4');
+    });
+    clientWithAccessToken.resetDeviceCache('12345');
+
+    clientWithAccessToken.setAirflowVerticalDirection('12345', 5, (error, result) => {
+        assert.strictEqual(error, null);
+        assert.strictEqual(result, 4);
 
         done();
     });
