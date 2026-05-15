@@ -510,7 +510,7 @@ class PlatformAccessoryManager {
     _updateExistingAccessory(existingAccessory, deviceId, model) {
         this.platform.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
 
-        existingAccessory.context.airstageClient = this.platform.airstageClient;
+        existingAccessory.context.airstageClient = this._getAirstageClient(deviceId);
         existingAccessory.context.deviceId = deviceId;
         existingAccessory.context.model = model;
 
@@ -548,7 +548,7 @@ class PlatformAccessoryManager {
     _registerNewAccessory(newAccessory, deviceId, model) {
         this.platform.log.info('Adding new accessory:', newAccessory.displayName);
 
-        newAccessory.context.airstageClient = this.platform.airstageClient;
+        newAccessory.context.airstageClient = this._getAirstageClient(deviceId);
         newAccessory.context.deviceId = deviceId;
         newAccessory.context.model = model;
 
@@ -569,7 +569,7 @@ class PlatformAccessoryManager {
             accessoryUuid
         );
 
-        accessory.context.airstageClient = this.platform.airstageClient;
+        accessory.context.airstageClient = this._getAirstageClient(deviceId);
         accessory.context.deviceId = deviceId;
         accessory.context.model = model;
 
@@ -613,6 +613,18 @@ class PlatformAccessoryManager {
         return this.platform.api.hap.uuid.generate(
             deviceId + '-' + suffix
         );
+    }
+
+    _getAirstageClient(deviceId) {
+        let airstageClient = null;
+
+        if (this.platform.lanDeviceIds.includes(deviceId)) {
+            airstageClient = this.platform.airstageLanClient;
+        } else {
+            airstageClient = this.platform.airstageCloudClient;
+        }
+
+        return airstageClient;
     }
 }
 
