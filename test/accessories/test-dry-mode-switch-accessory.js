@@ -11,6 +11,7 @@ const platformAccessory = new mockHomebridge.platform.api.platformAccessory(
     'test-name',
     'test-uuid'
 );
+platformAccessory.context.airstageClient = mockHomebridge.platform.airstageCloudClient;
 
 test('DryModeSwitchAccessory#constructor registers accessory', (context) => {
     context.mock.method(
