@@ -10,14 +10,17 @@ const mockHomebridge = new MockHomebridge();
 
 test('Platform#constructor configures classes using platform config', (context) => {
     const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
-        'accessToken': 'testAccessToken',
-        'accessTokenExpiry': '2022-01-01',
-        'refreshToken': 'testRefreshToken'
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -27,14 +30,11 @@ test('Platform#constructor configures classes using platform config', (context) 
     );
 
     assert.strictEqual(mockHomebridge.platform.log.success, mockHomebridge.platform.log.info);
-    assert.strictEqual(platform.airstageClient.email, platformConfig.email);
-    assert.strictEqual(platform.airstageClient.password, platformConfig.password);
-    assert.strictEqual(platform.airstageClient._apiClient.region, platformConfig.region);
-    assert.strictEqual(platform.airstageClient._apiClient.country, platformConfig.country);
-    assert.strictEqual(platform.airstageClient._apiClient.language, platformConfig.language);
-    assert.strictEqual(platform.airstageClient._apiClient.accessToken, platformConfig.accessToken);
-    assert.strictEqual(platform.airstageClient._apiClient.accessTokenExpiry.toISOString(), new Date(platformConfig.accessTokenExpiry).toISOString());
-    assert.strictEqual(platform.airstageClient._apiClient.refreshToken, platformConfig.refreshToken);
+    assert.strictEqual(platform.airstageCloudClient.email, platformConfig.email);
+    assert.strictEqual(platform.airstageCloudClient.password, platformConfig.password);
+    assert.strictEqual(platform.airstageCloudClient._apiClient.region, platformConfig.region);
+    assert.strictEqual(platform.airstageCloudClient._apiClient.country, platformConfig.country);
+    assert.strictEqual(platform.airstageCloudClient._apiClient.language, platformConfig.language);
     assert.strictEqual(platform.configManager.config, platformConfig);
     assert.strictEqual(platform.configManager.api, mockHomebridge.platform.api);
     assert.strictEqual(platform.accessoryManager.platform, platform);
@@ -51,11 +51,17 @@ test('Platform#constructor configures classes using platform config', (context) 
 
 test('Platform#configureAccessory pushes accessory to accessories', (context) => {
     const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
-        'password': 'test1234'
+        'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -70,13 +76,19 @@ test('Platform#configureAccessory pushes accessory to accessories', (context) =>
     assert.strictEqual(platform.accessories[0], 'foo');
 });
 
-test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate returns error', (context, done) => {
+test('Platform#discoverDevices when airstageCloudClient.refreshTokenOrAuthenticate returns error', (context, done) => {
     const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
-        'password': 'test1234'
+        'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -85,7 +97,7 @@ test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate re
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback('refreshTokenOrAuthenticate error');
@@ -104,11 +116,16 @@ test('Platform#discoverDevices when airstageClient.refreshTokenOrAuthenticate re
 test('Platform#discoverDevices updates platform config with access token', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
-        'password': 'test1234'
+        'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -117,18 +134,18 @@ test('Platform#discoverDevices updates platform config with access token', (cont
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
-            platform.airstageClient._apiClient.accessToken = 'testAccessToken';
-            platform.airstageClient._apiClient.accessTokenExpiry = new Date('2022-01-01');
-            platform.airstageClient._apiClient.refreshToken = 'testRefreshToken';
+            platform.airstageCloudClient._apiClient.accessToken = 'testAccessToken';
+            platform.airstageCloudClient._apiClient.accessTokenExpiry = new Date('2022-01-01');
+            platform.airstageCloudClient._apiClient.refreshToken = 'testRefreshToken';
 
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -136,10 +153,10 @@ test('Platform#discoverDevices updates platform config with access token', (cont
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
-            callback(null, {'metadata': {}});
+            callback(null, {'metadata': {}, 'parameters': {}});
         }
     );
 
@@ -175,11 +192,16 @@ test('Platform#discoverDevices updates platform config with access token', (cont
 test('Platform#discoverDevices registers accessory when enableThermostat is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableThermostat': true
     };
     const platform = new Platform(
@@ -189,14 +211,14 @@ test('Platform#discoverDevices registers accessory when enableThermostat is true
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -204,7 +226,7 @@ test('Platform#discoverDevices registers accessory when enableThermostat is true
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -237,11 +259,16 @@ test('Platform#discoverDevices registers accessory when enableThermostat is true
 test('Platform#discoverDevices does not register accessory when enableThermostat is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableThermostat': false
     };
     const platform = new Platform(
@@ -251,14 +278,14 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -266,7 +293,7 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -297,11 +324,16 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
 test('Platform#discoverDevices registers accessory when enableFan is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableFan': true
     };
     const platform = new Platform(
@@ -311,14 +343,14 @@ test('Platform#discoverDevices registers accessory when enableFan is true', (con
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -326,7 +358,7 @@ test('Platform#discoverDevices registers accessory when enableFan is true', (con
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -359,11 +391,16 @@ test('Platform#discoverDevices registers accessory when enableFan is true', (con
 test('Platform#discoverDevices does not register accessory when enableFan is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableFan': false
     };
     const platform = new Platform(
@@ -373,14 +410,14 @@ test('Platform#discoverDevices does not register accessory when enableFan is fal
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -388,7 +425,7 @@ test('Platform#discoverDevices does not register accessory when enableFan is fal
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -419,11 +456,16 @@ test('Platform#discoverDevices does not register accessory when enableFan is fal
 test('Platform#discoverDevices registers accessory when enableVerticalAirflowDirection is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableVerticalAirflowDirection': true
     };
     const platform = new Platform(
@@ -433,14 +475,14 @@ test('Platform#discoverDevices registers accessory when enableVerticalAirflowDir
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -448,7 +490,7 @@ test('Platform#discoverDevices registers accessory when enableVerticalAirflowDir
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -481,11 +523,16 @@ test('Platform#discoverDevices registers accessory when enableVerticalAirflowDir
 test('Platform#discoverDevices does not register accessory when enableVerticalAirflowDirection is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableVerticalAirflowDirection': false
     };
     const platform = new Platform(
@@ -495,14 +542,14 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -510,7 +557,7 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -541,11 +588,16 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
 test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableAutoFanSpeedSwitch': true
     };
     const platform = new Platform(
@@ -555,14 +607,14 @@ test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -570,7 +622,7 @@ test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -603,11 +655,16 @@ test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch
 test('Platform#discoverDevices does not register accessory when enableAutoFanSpeedSwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableAutoFanSpeedSwitch': false
     };
     const platform = new Platform(
@@ -617,14 +674,14 @@ test('Platform#discoverDevices does not register accessory when enableAutoFanSpe
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -632,7 +689,7 @@ test('Platform#discoverDevices does not register accessory when enableAutoFanSpe
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -663,11 +720,16 @@ test('Platform#discoverDevices does not register accessory when enableAutoFanSpe
 test('Platform#discoverDevices registers accessory when enableDryModeSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableDryModeSwitch': true
     };
     const platform = new Platform(
@@ -677,14 +739,14 @@ test('Platform#discoverDevices registers accessory when enableDryModeSwitch is t
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -692,7 +754,7 @@ test('Platform#discoverDevices registers accessory when enableDryModeSwitch is t
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -725,11 +787,16 @@ test('Platform#discoverDevices registers accessory when enableDryModeSwitch is t
 test('Platform#discoverDevices does not register accessory when enableDryModeSwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableDryModeSwitch': false
     };
     const platform = new Platform(
@@ -739,14 +806,14 @@ test('Platform#discoverDevices does not register accessory when enableDryModeSwi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -754,7 +821,7 @@ test('Platform#discoverDevices does not register accessory when enableDryModeSwi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -785,11 +852,16 @@ test('Platform#discoverDevices does not register accessory when enableDryModeSwi
 test('Platform#discoverDevices registers accessory when enableEconomySwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableEconomySwitch': true
     };
     const platform = new Platform(
@@ -799,14 +871,14 @@ test('Platform#discoverDevices registers accessory when enableEconomySwitch is t
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -814,7 +886,7 @@ test('Platform#discoverDevices registers accessory when enableEconomySwitch is t
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -847,11 +919,16 @@ test('Platform#discoverDevices registers accessory when enableEconomySwitch is t
 test('Platform#discoverDevices does not register accessory when enableEconomySwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableEconomySwitch': false
     };
     const platform = new Platform(
@@ -861,14 +938,14 @@ test('Platform#discoverDevices does not register accessory when enableEconomySwi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -876,7 +953,7 @@ test('Platform#discoverDevices does not register accessory when enableEconomySwi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -907,11 +984,16 @@ test('Platform#discoverDevices does not register accessory when enableEconomySwi
 test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableEnergySavingFanSwitch': true
     };
     const platform = new Platform(
@@ -921,14 +1003,14 @@ test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -936,7 +1018,7 @@ test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -969,11 +1051,16 @@ test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwi
 test('Platform#discoverDevices does not register accessory when enableEnergySavingFanSwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableEnergySavingFanSwitch': false
     };
     const platform = new Platform(
@@ -983,14 +1070,14 @@ test('Platform#discoverDevices does not register accessory when enableEnergySavi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -998,7 +1085,7 @@ test('Platform#discoverDevices does not register accessory when enableEnergySavi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -1029,11 +1116,16 @@ test('Platform#discoverDevices does not register accessory when enableEnergySavi
 test('Platform#discoverDevices registers accessory when enableFanModeSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableFanModeSwitch': true
     };
     const platform = new Platform(
@@ -1043,14 +1135,14 @@ test('Platform#discoverDevices registers accessory when enableFanModeSwitch is t
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -1058,7 +1150,7 @@ test('Platform#discoverDevices registers accessory when enableFanModeSwitch is t
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -1091,11 +1183,16 @@ test('Platform#discoverDevices registers accessory when enableFanModeSwitch is t
 test('Platform#discoverDevices does not register accessory when enableFanModeSwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableFanModeSwitch': false
     };
     const platform = new Platform(
@@ -1105,14 +1202,14 @@ test('Platform#discoverDevices does not register accessory when enableFanModeSwi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -1120,7 +1217,7 @@ test('Platform#discoverDevices does not register accessory when enableFanModeSwi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -1151,11 +1248,16 @@ test('Platform#discoverDevices does not register accessory when enableFanModeSwi
 test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableMinimumHeatModeSwitch': true
     };
     const platform = new Platform(
@@ -1165,14 +1267,14 @@ test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwi
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -1180,7 +1282,7 @@ test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwi
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -1213,11 +1315,16 @@ test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwi
 test('Platform#discoverDevices does not register accessory when enableMinimumHeatModeSwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enableMinimumHeatModeSwitch': false
     };
     const platform = new Platform(
@@ -1227,14 +1334,14 @@ test('Platform#discoverDevices does not register accessory when enableMinimumHea
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -1242,7 +1349,7 @@ test('Platform#discoverDevices does not register accessory when enableMinimumHea
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -1273,11 +1380,16 @@ test('Platform#discoverDevices does not register accessory when enableMinimumHea
 test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enablePowerfulSwitch': true
     };
     const platform = new Platform(
@@ -1287,14 +1399,14 @@ test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is 
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -1302,7 +1414,7 @@ test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is 
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {
@@ -1335,11 +1447,16 @@ test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is 
 test('Platform#discoverDevices does not register accessory when enablePowerfulSwitch is false', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
         'region': 'us',
         'country': 'United States',
         'language': 'en',
         'email': 'test@example.com',
         'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
         'enablePowerfulSwitch': false
     };
     const platform = new Platform(
@@ -1349,14 +1466,14 @@ test('Platform#discoverDevices does not register accessory when enablePowerfulSw
         false
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'refreshTokenOrAuthenticate',
         (callback) => {
             callback(null);
         }
     );
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getUserMetadata',
         (callback) => {
             callback(null);
@@ -1364,7 +1481,7 @@ test('Platform#discoverDevices does not register accessory when enablePowerfulSw
     );
 
     context.mock.method(
-        platform.airstageClient,
+        platform.airstageCloudClient,
         'getDevices',
         (limit, callback) => {
             callback(null, {

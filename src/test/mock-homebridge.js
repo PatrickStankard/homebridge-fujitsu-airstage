@@ -5,17 +5,23 @@ const hap = require('hap-nodejs');
 const PlatformAccessoryManager = require('../platform-accessory-manager');
 const airstage = require('../airstage');
 
-const airstageClient = new airstage.cloud.Client(
+const airstageCloudClient = new airstage.cloud.Client(
     'us',
     'United States',
     'en'
+);
+
+const airstageLanClient = new airstage.lan.Client(
+    [],
+    'C'
 );
 
 class MockPlatformAccessory {
     context = {
         'deviceId': 'testDeviceId',
         'model': 'Test Model',
-        'airstageClient': airstageClient
+        'airstageCloudClient': airstageCloudClient,
+        'airstageLanClient': airstageLanClient
     };
 
     constructor(name, uuid) {
@@ -54,8 +60,10 @@ const mockService = {
 const mockPlatform = {
     'Characteristic': hap.Characteristic,
     'Service': hap.Service,
-    'airstageClient': airstageClient,
+    'airstageCloudClient': airstageCloudClient,
+    'airstageLanClient': airstageLanClient,
     'accessories': [],
+    'lanDeviceIds': [],
     'api': {
         'hap': hap,
         'platformAccessory': MockPlatformAccessory,
@@ -107,6 +115,7 @@ class MockHomebridge {
         mockPlatform.log.error.mock.resetCalls();
         mockPlatform.log.info.mock.resetCalls();
         mockPlatform.accessories = [];
+        mockPlatform.lanDeviceIds = [];
     }
 }
 
