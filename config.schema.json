@@ -12,6 +12,16 @@
                 "required": true,
                 "description": "The display name for this platform instance."
             },
+            "enableCloudControl": {
+                "title": "Enable Airstage API (cloud) device control",
+                "type": "boolean",
+                "default": true
+            },
+            "enableLanControl": {
+                "title": "Enable LAN device control",
+                "type": "boolean",
+                "default": false
+            },
             "region": {
                 "title": "Region",
                 "type": "string",
@@ -27,40 +37,118 @@
                         "const": "eu"
                     }
                 ],
-                "description": "The region for your Airstage account (us or eu)."
+                "description": "The region for your Airstage account (U.S. or Europe).",
+                "condition": {
+                    "functionBody": "return model.enableCloudControl === true;"
+                }
             },
             "country": {
                 "title": "Country",
                 "type": "string",
                 "required": true,
                 "default": "United States",
-                "description": "The country associated with your Airstage account."
+                "description": "The country associated with your Airstage account.",
+                "condition": {
+                    "functionBody": "return model.enableCloudControl === true;"
+                }
             },
             "language": {
                 "title": "Language",
                 "type": "string",
                 "required": true,
                 "default": "en",
-                "description": "The language code for your Airstage account (e.g., 'en')."
+                "description": "The language code for your Airstage account (e.g., 'en').",
+                "condition": {
+                    "functionBody": "return model.enableCloudControl === true;"
+                }
             },
             "email": {
                 "title": "Airstage Email",
                 "type": "string",
                 "format": "email",
                 "default": "",
-                "description": "The email address for your Airstage account."
+                "description": "The email address for your Airstage account.",
+                "condition": {
+                    "functionBody": "return model.enableCloudControl === true;"
+                }
             },
             "password": {
                 "title": "Airstage Password",
                 "type": "string",
                 "default": "",
-                "description": "The password for your Airstage account."
+                "description": "The password for your Airstage account.",
+                "condition": {
+                    "functionBody": "return model.enableCloudControl === true;"
+                }
             },
-            "apiPollingInterval": {
+            "cloudPollingInterval": {
                 "title": "Airstage API Polling Interval",
                 "type": "integer",
                 "default": 30,
-                "description": "The polling interval for getting updates from the Airstage API, in minutes. WARNING: setting this too low may result in getting your IP banned from accessing the Airstage API! Set to '0' to disable polling completely."
+                "description": "The polling interval for getting updates from the Airstage API, in minutes. WARNING: setting this too low may result in getting your IP banned from accessing the Airstage API! Set to '0' to disable polling completely.",
+                "condition": {
+                    "functionBody": "return model.enableCloudControl === true;"
+                }
+            },
+            "lanDevices": {
+                "title": "LAN Devices",
+                "type": "array",
+                "description": "If your Homebridge server is on the same local network as your Fujitsu devices, you can manually specify the hostname (or IP address) and the MAC address here, in order to control them directly.",
+                "items": {
+                    "title": "Local Device",
+                    "type": "object",
+                    "properties": {
+                        "displayName": {
+                            "title": "Display Name",
+                            "type": "string",
+                            "required": true
+                        },
+                        "hostname": {
+                            "title": "IP Address / Hostname",
+                            "type": "string",
+                            "required": true,
+                            "format": "hostname"
+                        },
+                        "macAddress": {
+                            "title": "MAC Address",
+                            "type": "string",
+                            "required": true,
+                            "pattern": "^([A-Fa-f0-9]{2}:){5}[A-Fa-f0-9]{2}$"
+                        }
+                    }
+                },
+                "condition": {
+                    "functionBody": "return model.enableLanControl === true;"
+                }
+            },
+            "lanTemperatureScale": {
+                "title": "LAN Temperature Scale",
+                "type": "string",
+                "description": "The temperature scale that your local devices should use: either Celsius (default), or Fahrenheit.",
+                "required": true,
+                "default": "C",
+                "oneOf": [
+                    {
+                        "title": "Celsius (C)",
+                        "enum": ["C"]
+                    },
+                    {
+                        "title": "Fahrenheit (F)",
+                        "enum": ["F"]
+                    }
+                ],
+                "condition": {
+                    "functionBody": "return model.enableLanControl === true;"
+                }
+            },
+            "lanPollingInterval": {
+                "title": "LAN Polling Interval",
+                "type": "integer",
+                "default": 30,
+                "description": "The polling interval for getting updates from local devices, in minutes. Set to '0' to disable polling completely.",
+                "condition": {
+                    "functionBody": "return model.enableLanControl === true;"
+                }
             },
             "enableThermostat": {
                 "title": "Enable thermostat control",
