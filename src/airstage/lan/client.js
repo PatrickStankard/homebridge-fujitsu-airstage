@@ -745,10 +745,26 @@ class Client {
         this._deviceIdToLocalDeviceMap = {};
 
         this.localDevices.forEach(function(localDevice) {
-            const deviceId = localDevice.macAddress.replaceAll(':', '').toUpperCase();
+            const deviceId = this._getDeviceIdFromLocalDevice(localDevice);
 
             this._deviceIdToLocalDeviceMap[deviceId] = localDevice;
         }, this);
+    }
+
+    _getDeviceIds() {
+        const deviceIds = [];
+
+        this.localDevices.forEach((function(localDevice) {
+            const deviceId = this._getDeviceIdFromLocalDevice(localDevice);
+
+            deviceIds.push(deviceId);
+        }).bind(this));
+
+        return deviceIds;
+    }
+
+    _getDeviceIdFromLocalDevice(localDevice) {
+        return localDevice.macAddress.replaceAll(':', '').toUpperCase();
     }
 
     _getHostnameForDeviceId(deviceId) {
@@ -815,38 +831,32 @@ class Client {
     }
 
     _getDevicesFromApi(callback) {
-        const deviceIds = Object.keys(this._deviceIdToLocalDeviceMap);
-        const errors = {};
+        const deviceIds = this._getDeviceIds();
 
-        let numRequests = deviceIds.length;
+        this._getGivenDevicesFromApi(deviceIds, callback);
+    }
 
-        for (let i = 0; i < deviceIds.length; i++) {
-            const deviceId = deviceIds[i];
-            this._getDeviceFromApi(
-                deviceId,
-                (function(error, result) {
-                    if (error) {
-                        errors[deviceId] = error;
-                    }
+    _getGivenDevicesFromApi(deviceIds, callback) {
+        const deviceId = deviceIds.shift();
 
-                    numRequests -= 1;
-                }).bind(this)
-            );
+        if (deviceId === undefined) {
+            const deviceParameters = this._getDeviceParameterCache(null);
+
+            return callback(null, {
+                'parameters': deviceParameters
+            });
         }
 
-        while (numRequests !== 0) {
-            // No-op, waiting for all of the requests to finish
-        }
+        this._getDeviceFromApi(
+            deviceId,
+            (function(error, result) {
+                if (error) {
+                    return callback(error, null);
+                }
 
-        if (Object.keys(errors).length !== 0) {
-            return callback(errors, null);
-        }
-
-        const deviceParameters = this._getDeviceParameterCache(null);
-
-        callback(null, {
-            'parameters': deviceParameters
-        });
+                this._getGivenDevicesFromApi(deviceIds, callback);
+            }).bind(this)
+        );
     }
 
     _getDeviceFromCache(deviceId) {
@@ -863,20 +873,24 @@ class Client {
             return callback('No hostname for device ID: ' + deviceId, null);
         }
 
+        let device = null;
+        let deviceParameters = null;
+
+        // For some reason, the response gets truncated when `iu_model` is
+        // included in the request list. Therefore, let's request all parameters
+        // besides `iu_model` first, then request `iu_model` after that
         this._apiClient.postGetParam(
             hostname,
             deviceId,
             deviceSubId,
-            constants.PARAMETER_NAMES,
+            constants.PARAMETER_NAMES_BESIDES_MODEL,
             (function(result) {
                 if (result.error) {
                     return callback(result.error, null);
                 }
 
-                let deviceParameters = null;
-
                 if (result.response.value) {
-                    const device = {
+                    device = {
                         'parameters': []
                     };
 
@@ -890,9 +904,38 @@ class Client {
                     deviceParameters = this._setDeviceParameterCache(deviceId, device);
                 }
 
-                callback(null, {
-                    'parameters': deviceParameters
-                });
+                this._apiClient.postGetParam(
+                    hostname,
+                    deviceId,
+                    deviceSubId,
+                    constants.PARAMETER_NAMES_ONLY_MODEL,
+                    (function(result) {
+                        if (result.error) {
+                            return callback(result.error, null);
+                        }
+
+                        if (result.response.value) {
+                            if (device === null) {
+                                device = {
+                                    'parameters': []
+                                };
+                            }
+
+                            Object.keys(result.response.value).forEach(function(parameterName) {
+                                device.parameters.push({
+                                    'name': parameterName,
+                                    'value': result.response.value[parameterName]
+                                });
+                            }, this);
+
+                            deviceParameters = this._setDeviceParameterCache(deviceId, device);
+                        }
+
+                        callback(null, {
+                            'parameters': deviceParameters
+                        });
+                    }).bind(this)
+                );
             }).bind(this)
         );
     }
