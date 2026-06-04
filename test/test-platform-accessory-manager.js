@@ -34,7 +34,7 @@ test('PlatformAccessoryManager#registerThermostatAccessory registers existing ac
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Thermostat');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -52,7 +52,7 @@ test('PlatformAccessoryManager#registerThermostatAccessory registers new accesso
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Thermostat');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -78,7 +78,7 @@ test('PlatformAccessoryManager#registerFanAccessory registers existing accessory
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Fan');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -96,7 +96,7 @@ test('PlatformAccessoryManager#registerFanAccessory registers new accessory', (c
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Fan');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -122,7 +122,7 @@ test('PlatformAccessoryManager#registerVerticalAirflowDirectionAccessory registe
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Vertical Airflow Direction');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -140,7 +140,7 @@ test('PlatformAccessoryManager#registerVerticalAirflowDirectionAccessory registe
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Vertical Airflow Direction');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -166,7 +166,7 @@ test('PlatformAccessoryManager#registerAutoFanSpeedSwitchAccessory registers exi
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Auto Fan Speed Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -184,7 +184,7 @@ test('PlatformAccessoryManager#registerAutoFanSpeedSwitchAccessory registers new
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Auto Fan Speed Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -210,7 +210,7 @@ test('PlatformAccessoryManager#registerDryModeSwitchAccessory registers existing
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Dry Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -228,7 +228,7 @@ test('PlatformAccessoryManager#registerDryModeSwitchAccessory registers new acce
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Dry Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -254,7 +254,7 @@ test('PlatformAccessoryManager#registerEconomySwitchAccessory registers existing
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Economy Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -272,7 +272,7 @@ test('PlatformAccessoryManager#registerEconomySwitchAccessory registers new acce
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Economy Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -298,7 +298,7 @@ test('PlatformAccessoryManager#registerEnergySavingFanSwitchAccessory registers 
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Energy Saving Fan Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -316,7 +316,7 @@ test('PlatformAccessoryManager#registerEnergySavingFanSwitchAccessory registers 
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Energy Saving Fan Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -342,7 +342,7 @@ test('PlatformAccessoryManager#registerFanModeSwitchAccessory registers existing
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Fan Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -360,7 +360,7 @@ test('PlatformAccessoryManager#registerFanModeSwitchAccessory registers new acce
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Fan Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -386,7 +386,7 @@ test('PlatformAccessoryManager#registerMinimumHeatModeSwitchAccessory registers 
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Minimum Heat Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -404,7 +404,7 @@ test('PlatformAccessoryManager#registerMinimumHeatModeSwitchAccessory registers 
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Minimum Heat Mode Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -430,7 +430,7 @@ test('PlatformAccessoryManager#registerPowerfulSwitchAccessory registers existin
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
     assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Powerful Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
@@ -448,7 +448,7 @@ test('PlatformAccessoryManager#registerPowerfulSwitchAccessory registers new acc
     assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
     const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
     assert.strictEqual(mockPlatformAccessory.name, 'Test Device Powerful Switch');
-    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageClient);
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
     assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);

@@ -8,6 +8,9 @@ const settings = require('./settings');
 
 class Platform {
     accessories = [];
+    lanDeviceIds = [];
+    airstageCloudClient = null;
+    airstageLanClient = null;
 
     constructor(log, config, api, withSetInterval = true) {
         this.log = log;
@@ -19,7 +22,7 @@ class Platform {
             this.log.success = this.log.info;
         }
 
-        // Initialize platform Airstage client and accessories
+        // Initialize platform Airstage clients and accessories
         this._init(withSetInterval);
     }
 
@@ -30,35 +33,55 @@ class Platform {
         this.configManager = new ConfigManager(this.config, this.api);
         this.accessoryManager = new PlatformAccessoryManager(this);
 
-        let tokens = this.configManager.getTokens();
+        const tokens = this.configManager.getTokens();
 
-        this.airstageClient = new airstage.cloud.Client(
-            this.config.region,
-            this.config.country,
-            this.config.language,
-            this.config.email || null,
-            this.config.password || null,
-            null,
-            null,
-            tokens.accessToken || null,
-            tokens.accessTokenExpiry || null,
-            tokens.refreshToken || null
-        );
+        if (this.config.enableCloudControl) {
+            this.airstageCloudClient = new airstage.cloud.Client(
+                this.config.region,
+                this.config.country,
+                this.config.language,
+                this.config.email || null,
+                this.config.password || null,
+                null,
+                null,
+                tokens.accessToken || null,
+                tokens.accessTokenExpiry || null,
+                tokens.refreshToken || null
+            );
 
-        if (withSetInterval) {
-            const apiPollingInterval = ((this.config.apiPollingInterval * 1000) * 60);
+            if (withSetInterval) {
+                const cloudPollingInterval = ((this.config.cloudPollingInterval * 1000) * 60);
 
-            if (apiPollingInterval > 0) {
+                if (cloudPollingInterval > 0) {
+                    setInterval(
+                        this._refreshAirstageCloudClientCache.bind(this),
+                        cloudPollingInterval
+                    );
+                }
+
                 setInterval(
-                    this._refreshAirstageClientCache.bind(this),
-                    apiPollingInterval
+                    this._refreshAirstageCloudClientTokenOrAuthenticate.bind(this),
+                    (50 * 60 * 1000) // 50 minutes
                 );
             }
+        }
 
-            setInterval(
-                this._refreshAirstageClientTokenOrAuthenticate.bind(this),
-                (50 * 60 * 1000) // 50 minutes
+        if (this.config.enableLanControl) {
+            this.airstageLanClient = new airstage.lan.Client(
+                this.config.lanDevices || [],
+                this.config.lanTemperatureScale
             );
+
+            if (withSetInterval) {
+                const lanPollingInterval = ((this.config.lanPollingInterval * 1000) * 60);
+
+                if (lanPollingInterval > 0) {
+                    setInterval(
+                        this._refreshAirstageLanClientCache.bind(this),
+                        lanPollingInterval
+                    );
+                }
+            }
         }
 
         this.api.on('didFinishLaunching', this.discoverDevices.bind(this));
@@ -69,7 +92,108 @@ class Platform {
     }
 
     discoverDevices(callback = null) {
-        this.airstageClient.refreshTokenOrAuthenticate((function(error) {
+        if (this.config.enableLanControl) {
+            this._discoverAirstageLanDevices((function(error) {
+                if (error) {
+                    if (callback !== null) {
+                        return callback(error);
+                    }
+                }
+
+                if (this.config.enableCloudControl) {
+                    this._discoverAirstageCloudDevices((function(error) {
+                        if (error) {
+                            if (callback !== null) {
+                                return callback(error);
+                            }
+                        }
+
+                        if (callback !== null) {
+                            callback(null);
+                        }
+                    }).bind(this));
+                } else {
+                    if (callback !== null) {
+                        callback(null);
+                    }
+                }
+            }).bind(this));
+        } else if (this.config.enableCloudControl) {
+            this._discoverAirstageCloudDevices((function(error) {
+                if (error) {
+                    if (callback !== null) {
+                        return callback(error);
+                    }
+                }
+
+                if (callback !== null) {
+                    callback(null);
+                }
+            }).bind(this));
+        } else {
+            if (callback !== null) {
+                callback(null);
+            }
+        }
+    }
+
+    _discoverAirstageLanDevices(callback = null) {
+        this.airstageLanClient.getDevices(null, (function(error, devices) {
+            if (error) {
+                if (callback !== null) {
+                    callback(error);
+                }
+
+                return this.log.error('Error when attempting to communicate with Airstage LAN:', error);
+            }
+
+            const deviceIds = Object.keys(devices.parameters);
+            this.lanDeviceIds = deviceIds;
+
+            this._configureAirstageLanDevices(callback);
+        }).bind(this));
+    }
+
+    _configureAirstageLanDevices(callback = null) {
+        this.airstageLanClient.getDevices(null, (function(error, devices) {
+            if (error) {
+                if (callback !== null) {
+                    callback(error);
+                }
+
+                return this.log.error('Error when attempting to communicate with Airstage LAN:', error);
+            }
+
+            const deviceIds = Object.keys(devices.parameters);
+
+            deviceIds.forEach(function(deviceId) {
+                const deviceParameters = devices.parameters[deviceId];
+
+                this.airstageLanClient.getName(deviceId, (function(error, deviceName) {
+                    if (error !== null) {
+                        this.log.error('Error when attempting to communicate with Airstage LAN:', error);
+                        // Fallback to using the device ID for the display name
+                        deviceName = deviceId;
+                    }
+
+                    const model = deviceParameters[airstage.constants.PARAMETER_MODEL] || 'Airstage';
+
+                    this._configureAirstageDevice(
+                        deviceId,
+                        deviceName,
+                        model
+                    );
+                }).bind(this));
+            }, this);
+
+            if (callback !== null) {
+                callback(null);
+            }
+        }).bind(this));
+    }
+
+    _discoverAirstageCloudDevices(callback = null) {
+        this.airstageCloudClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
                 if (callback !== null) {
                     callback(error);
@@ -79,19 +203,19 @@ class Platform {
                     this._unsetAccessTokenInConfig();
                 }
 
-                return this.log.error('Error when attempting to authenticate with Airstage:', error);
+                return this.log.error('Error when attempting to authenticate with Airstage Cloud:', error);
             }
 
             this._updateConfigWithAccessToken();
-            this._configureAirstageDevices(callback);
+            this._configureAirstageCloudDevices(callback);
         }).bind(this));
     }
 
     _updateConfigWithAccessToken() {
         this.configManager.saveTokens(
-            this.airstageClient.getAccessToken(),
-            this.airstageClient.getAccessTokenExpiry(),
-            this.airstageClient.getRefreshToken()
+            this.airstageCloudClient.getAccessToken(),
+            this.airstageCloudClient.getAccessTokenExpiry(),
+            this.airstageCloudClient.getRefreshToken()
         );
     }
 
@@ -99,26 +223,26 @@ class Platform {
         this.configManager.saveTokens(null, null, null);
     }
 
-    _configureAirstageDevices(callback) {
-        this.airstageClient.getUserMetadata((function(error) {
+    _configureAirstageCloudDevices(callback) {
+        this.airstageCloudClient.getUserMetadata((function(error) {
             if (error) {
                 if (callback !== null) {
                     callback(error);
                 }
 
-                return this.log.error('Error when attempting to communicate with Airstage:', error);
+                return this.log.error('Error when attempting to communicate with Airstage Cloud:', error);
             }
 
-            this.airstageClient.getDevices(null, (function(error, devices) {
+            this.airstageCloudClient.getDevices(null, (function(error, devices) {
                 if (error) {
                     if (callback !== null) {
                         callback(error);
                     }
 
-                    return this.log.error('Error when attempting to communicate with Airstage:', error);
+                    return this.log.error('Error when attempting to communicate with Airstage Cloud:', error);
                 }
 
-                const deviceIds = Object.keys(devices.metadata);
+                const deviceIds = Object.keys(devices.parameters);
 
                 deviceIds.forEach(function(deviceId) {
                     const deviceMetadata = devices.metadata[deviceId];
@@ -126,11 +250,13 @@ class Platform {
                     const deviceName = deviceMetadata.deviceName;
                     const model = deviceParameters[airstage.constants.PARAMETER_MODEL] || 'Airstage';
 
-                    this._configureAirstageDevice(
-                        deviceId,
-                        deviceName,
-                        model
-                    );
+                    if (this.lanDeviceIds.includes(deviceId) === false) {
+                        this._configureAirstageDevice(
+                            deviceId,
+                            deviceName,
+                            model
+                        );
+                    }
                 }, this);
 
                 if (callback !== null) {
@@ -293,46 +419,64 @@ class Platform {
         }
     }
 
-    _refreshAirstageClientTokenOrAuthenticate() {
-        this.airstageClient.refreshTokenOrAuthenticate((function(error) {
+    _refreshAirstageCloudClientTokenOrAuthenticate() {
+        this.airstageCloudClient.refreshTokenOrAuthenticate((function(error) {
             if (error) {
                 if (error === 'Invalid access token') {
                     this._unsetAccessTokenInConfig();
                 }
 
-                return this.log.error('Error when attempting to authenticate with Airstage:', error);
+                return this.log.error('Error when attempting to authenticate with Airstage Cloud:', error);
             }
 
             this._updateConfigWithAccessToken();
 
-            this.log.debug('Refreshed Airstage authentication');
+            this.log.debug('Refreshed Airstage Cloud authentication');
         }).bind(this));
     }
 
-    _refreshAirstageClientCache() {
-        this.airstageClient.refreshUserMetadataCache(
+    _refreshAirstageCloudClientCache() {
+        this.airstageCloudClient.refreshUserMetadataCache(
             (function(error) {
                 if (error) {
-                    return this.log.error('Error when attempting to communicate with Airstage:', error);
+                    return this.log.error('Error when attempting to communicate with Airstage Cloud:', error);
                 }
 
-                this.log.debug('Refreshed Airstage client user metadata cache');
+                this.log.debug('Refreshed Airstage Cloud client user metadata cache');
 
-                this.airstageClient.refreshDeviceCache(
+                this.airstageCloudClient.refreshDeviceCache(
                     (function(error, devices) {
                         if (error) {
-                            return this.log.error('Error when attempting to communicate with Airstage:', error);
+                            return this.log.error('Error when attempting to communicate with Airstage Cloud:', error);
                         }
 
-                        this.log.debug('Refreshed Airstage client device cache');
+                        this.log.debug('Refreshed Airstage Cloud client device cache');
 
-                        const deviceIds = Object.keys(devices.metadata);
+                        const deviceIds = Object.keys(devices.parameters);
 
                         deviceIds.forEach(function(deviceId) {
                             this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId);
                         }, this);
                     }).bind(this)
                 );
+            }).bind(this)
+        );
+    }
+
+    _refreshAirstageLanClientCache() {
+        this.airstageLanClient.refreshDeviceCache(
+            (function(error, devices) {
+                if (error) {
+                    return this.log.error('Error when attempting to communicate with Airstage LAN:', error);
+                }
+
+                this.log.debug('Refreshed Airstage LAN client device cache');
+
+                const deviceIds = Object.keys(devices.parameters);
+
+                deviceIds.forEach(function(deviceId) {
+                    this.accessoryManager.refreshAllAccessoryCharacteristics(deviceId);
+                }, this);
             }).bind(this)
         );
     }
