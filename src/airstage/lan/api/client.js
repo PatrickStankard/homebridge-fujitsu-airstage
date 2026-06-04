@@ -72,7 +72,8 @@ class Client {
             'hostname': hostname,
             'path': path,
             'method': method,
-            'headers': requestHeaders
+            'headers': requestHeaders,
+            'timeout': 30000 // 30 seconds
         };
 
         this._makeHttpRequest(requestOptions, requestBodyJson, callback);
@@ -98,6 +99,11 @@ class Client {
         }).on('error', (error) => {
             result.error = error;
             callback(result);
+        }).on('timeout', () => {
+            result.error = 'Request timeout';
+            callback(result);
+
+            request.destroy();
         });
 
         if (requestBodyJson) {
