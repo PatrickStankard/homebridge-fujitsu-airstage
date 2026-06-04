@@ -135,12 +135,17 @@ test('airstage.lan.Client#getModel calls _apiClient.postGetParam with success', 
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -169,7 +174,7 @@ test('airstage.lan.Client#getModel calls _apiClient.postGetParam with error', (c
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -206,12 +211,17 @@ test('airstage.lan.Client#getPowerState calls _apiClient.postGetParam with succe
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -240,7 +250,7 @@ test('airstage.lan.Client#getPowerState calls _apiClient.postGetParam with error
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -351,12 +361,17 @@ test('airstage.lan.Client#getOperationMode calls _apiClient.postGetParam with su
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -385,7 +400,7 @@ test('airstage.lan.Client#getOperationMode calls _apiClient.postGetParam with er
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -547,12 +562,17 @@ test('airstage.lan.Client#getIndoorTemperature calls _apiClient.postGetParam wit
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -581,7 +601,7 @@ test('airstage.lan.Client#getIndoorTemperature calls _apiClient.postGetParam wit
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -618,12 +638,17 @@ test('airstage.lan.Client#getTargetTemperature calls _apiClient.postGetParam wit
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -652,7 +677,7 @@ test('airstage.lan.Client#getTargetTemperature calls _apiClient.postGetParam wit
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -808,12 +833,17 @@ test('airstage.lan.Client#getTemperatureDelta calls _apiClient.postGetParam with
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -842,7 +872,7 @@ test('airstage.lan.Client#getTemperatureDelta calls _apiClient.postGetParam with
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -879,12 +909,17 @@ test('airstage.lan.Client#getFanSpeed calls _apiClient.postGetParam with success
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -913,7 +948,7 @@ test('airstage.lan.Client#getFanSpeed calls _apiClient.postGetParam with error',
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1024,12 +1059,17 @@ test('airstage.lan.Client#getAirflowVerticalDirection calls _apiClient.postGetPa
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1058,7 +1098,7 @@ test('airstage.lan.Client#getAirflowVerticalDirection calls _apiClient.postGetPa
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1257,12 +1297,17 @@ test('airstage.lan.Client#getAirflowVerticalSwingState calls _apiClient.postGetP
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1291,7 +1336,7 @@ test('airstage.lan.Client#getAirflowVerticalSwingState calls _apiClient.postGetP
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1402,12 +1447,17 @@ test('airstage.lan.Client#getPowerfulState calls _apiClient.postGetParam with su
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1436,7 +1486,7 @@ test('airstage.lan.Client#getPowerfulState calls _apiClient.postGetParam with er
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1547,12 +1597,17 @@ test('airstage.lan.Client#getEconomyState calls _apiClient.postGetParam with suc
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1581,7 +1636,7 @@ test('airstage.lan.Client#getEconomyState calls _apiClient.postGetParam with err
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1692,12 +1747,17 @@ test('airstage.lan.Client#getEnergySavingFanState calls _apiClient.postGetParam 
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1726,7 +1786,7 @@ test('airstage.lan.Client#getEnergySavingFanState calls _apiClient.postGetParam 
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1837,12 +1897,17 @@ test('airstage.lan.Client#getMinimumHeatState calls _apiClient.postGetParam with
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -1871,7 +1936,7 @@ test('airstage.lan.Client#getMinimumHeatState calls _apiClient.postGetParam with
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -2044,12 +2109,17 @@ test('airstage.lan.Client#getParameter with null parameter calls _apiClient.post
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -2087,12 +2157,17 @@ test('airstage.lan.Client#getParameter with undefined parameter calls _apiClient
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 1);
+        assert.strictEqual(mockedMethod.calls.length, 2);
+        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[1].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[1].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
         assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache('39FFBB9D6EBA');
 
@@ -2169,17 +2244,27 @@ test('airstage.lan.Client#getDevices without cache hit calls _apiClient.postGetP
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls.length, 4);
+        assert.strictEqual(mockedMethod.calls[3].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[3].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[3].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[3].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[3].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
+        assert.strictEqual(mockedMethod.calls[2].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[2].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[2].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[2].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[2].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
         assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[1].arguments[0], '2.3.4.5');
         assert.strictEqual(mockedMethod.calls[1].arguments[1], '96658F1BF601');
         assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '2.3.4.5');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '96658F1BF601');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache();
 
@@ -2221,17 +2306,27 @@ test('airstage.lan.Client#refreshDeviceCache calls _apiClient.postGetParam with 
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
-        assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
-        assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls.length, 4);
+        assert.strictEqual(mockedMethod.calls[3].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[3].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[3].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[3].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[3].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
+        assert.strictEqual(mockedMethod.calls[2].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[2].arguments[0], '1.2.3.4');
+        assert.strictEqual(mockedMethod.calls[2].arguments[1], '39FFBB9D6EBA');
+        assert.strictEqual(mockedMethod.calls[2].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[2].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
         assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
         assert.strictEqual(mockedMethod.calls[1].arguments[0], '2.3.4.5');
         assert.strictEqual(mockedMethod.calls[1].arguments[1], '96658F1BF601');
         assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
+        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls[0].arguments[0], '2.3.4.5');
+        assert.strictEqual(mockedMethod.calls[0].arguments[1], '96658F1BF601');
+        assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_ONLY_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache();
 
@@ -2260,24 +2355,16 @@ test('airstage.lan.Client#refreshDeviceCache calls _apiClient.postGetParam with 
     context.after(() => {
         const mockedMethod = clientWithFahrenheit._apiClient.postGetParam.mock;
 
-        assert.strictEqual(mockedMethod.calls.length, 2);
-        assert.strictEqual(mockedMethod.calls[0].arguments.length, 5);
+        assert.strictEqual(mockedMethod.calls.length, 1);
         assert.strictEqual(mockedMethod.calls[0].arguments[0], '1.2.3.4');
         assert.strictEqual(mockedMethod.calls[0].arguments[1], '39FFBB9D6EBA');
         assert.strictEqual(mockedMethod.calls[0].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES);
-        assert.strictEqual(mockedMethod.calls[1].arguments.length, 5);
-        assert.strictEqual(mockedMethod.calls[1].arguments[0], '2.3.4.5');
-        assert.strictEqual(mockedMethod.calls[1].arguments[1], '96658F1BF601');
-        assert.strictEqual(mockedMethod.calls[1].arguments[2], '0');
-        assert.strictEqual(mockedMethod.calls[1].arguments[3], airstage.constants.PARAMETER_NAMES);
+        assert.strictEqual(mockedMethod.calls[0].arguments[3], airstage.constants.PARAMETER_NAMES_BESIDES_MODEL);
     });
     clientWithFahrenheit.resetDeviceCache();
 
     clientWithFahrenheit.refreshDeviceCache((error, result) => {
-        assert.strictEqual(Object.keys(error).length, 2);
-        assert.strictEqual(error['39FFBB9D6EBA'], expectedError);
-        assert.strictEqual(error['96658F1BF601'], expectedError);
+        assert.strictEqual(error, expectedError);
         assert.strictEqual(result, null);
 
         done();

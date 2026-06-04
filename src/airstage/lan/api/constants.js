@@ -15,7 +15,6 @@ module.exports.SET_LEVEL_GET = '03';
 module.exports.SET_LEVEL_SET = '02';
 
 // Request header keys
-module.exports.REQUEST_HEADER_AUTHORIZATION = 'authorization';
 module.exports.REQUEST_HEADER_CONTENT_LENGTH = 'content-length';
 module.exports.REQUEST_HEADER_USER_AGENT = 'user-agent';
 
@@ -24,14 +23,7 @@ module.exports.PARAMETER_RESULT_SUCCESS = 'OK';
 
 // Request header templates
 module.exports.REQUEST_HEADERS_POST = {
-    'content-type': 'application/json',
-    'accept': 'application/json, text/plain, */*',
-    'sec-fetch-site': 'cross-site',
-    'accept-encoding': 'gzip, deflate, br',
-    'accept-language': 'en-US,en;q=0.9',
-    'sec-fetch-mode': 'cors',
-    'origin': 'file://',
-    'sec-fetch-dest': 'empty'
+    'content-type': 'application/json'
 };
 
 // Result template

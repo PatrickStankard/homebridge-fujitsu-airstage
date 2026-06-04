@@ -18,8 +18,7 @@ module.exports.PARAMETER_ECONOMY = 'iu_economy';
 module.exports.PARAMETER_ENERGY_SAVING_FAN = 'iu_fan_ctrl';
 module.exports.PARAMETER_MINIMUM_HEAT = 'iu_min_heat';
 
-module.exports.PARAMETER_NAMES = [
-    module.exports.PARAMETER_MODEL,
+module.exports.PARAMETER_NAMES_BESIDES_MODEL = [
     module.exports.PARAMETER_FAN_SPEED,
     module.exports.PARAMETER_ON_OFF,
     module.exports.PARAMETER_SET_TEMPERATURE,
@@ -33,6 +32,12 @@ module.exports.PARAMETER_NAMES = [
     module.exports.PARAMETER_ENERGY_SAVING_FAN,
     module.exports.PARAMETER_MINIMUM_HEAT
 ];
+
+module.exports.PARAMETER_NAMES_ONLY_MODEL = [
+    module.exports.PARAMETER_MODEL
+];
+
+module.exports.PARAMETER_NAMES = module.exports.PARAMETER_NAMES_BESIDES_MODEL.concat(module.exports.PARAMETER_NAMES_ONLY_MODEL);
 
 // Parameter values
 module.exports.PARAMETER_ON = '1';
