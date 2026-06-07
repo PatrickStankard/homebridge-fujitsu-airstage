@@ -15,15 +15,15 @@ module.exports.SET_LEVEL_GET = '03';
 module.exports.SET_LEVEL_SET = '02';
 
 // Request header keys
-module.exports.REQUEST_HEADER_CONTENT_LENGTH = 'content-length';
-module.exports.REQUEST_HEADER_USER_AGENT = 'user-agent';
+module.exports.REQUEST_HEADER_CONTENT_LENGTH = 'Content-Length';
+module.exports.REQUEST_HEADER_USER_AGENT = 'User-Agent';
 
 // Parameter results
 module.exports.PARAMETER_RESULT_SUCCESS = 'OK';
 
 // Request header templates
 module.exports.REQUEST_HEADERS_POST = {
-    'content-type': 'application/json'
+    'Content-Type': 'application/json'
 };
 
 // Result template
