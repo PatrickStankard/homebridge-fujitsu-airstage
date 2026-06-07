@@ -6,11 +6,10 @@ module.exports.MANUFACTURER_FUJITSU = 'Fujitsu';
 // Parameter names
 module.exports.PARAMETER_MODEL = 'iu_model';
 module.exports.PARAMETER_FAN_SPEED = 'iu_fan_spd';
-module.exports.PARAMETER_ON_OFF = 'iu_onoff'
+module.exports.PARAMETER_ON_OFF = 'iu_onoff';
 module.exports.PARAMETER_SET_TEMPERATURE = 'iu_set_tmp';
 module.exports.PARAMETER_INDOOR_TEMPERATURE = 'iu_indoor_tmp';
 module.exports.PARAMETER_OPERATION_MODE = 'iu_op_mode';
-module.exports.PARAMETER_FAN_SPEED = 'iu_fan_spd';
 module.exports.PARAMETER_AIRFLOW_VERTICAL_DIRECTION = 'iu_af_dir_vrt';
 module.exports.PARAMETER_AIRFLOW_VERTICAL_SWING = 'iu_af_swg_vrt';
 module.exports.PARAMETER_POWERFUL = 'iu_powerful';
@@ -19,7 +18,6 @@ module.exports.PARAMETER_ENERGY_SAVING_FAN = 'iu_fan_ctrl';
 module.exports.PARAMETER_MINIMUM_HEAT = 'iu_min_heat';
 
 module.exports.PARAMETER_NAMES_BESIDES_MODEL = [
-    module.exports.PARAMETER_FAN_SPEED,
     module.exports.PARAMETER_ON_OFF,
     module.exports.PARAMETER_SET_TEMPERATURE,
     module.exports.PARAMETER_INDOOR_TEMPERATURE,
