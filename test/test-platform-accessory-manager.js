@@ -17,6 +17,50 @@ const deviceId = '1234';
 const deviceName = 'Test Device';
 const deviceModel = 'Test Model';
 
+test('PlatformAccessoryManager#registerHeaterCoolerAccessory registers existing accessory', (context) => {
+    const existingUuid = hap.uuid.generate(
+        deviceId + '-heater-cooler'
+    );
+    const existingPlatformAccessory = new mockHomebridge.platform.api.platformAccessory(
+        'Test Device Heater Cooler',
+        existingUuid
+    );
+    mockHomebridge.platform.accessories = [existingPlatformAccessory];
+
+    platformAccessoryManager.registerHeaterCoolerAccessory(deviceId, deviceName, deviceModel);
+
+    const mockedMethod = mockHomebridge.platform.api.updatePlatformAccessories.mock;
+    assert.strictEqual(mockedMethod.calls.length, 1);
+    const mockPlatformAccessory = mockedMethod.calls[0].arguments[0][0];
+    assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
+    assert.strictEqual(mockPlatformAccessory.name, 'Test Device Heater Cooler');
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
+    assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
+    assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
+    assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
+    assert.strictEqual(mockHomebridge.platform.accessories[0], mockPlatformAccessory);
+
+    mockHomebridge.resetMocks();
+});
+
+test('PlatformAccessoryManager#registerHeaterCoolerAccessory registers new accessory', (context) => {
+    platformAccessoryManager.registerHeaterCoolerAccessory(deviceId, deviceName, deviceModel);
+
+    const mockedMethod = mockHomebridge.platform.api.registerPlatformAccessories.mock;
+    assert.strictEqual(mockedMethod.calls.length, 1);
+    assert.strictEqual(mockedMethod.calls[0].arguments[0], settings.PLUGIN_NAME);
+    assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
+    const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
+    assert.strictEqual(mockPlatformAccessory.name, 'Test Device Heater Cooler');
+    assert.strictEqual(mockPlatformAccessory.context.airstageClient, mockHomebridge.platform.airstageCloudClient);
+    assert.strictEqual(mockPlatformAccessory.context.deviceId, deviceId);
+    assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
+    assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
+    assert.strictEqual(mockHomebridge.platform.accessories[0], mockPlatformAccessory);
+
+    mockHomebridge.resetMocks();
+});
+
 test('PlatformAccessoryManager#registerThermostatAccessory registers existing accessory', (context) => {
     const existingUuid = hap.uuid.generate(
         deviceId + '-thermostat'
@@ -453,6 +497,28 @@ test('PlatformAccessoryManager#registerPowerfulSwitchAccessory registers new acc
     assert.strictEqual(mockPlatformAccessory.context.model, deviceModel);
     assert.strictEqual(mockHomebridge.platform.accessories.length, 1);
     assert.strictEqual(mockHomebridge.platform.accessories[0], mockPlatformAccessory);
+
+    mockHomebridge.resetMocks();
+});
+
+test('PlatformAccessoryManager#unregisterHeaterCoolerAccessory unregisters existing accessory', (context) => {
+    const existingUuid = hap.uuid.generate(
+        deviceId + '-heater-cooler'
+    );
+    const existingPlatformAccessory = new mockHomebridge.platform.api.platformAccessory(
+        'Test Device Heater Cooler',
+        existingUuid
+    );
+    mockHomebridge.platform.accessories = [existingPlatformAccessory];
+
+    platformAccessoryManager.unregisterHeaterCoolerAccessory(deviceId, deviceName);
+
+    const mockedMethod = mockHomebridge.platform.api.unregisterPlatformAccessories.mock;
+    assert.strictEqual(mockedMethod.calls.length, 1);
+    assert.strictEqual(mockedMethod.calls[0].arguments[0], settings.PLUGIN_NAME);
+    assert.strictEqual(mockedMethod.calls[0].arguments[1], settings.PLATFORM_NAME);
+    const mockPlatformAccessory = mockedMethod.calls[0].arguments[2][0];
+    assert.strictEqual(mockPlatformAccessory, existingPlatformAccessory);
 
     mockHomebridge.resetMocks();
 });

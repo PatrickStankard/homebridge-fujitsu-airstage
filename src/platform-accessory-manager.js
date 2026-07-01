@@ -13,6 +13,28 @@ class PlatformAccessoryManager {
         this.Characteristic = this.platform.Characteristic;
     }
 
+    registerHeaterCoolerAccessory(deviceId, deviceName, model) {
+        const suffix = constants.ACCESSORY_SUFFIX_HEATER_COOLER;
+        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (existingAccessory) {
+            this._updateExistingAccessory(existingAccessory, deviceId, model);
+
+            new accessories.HeaterCoolerAccessory(this.platform, existingAccessory);
+        } else {
+            const newAccessory = this._instantiateNewAccessory(
+                deviceId,
+                deviceName,
+                model,
+                suffix
+            );
+
+            new accessories.HeaterCoolerAccessory(this.platform, newAccessory);
+
+            this._registerNewAccessory(newAccessory, deviceId, model);
+        }
+    }
+
     registerThermostatAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_THERMOSTAT;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -233,6 +255,12 @@ class PlatformAccessoryManager {
         }
     }
 
+    unregisterHeaterCoolerAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_HEATER_COOLER;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
     unregisterThermostatAccessory(deviceId, deviceName) {
         const suffix = constants.ACCESSORY_SUFFIX_THERMOSTAT;
 
@@ -302,6 +330,7 @@ class PlatformAccessoryManager {
     }
 
     refreshAllAccessoryCharacteristics(deviceId) {
+        this.refreshHeaterCoolerAccessoryCharacteristics(deviceId);
         this.refreshThermostatAccessoryCharacteristics(deviceId);
         this.refreshFanAccessoryCharacteristics(deviceId);
         this.refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId);
@@ -312,6 +341,30 @@ class PlatformAccessoryManager {
         this.refreshFanModeSwitchAccessoryCharacteristics(deviceId);
         this.refreshMinimumHeatModeSwitchAccessoryCharacteristics(deviceId);
         this.refreshPowerfulSwitchAccessoryCharacteristics(deviceId);
+    }
+
+    refreshHeaterCoolerAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_HEATER_COOLER;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.Characteristic.Active,
+                this.Characteristic.CurrentHeaterCoolerState,
+                this.Characteristic.TargetHeaterCoolerState,
+                this.Characteristic.CurrentTemperature,
+                this.Characteristic.CoolingThresholdTemperature,
+                this.Characteristic.HeatingThresholdTemperature,
+                this.Characteristic.TemperatureDisplayUnits,
+                this.Characteristic.RotationSpeed,
+                this.Characteristic.SwingMode
+            ]
+        );
     }
 
     refreshThermostatAccessoryCharacteristics(deviceId) {
