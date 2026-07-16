@@ -343,6 +343,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, null);
 
                 this._refreshDynamicServiceCharacteristics();
+                this._refreshRelatedAccessoryCharacteristics();
 
                 this._setAirflowVerticalDirectionHandle = null;
 
