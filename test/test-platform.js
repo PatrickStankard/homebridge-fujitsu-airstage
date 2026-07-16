@@ -20,7 +20,8 @@ test('Platform#constructor configures classes using platform config', (context) 
         'cloudPollingInterval': 30,
         'lanDevices': [],
         'lanTemperatureScale': 'C',
-        'lanPollingInterval': 30
+        'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm'
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -61,7 +62,8 @@ test('Platform#configureAccessory pushes accessory to accessories', (context) =>
         'cloudPollingInterval': 30,
         'lanDevices': [],
         'lanTemperatureScale': 'C',
-        'lanPollingInterval': 30
+        'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm'
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -88,7 +90,8 @@ test('Platform#discoverDevices when airstageCloudClient.refreshTokenOrAuthentica
         'cloudPollingInterval': 30,
         'lanDevices': [],
         'lanTemperatureScale': 'C',
-        'lanPollingInterval': 30
+        'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm'
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -125,7 +128,8 @@ test('Platform#discoverDevices updates platform config with access token', (cont
         'cloudPollingInterval': 30,
         'lanDevices': [],
         'lanTemperatureScale': 'C',
-        'lanPollingInterval': 30
+        'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm'
     };
     const platform = new Platform(
         mockHomebridge.platform.log,
@@ -334,6 +338,7 @@ test('Platform#discoverDevices registers accessory when enableThermostat is true
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableThermostat': true
     };
     const platform = new Platform(
@@ -401,6 +406,7 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableThermostat': false
     };
     const platform = new Platform(
@@ -466,6 +472,7 @@ test('Platform#discoverDevices registers accessory when enableFan is true', (con
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableFan': true
     };
     const platform = new Platform(
@@ -533,6 +540,7 @@ test('Platform#discoverDevices does not register accessory when enableFan is fal
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableFan': false
     };
     const platform = new Platform(
@@ -598,6 +606,7 @@ test('Platform#discoverDevices registers accessory when enableVerticalAirflowDir
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableVerticalAirflowDirection': true
     };
     const platform = new Platform(
@@ -665,6 +674,7 @@ test('Platform#discoverDevices does not register accessory when enableVerticalAi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableVerticalAirflowDirection': false
     };
     const platform = new Platform(
@@ -730,6 +740,7 @@ test('Platform#discoverDevices registers accessory when enableAutoFanSpeedSwitch
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableAutoFanSpeedSwitch': true
     };
     const platform = new Platform(
@@ -797,6 +808,7 @@ test('Platform#discoverDevices does not register accessory when enableAutoFanSpe
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableAutoFanSpeedSwitch': false
     };
     const platform = new Platform(
@@ -862,6 +874,7 @@ test('Platform#discoverDevices registers accessory when enableDryModeSwitch is t
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableDryModeSwitch': true
     };
     const platform = new Platform(
@@ -929,6 +942,7 @@ test('Platform#discoverDevices does not register accessory when enableDryModeSwi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableDryModeSwitch': false
     };
     const platform = new Platform(
@@ -994,6 +1008,7 @@ test('Platform#discoverDevices registers accessory when enableEconomySwitch is t
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableEconomySwitch': true
     };
     const platform = new Platform(
@@ -1061,6 +1076,7 @@ test('Platform#discoverDevices does not register accessory when enableEconomySwi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableEconomySwitch': false
     };
     const platform = new Platform(
@@ -1126,6 +1142,7 @@ test('Platform#discoverDevices registers accessory when enableEnergySavingFanSwi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableEnergySavingFanSwitch': true
     };
     const platform = new Platform(
@@ -1193,6 +1210,7 @@ test('Platform#discoverDevices does not register accessory when enableEnergySavi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableEnergySavingFanSwitch': false
     };
     const platform = new Platform(
@@ -1258,6 +1276,7 @@ test('Platform#discoverDevices registers accessory when enableFanModeSwitch is t
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableFanModeSwitch': true
     };
     const platform = new Platform(
@@ -1325,6 +1344,7 @@ test('Platform#discoverDevices does not register accessory when enableFanModeSwi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableFanModeSwitch': false
     };
     const platform = new Platform(
@@ -1390,6 +1410,7 @@ test('Platform#discoverDevices registers accessory when enableMinimumHeatModeSwi
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableMinimumHeatModeSwitch': true
     };
     const platform = new Platform(
@@ -1457,6 +1478,7 @@ test('Platform#discoverDevices does not register accessory when enableMinimumHea
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enableMinimumHeatModeSwitch': false
     };
     const platform = new Platform(
@@ -1522,6 +1544,7 @@ test('Platform#discoverDevices registers accessory when enablePowerfulSwitch is 
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enablePowerfulSwitch': true
     };
     const platform = new Platform(
@@ -1589,6 +1612,7 @@ test('Platform#discoverDevices does not register accessory when enablePowerfulSw
         'lanDevices': [],
         'lanTemperatureScale': 'C',
         'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
         'enablePowerfulSwitch': false
     };
     const platform = new Platform(

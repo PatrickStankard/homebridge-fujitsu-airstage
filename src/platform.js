@@ -73,7 +73,18 @@ class Platform {
             );
 
             if (withSetInterval) {
-                const lanPollingInterval = ((this.config.lanPollingInterval * 1000) * 60);
+                const lanPollingIntervalUnits = this.config.lanPollingIntervalUnits ?? 'm';
+                const lanPollingIntervalValue = this.config.lanPollingInterval;
+
+                let lanPollingInterval = 0;
+
+                if (lanPollingIntervalUnits === 'm') {
+                    // Minutes
+                    lanPollingInterval = (lanPollingIntervalValue * 60 * 1000);
+                } else if (lanPollingIntervalUnits === 's') {
+                    // Seconds
+                    lanPollingInterval = (lanPollingIntervalValue * 1000);
+                }
 
                 if (lanPollingInterval > 0) {
                     setInterval(
