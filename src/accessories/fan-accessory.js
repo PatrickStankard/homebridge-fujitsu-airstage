@@ -383,6 +383,7 @@ class FanAccessory extends Accessory {
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
+        accessoryManager.refreshHeaterCoolerAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
