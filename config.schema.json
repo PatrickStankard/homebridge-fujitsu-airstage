@@ -142,10 +142,29 @@
                 }
             },
             "lanPollingInterval": {
-                "title": "LAN Polling Interval",
+                "title": "LAN Polling Interval (value)",
                 "type": "integer",
                 "default": 30,
-                "description": "The polling interval for getting updates from local devices, in minutes. Set to '0' to disable polling completely.",
+                "description": "The polling interval value for getting updates from local devices. Set to '0' to disable polling completely.",
+                "condition": {
+                    "functionBody": "return model.enableLanControl === true;"
+                }
+            },
+            "lanPollingIntervalUnits": {
+                "title": "LAN Polling Interval (units)",
+                "type": "string",
+                "default": "m",
+                "description": "The units used by the polling interval for getting updates from local devices: either minutes (default), or seconds.",
+                "oneOf": [
+                    {
+                        "title": "Minutes (m)",
+                        "enum": ["m"]
+                    },
+                    {
+                        "title": "Seconds (s)",
+                        "enum": ["s"]
+                    }
+                ],
                 "condition": {
                     "functionBody": "return model.enableLanControl === true;"
                 }
