@@ -150,6 +150,11 @@
                     "functionBody": "return model.enableLanControl === true;"
                 }
             },
+            "enableHeaterCooler": {
+                "title": "Enable heater cooler control",
+                "type": "boolean",
+                "default": false
+            },
             "enableThermostat": {
                 "title": "Enable thermostat control",
                 "type": "boolean",

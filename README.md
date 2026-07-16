@@ -33,6 +33,7 @@ installed and configured this plugin:
             "email": "test@example.com",
             "password": "test1234",
             "apiPollingInterval": 30,
+            "enableHeaterCooler": false,
             "enableThermostat": true,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,
@@ -53,6 +54,12 @@ installed and configured this plugin:
 For each device in your Airstage account, this plugin offers several
 accessories that you can use in order to control them. You can enable these
 accessories for your devices in the plugin config.
+
+### Heater Cooler
+
+This accessory allows you to control the temperature, operating
+mode (cool/heat/auto), fan speed, oscillation state (on/off), and
+power state (on/off) of your device.
 
 ### Thermostat
 

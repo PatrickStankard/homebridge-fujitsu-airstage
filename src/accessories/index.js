@@ -1,5 +1,6 @@
 'use strict';
 
+const HeaterCoolerAccessory = require('./heater-cooler-accessory');
 const ThermostatAccessory = require('./thermostat-accessory');
 const FanAccessory = require('./fan-accessory');
 const VerticalAirflowDirectionAccessory = require('./vertical-airflow-direction-accessory');
@@ -12,6 +13,7 @@ const MinimumHeatModeSwitchAccessory = require('./minimum-heat-mode-switch-acces
 const PowerfulSwitchAccessory = require('./powerful-switch-accessory');
 
 module.exports = {
+    HeaterCoolerAccessory,
     ThermostatAccessory,
     FanAccessory,
     VerticalAirflowDirectionAccessory,

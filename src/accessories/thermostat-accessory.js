@@ -315,6 +315,7 @@ class ThermostatAccessory extends Accessory {
                 this._logMethodCallResult(methodName, null, null);
 
                 this._refreshDynamicServiceCharacteristics();
+                this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
             }).bind(this)
@@ -373,6 +374,8 @@ class ThermostatAccessory extends Accessory {
 
                 this._logMethodCallResult(methodName, null, null);
 
+                this._refreshRelatedAccessoryCharacteristics();
+
                 callback(null);
             }).bind(this)
         );
@@ -425,6 +428,7 @@ class ThermostatAccessory extends Accessory {
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
+        accessoryManager.refreshHeaterCoolerAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);

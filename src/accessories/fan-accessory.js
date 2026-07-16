@@ -35,6 +35,7 @@ class FanAccessory extends Accessory {
             .on('get', this.getRotationSpeed.bind(this))
             .on('set', this.setRotationSpeed.bind(this));
 
+        this.dynamicServiceCharacteristics.push(this.Characteristic.SwingMode);
         this.service.getCharacteristic(this.Characteristic.SwingMode)
             .on('get', this.getSwingMode.bind(this))
             .on('set', this.setSwingMode.bind(this));
@@ -344,6 +345,7 @@ class FanAccessory extends Accessory {
 
                 this._logMethodCallResult(methodName, null, null);
 
+                this._refreshDynamicServiceCharacteristics();
                 this._refreshRelatedAccessoryCharacteristics();
 
                 callback(null);
@@ -383,6 +385,7 @@ class FanAccessory extends Accessory {
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
+        accessoryManager.refreshHeaterCoolerAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);

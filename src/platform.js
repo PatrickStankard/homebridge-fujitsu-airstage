@@ -271,6 +271,20 @@ class Platform {
         deviceName,
         model
     ) {
+        // Heater Cooler
+        if (this.config.enableHeaterCooler) {
+            this.accessoryManager.registerHeaterCoolerAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterHeaterCoolerAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
         // Thermostat
         if (this.config.enableThermostat) {
             this.accessoryManager.registerThermostatAccessory(
