@@ -35,9 +35,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -93,9 +91,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -136,9 +132,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Minimum Heat Mode Switch';
@@ -175,9 +169,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                     airstage.constants.TEMPERATURE_SCALE_CELSIUS,
                     (function(error, targetTemperature) {
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error);
+                            return this._handleError(methodName, error, callback, false);
                         }
 
                         this.lastKnownTargetTemperature = targetTemperature;

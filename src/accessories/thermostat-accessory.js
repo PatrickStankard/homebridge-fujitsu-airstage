@@ -48,9 +48,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -125,9 +123,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -188,9 +184,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, powerState) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (value === this.Characteristic.TargetHeatingCoolingState.OFF) {
@@ -262,9 +256,7 @@ class ThermostatAccessory extends Accessory {
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
             (function (error, indoorTemperature) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 this._logMethodCallResult(methodName, null, indoorTemperature);
@@ -284,9 +276,7 @@ class ThermostatAccessory extends Accessory {
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
             (function (error, targetTemperature) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 this._logMethodCallResult(methodName, null, targetTemperature);
@@ -307,9 +297,7 @@ class ThermostatAccessory extends Accessory {
             airstage.constants.TEMPERATURE_SCALE_CELSIUS,
             (function (error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);
@@ -332,9 +320,7 @@ class ThermostatAccessory extends Accessory {
                 let temperatureDisplayUnits = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (temperatureScale === airstage.constants.TEMPERATURE_SCALE_CELSIUS) {
@@ -367,9 +353,7 @@ class ThermostatAccessory extends Accessory {
             temperatureScale,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);
@@ -390,9 +374,7 @@ class ThermostatAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Thermostat';
@@ -410,9 +392,7 @@ class ThermostatAccessory extends Accessory {
             operationMode,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);

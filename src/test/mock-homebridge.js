@@ -91,7 +91,8 @@ const mockPlatform = {
     'log': {
         'debug': mock.fn(() => {}),
         'error': mock.fn(() => {}),
-        'info': mock.fn(() => {})
+        'info': mock.fn(() => {}),
+        'warn': mock.fn(() => {})
     }
 };
 
@@ -114,6 +115,7 @@ class MockHomebridge {
         mockPlatform.log.debug.mock.resetCalls();
         mockPlatform.log.error.mock.resetCalls();
         mockPlatform.log.info.mock.resetCalls();
+        mockPlatform.log.warn.mock.resetCalls();
         mockPlatform.accessories = [];
         mockPlatform.lanDeviceIds = [];
     }

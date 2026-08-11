@@ -32,9 +32,7 @@ class EnergySavingFanSwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -90,9 +88,7 @@ class EnergySavingFanSwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -133,9 +129,7 @@ class EnergySavingFanSwitchAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Energy Saving Fan Switch';
@@ -153,9 +147,7 @@ class EnergySavingFanSwitchAccessory extends Accessory {
             energySavingFanState,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);

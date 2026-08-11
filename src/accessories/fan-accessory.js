@@ -54,9 +54,7 @@ class FanAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_ON) {
@@ -90,9 +88,7 @@ class FanAccessory extends Accessory {
             powerState,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);
@@ -116,9 +112,7 @@ class FanAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_ON) {
@@ -145,9 +139,7 @@ class FanAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
@@ -174,9 +166,7 @@ class FanAccessory extends Accessory {
                 airstage.constants.FAN_SPEED_AUTO,
                 (function(error) {
                     if (error) {
-                        this._logMethodCallResult(methodName, error);
-
-                        return callback(error);
+                        return this._handleError(methodName, error, callback, false);
                     }
 
                     this._logMethodCallResult(methodName, null, null);
@@ -206,9 +196,7 @@ class FanAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Fan';
@@ -231,9 +219,7 @@ class FanAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (fanSpeed === airstage.constants.FAN_SPEED_AUTO) {
@@ -302,9 +288,7 @@ class FanAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (swingState === airstage.constants.TOGGLE_ON) {
@@ -338,9 +322,7 @@ class FanAccessory extends Accessory {
             swingState,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);

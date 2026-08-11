@@ -32,9 +32,7 @@ class EconomySwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -51,9 +49,7 @@ class EconomySwitchAccessory extends Accessory {
                         let value = null;
 
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
-
-                            return callback(error, null);
+                            return this._handleError(methodName, error, callback);
                         }
 
                         if (economyState === airstage.constants.TOGGLE_ON) {
@@ -90,9 +86,7 @@ class EconomySwitchAccessory extends Accessory {
                 let value = null;
 
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
@@ -101,9 +95,7 @@ class EconomySwitchAccessory extends Accessory {
                         airstage.constants.TOGGLE_ON,
                         (function(error) {
                             if (error) {
-                                this._logMethodCallResult(methodName, error);
-
-                                return callback(error);
+                                return this._handleError(methodName, error, callback, false);
                             }
 
                             this._setEconomyState(
@@ -133,9 +125,7 @@ class EconomySwitchAccessory extends Accessory {
             this.deviceId,
             (function(error, name) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error, null);
+                    return this._handleError(methodName, error, callback);
                 }
 
                 const value = name + ' Economy Switch';
@@ -153,9 +143,7 @@ class EconomySwitchAccessory extends Accessory {
             economyState,
             (function(error) {
                 if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
+                    return this._handleError(methodName, error, callback, false);
                 }
 
                 this._logMethodCallResult(methodName, null, null);
