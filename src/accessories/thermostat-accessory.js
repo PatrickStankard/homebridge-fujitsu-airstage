@@ -429,6 +429,7 @@ class ThermostatAccessory extends Accessory {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshHeaterCoolerAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshTemperatureAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);

@@ -359,6 +359,7 @@ class VerticalAirflowDirectionAccessory extends Accessory {
 
         accessoryManager.refreshHeaterCoolerAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshTemperatureAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshDryModeSwitchAccessoryCharacteristics(this.deviceId);
