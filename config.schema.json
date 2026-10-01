@@ -179,6 +179,11 @@
                 "type": "boolean",
                 "default": true
             },
+            "enableTemperature": {
+                "title": "Enable temperature control",
+                "type": "boolean",
+                "default": false
+            },
             "enableFan": {
                 "title": "Enable fan control",
                 "type": "boolean",
