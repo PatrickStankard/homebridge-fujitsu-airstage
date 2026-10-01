@@ -459,6 +459,140 @@ test('Platform#discoverDevices does not register accessory when enableThermostat
     });
 });
 
+test('Platform#discoverDevices registers accessory when enableTemperature is true', (context, done) => {
+    const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
+        'region': 'us',
+        'country': 'United States',
+        'language': 'en',
+        'email': 'test@example.com',
+        'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
+        'enableTemperature': true
+    };
+    const platform = new Platform(
+        mockHomebridge.platform.log,
+        platformConfig,
+        mockHomebridge.platform.api,
+        false
+    );
+    context.mock.method(
+        platform.airstageCloudClient,
+        'refreshTokenOrAuthenticate',
+        (callback) => {
+            callback(null);
+        }
+    );
+    context.mock.method(
+        platform.airstageCloudClient,
+        'getUserMetadata',
+        (callback) => {
+            callback(null);
+        }
+    );
+
+    context.mock.method(
+        platform.airstageCloudClient,
+        'getDevices',
+        (limit, callback) => {
+            callback(null, {
+                'metadata': {
+                    'testDevice': {
+                        'deviceName': 'Test Device'
+                    }
+                },
+                'parameters': {
+                    'testDevice': {
+                        'iu_model': 'Fujitsu Mini Split'
+                    }
+                }
+            });
+        }
+    );
+
+    platform.discoverDevices(function(error) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(platform.accessories.length, 1);
+        const accessory = platform.accessories[0];
+        assert.strictEqual(accessory.name, 'Test Device Temperature');
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
+test('Platform#discoverDevices does not register accessory when enableTemperature is false', (context, done) => {
+    const platformConfig = {
+        'platform': 'fujitsu-airstage',
+        'enableCloudControl': true,
+        'region': 'us',
+        'country': 'United States',
+        'language': 'en',
+        'email': 'test@example.com',
+        'password': 'test1234',
+        'cloudPollingInterval': 30,
+        'lanDevices': [],
+        'lanTemperatureScale': 'C',
+        'lanPollingInterval': 30,
+        'lanPollingIntervalUnits': 'm',
+        'enableTemperature': false
+    };
+    const platform = new Platform(
+        mockHomebridge.platform.log,
+        platformConfig,
+        mockHomebridge.platform.api,
+        false
+    );
+    context.mock.method(
+        platform.airstageCloudClient,
+        'refreshTokenOrAuthenticate',
+        (callback) => {
+            callback(null);
+        }
+    );
+    context.mock.method(
+        platform.airstageCloudClient,
+        'getUserMetadata',
+        (callback) => {
+            callback(null);
+        }
+    );
+
+    context.mock.method(
+        platform.airstageCloudClient,
+        'getDevices',
+        (limit, callback) => {
+            callback(null, {
+                'metadata': {
+                    'testDevice': {
+                        'deviceName': 'Test Device'
+                    }
+                },
+                'parameters': {
+                    'testDevice': {
+                        'iu_model': 'Fujitsu Mini Split'
+                    }
+                }
+            });
+        }
+    );
+
+    platform.discoverDevices(function(error) {
+        assert.strictEqual(error, null);
+        assert.strictEqual(platform.accessories.length, 0);
+
+        mockHomebridge.resetMocks();
+
+        done();
+    });
+});
+
 test('Platform#discoverDevices registers accessory when enableFan is true', (context, done) => {
     const platformConfig = {
         'platform': 'fujitsu-airstage',
