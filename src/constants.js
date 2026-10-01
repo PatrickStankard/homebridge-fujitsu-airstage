@@ -3,6 +3,7 @@
 // Accessory suffixes
 module.exports.ACCESSORY_SUFFIX_HEATER_COOLER = 'heater-cooler';
 module.exports.ACCESSORY_SUFFIX_THERMOSTAT = 'thermostat';
+module.exports.ACCESSORY_SUFFIX_TEMPERATURE = 'temperature';
 module.exports.ACCESSORY_SUFFIX_FAN = 'fan';
 // Deprecated: the VerticalSlatsAccessory was replaced by the
 // VerticalAirflowDirectionAccessory

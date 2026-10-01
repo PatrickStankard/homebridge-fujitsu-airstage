@@ -57,6 +57,28 @@ class PlatformAccessoryManager {
         }
     }
 
+    registerTemperatureAccessory(deviceId, deviceName, model) {
+        const suffix = constants.ACCESSORY_SUFFIX_TEMPERATURE;
+        const existingAccessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (existingAccessory) {
+            this._updateExistingAccessory(existingAccessory, deviceId, model);
+
+            new accessories.TemperatureAccessory(this.platform, existingAccessory);
+        } else {
+            const newAccessory = this._instantiateNewAccessory(
+                deviceId,
+                deviceName,
+                model,
+                suffix
+            );
+
+            new accessories.TemperatureAccessory(this.platform, newAccessory);
+
+            this._registerNewAccessory(newAccessory, deviceId, model);
+        }
+    }
+
     registerFanAccessory(deviceId, deviceName, model) {
         const suffix = constants.ACCESSORY_SUFFIX_FAN;
         const existingAccessory = this._getExistingAccessory(deviceId, suffix);
@@ -267,6 +289,12 @@ class PlatformAccessoryManager {
         this._unregisterAccessory(deviceId, deviceName, suffix);
     }
 
+    unregisterTemperatureAccessory(deviceId, deviceName) {
+        const suffix = constants.ACCESSORY_SUFFIX_TEMPERATURE;
+
+        this._unregisterAccessory(deviceId, deviceName, suffix);
+    }
+
     unregisterFanAccessory(deviceId, deviceName) {
         const suffix = constants.ACCESSORY_SUFFIX_FAN;
 
@@ -332,6 +360,7 @@ class PlatformAccessoryManager {
     refreshAllAccessoryCharacteristics(deviceId) {
         this.refreshHeaterCoolerAccessoryCharacteristics(deviceId);
         this.refreshThermostatAccessoryCharacteristics(deviceId);
+        this.refreshTemperatureAccessoryCharacteristics(deviceId);
         this.refreshFanAccessoryCharacteristics(deviceId);
         this.refreshVerticalAirflowDirectionAccessoryCharacteristics(deviceId);
         this.refreshAutoFanSpeedSwitchAccessoryCharacteristics(deviceId);
@@ -369,6 +398,26 @@ class PlatformAccessoryManager {
 
     refreshThermostatAccessoryCharacteristics(deviceId) {
         const suffix = constants.ACCESSORY_SUFFIX_THERMOSTAT;
+        const accessory = this._getExistingAccessory(deviceId, suffix);
+
+        if (accessory === null) {
+            return false;
+        }
+
+        return this._refreshAccessoryCharacteristics(
+            accessory,
+            [
+                this.Characteristic.CurrentHeatingCoolingState,
+                this.Characteristic.TargetHeatingCoolingState,
+                this.Characteristic.CurrentTemperature,
+                this.Characteristic.TargetTemperature,
+                this.Characteristic.TemperatureDisplayUnits
+            ]
+        );
+    }
+
+    refreshTemperatureAccessoryCharacteristics(deviceId) {
+        const suffix = constants.ACCESSORY_SUFFIX_TEMPERATURE;
         const accessory = this._getExistingAccessory(deviceId, suffix);
 
         if (accessory === null) {

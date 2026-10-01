@@ -310,6 +310,20 @@ class Platform {
             );
         }
 
+        // Temperature
+        if (this.config.enableTemperature) {
+            this.accessoryManager.registerTemperatureAccessory(
+                deviceId,
+                deviceName,
+                model
+            );
+        } else {
+            this.accessoryManager.unregisterTemperatureAccessory(
+                deviceId,
+                deviceName
+            );
+        }
+
         // Fan
         if (this.config.enableFan) {
             this.accessoryManager.registerFanAccessory(

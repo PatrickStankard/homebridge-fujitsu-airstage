@@ -3,7 +3,7 @@
 const Accessory = require('./accessory');
 const airstage = require('./../airstage');
 
-class ThermostatAccessory extends Accessory {
+class TemperatureAccessory extends Accessory {
 
     constructor(platform, accessory) {
         super(platform, accessory);
@@ -20,7 +20,7 @@ class ThermostatAccessory extends Accessory {
         this.dynamicServiceCharacteristics.push(this.Characteristic.TargetHeatingCoolingState);
         this.service.getCharacteristic(this.Characteristic.TargetHeatingCoolingState)
             .on('get', this.getTargetHeatingCoolingState.bind(this))
-            .on('set', this.setTargetHeatingCoolingState.bind(this));
+            .on('set', this.setTargetHeatingCoolingState.bind(this))
 
         this.dynamicServiceCharacteristics.push(this.Characteristic.CurrentTemperature);
         this.service.getCharacteristic(this.Characteristic.CurrentTemperature)
@@ -33,7 +33,7 @@ class ThermostatAccessory extends Accessory {
 
         this.service.getCharacteristic(this.Characteristic.TemperatureDisplayUnits)
             .on('get', this.getTemperatureDisplayUnits.bind(this))
-            .on('set', this.setTemperatureDisplayUnits.bind(this));
+            .on('set', this.setTemperatureDisplayUnits.bind(this))
 
         this.service.getCharacteristic(this.Characteristic.Name)
             .on('get', this.getName.bind(this));
@@ -54,6 +54,12 @@ class ThermostatAccessory extends Accessory {
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this._logMethodCallResult(
+                        methodName,
+                        null,
+                        this.Characteristic.CurrentHeatingCoolingState.OFF
+                    );
+
                     return callback(
                         null,
                         this.Characteristic.CurrentHeatingCoolingState.OFF
@@ -131,6 +137,12 @@ class ThermostatAccessory extends Accessory {
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
+                    this._logMethodCallResult(
+                        methodName,
+                        null,
+                        this.Characteristic.TargetHeatingCoolingState.OFF
+                    );
+
                     return callback(
                         null,
                         this.Characteristic.TargetHeatingCoolingState.OFF
@@ -143,20 +155,14 @@ class ThermostatAccessory extends Accessory {
                         let targetHeatingCoolingState = null;
 
                         if (error) {
-                            this._logMethodCallResult(methodName, error);
+                            this._logMethodCallResult(methodName, error, null);
 
                             return callback(error, null);
                         }
 
-                        if (operationMode === airstage.constants.OPERATION_MODE_COOL) {
-                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.COOL;
-                        } else if (operationMode === airstage.constants.OPERATION_MODE_DRY) {
-                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.COOL;
-                        } else if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
+                        if (operationMode === airstage.constants.OPERATION_MODE_FAN) {
                             targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.OFF;
-                        } else if (operationMode === airstage.constants.OPERATION_MODE_HEAT) {
-                            targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.HEAT;
-                        } else if (operationMode === airstage.constants.OPERATION_MODE_AUTO) {
+                        } else {
                             targetHeatingCoolingState = this.Characteristic.TargetHeatingCoolingState.AUTO;
                         }
 
@@ -174,16 +180,9 @@ class ThermostatAccessory extends Accessory {
 
         this._logMethodCall(methodName, value);
 
-        let operationMode = null;
-
-        if (value === this.Characteristic.TargetHeatingCoolingState.COOL) {
-            operationMode = airstage.constants.OPERATION_MODE_COOL;
-        } else if (value === this.Characteristic.TargetHeatingCoolingState.HEAT) {
-            operationMode = airstage.constants.OPERATION_MODE_HEAT;
-        } else if (value === this.Characteristic.TargetHeatingCoolingState.AUTO) {
-            operationMode = airstage.constants.OPERATION_MODE_AUTO;
-        }
-
+        // Setting the target heating cooling state itself is a no-op - we
+        // only set the target temperature in this accessory. However, we can
+        // allow for toggling the power on and off based on the value given.
         this.airstageClient.getPowerState(
             this.deviceId,
             (function(error, powerState) {
@@ -233,19 +232,21 @@ class ThermostatAccessory extends Accessory {
                                     return callback(error);
                                 }
 
-                                this._setOperationMode(
-                                    methodName,
-                                    operationMode,
-                                    callback
-                                );
+                                this._refreshDynamicServiceCharacteristics();
+                                this._refreshRelatedAccessoryCharacteristics();
+
+                                this._logMethodCallResult(methodName, null, null);
+
+                                callback(null);
                             }).bind(this)
                         );
                     } else if (powerState === airstage.constants.TOGGLE_ON) {
-                        this._setOperationMode(
-                            methodName,
-                            operationMode,
-                            callback
-                        );
+                        this._logMethodCallResult(methodName, null, null);
+
+                        this._refreshDynamicServiceCharacteristics();
+                        this._refreshRelatedAccessoryCharacteristics();
+
+                        callback(null);
                     }
                 }
             }).bind(this)
@@ -355,30 +356,10 @@ class ThermostatAccessory extends Accessory {
 
         this._logMethodCall(methodName, value);
 
-        let temperatureScale = null;
+        // This is a no-op - we only set target temperature in this accessory
+        this._logMethodCallResult(methodName, null, null);
 
-        if (value === this.Characteristic.TemperatureDisplayUnits.FAHRENHEIT) {
-            temperatureScale = airstage.constants.TEMPERATURE_SCALE_FAHRENHEIT;
-        } else if (value === this.Characteristic.TemperatureDisplayUnits.CELSIUS) {
-            temperatureScale = airstage.constants.TEMPERATURE_SCALE_CELSIUS;
-        }
-
-        this.airstageClient.setTemperatureScale(
-            temperatureScale,
-            (function(error) {
-                if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
-                }
-
-                this._logMethodCallResult(methodName, null, null);
-
-                this._refreshRelatedAccessoryCharacteristics();
-
-                callback(null);
-            }).bind(this)
-        );
+        callback(null);
     }
 
     getName(callback) {
@@ -395,7 +376,7 @@ class ThermostatAccessory extends Accessory {
                     return callback(error, null);
                 }
 
-                const value = name + ' Thermostat';
+                const value = name + ' Temperature';
 
                 this._logMethodCallResult(methodName, null, value);
 
@@ -404,32 +385,11 @@ class ThermostatAccessory extends Accessory {
         );
     }
 
-    _setOperationMode(methodName, operationMode, callback) {
-        this.airstageClient.setOperationMode(
-            this.deviceId,
-            operationMode,
-            (function(error) {
-                if (error) {
-                    this._logMethodCallResult(methodName, error);
-
-                    return callback(error);
-                }
-
-                this._logMethodCallResult(methodName, null, null);
-
-                this._refreshDynamicServiceCharacteristics();
-                this._refreshRelatedAccessoryCharacteristics();
-
-                callback(null);
-            }).bind(this)
-        );
-    }
-
     _refreshRelatedAccessoryCharacteristics() {
         const accessoryManager = this.platform.accessoryManager;
 
         accessoryManager.refreshHeaterCoolerAccessoryCharacteristics(this.deviceId);
-        accessoryManager.refreshTemperatureAccessoryCharacteristics(this.deviceId);
+        accessoryManager.refreshThermostatAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshFanAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshVerticalAirflowDirectionAccessoryCharacteristics(this.deviceId);
         accessoryManager.refreshAutoFanSpeedSwitchAccessoryCharacteristics(this.deviceId);
@@ -442,4 +402,4 @@ class ThermostatAccessory extends Accessory {
     }
 }
 
-module.exports = ThermostatAccessory;
+module.exports = TemperatureAccessory;

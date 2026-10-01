@@ -35,6 +35,7 @@ installed and configured this plugin:
             "apiPollingInterval": 30,
             "enableHeaterCooler": false,
             "enableThermostat": true,
+            "enableTemperature": false,
             "enableFan": true,
             "enableVerticalAirflowDirection": false,
             "enableAutoFanSpeedSwitch": false,
@@ -66,6 +67,13 @@ power state (on/off) of your device.
 This accessory allows you to control the temperature, operating
 mode (cool/heat/auto), and power state (on/off) of your device.
 This is enabled by default.
+
+### Temperature
+
+Similar to the Thermostat accessory, this accessory allows you to control the
+temperature, and power state (on/off) of your device - but _not_ the operating
+mode (cool/heat/auto). This is useful in situations where you only want to
+set the temperature, such as in HomeKit scenes and automations.
 
 ### Fan
 
