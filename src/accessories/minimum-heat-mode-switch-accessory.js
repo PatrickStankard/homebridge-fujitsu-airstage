@@ -95,7 +95,7 @@ class MinimumHeatModeSwitchAccessory extends Accessory {
                 if (error) {
                     this._logMethodCallResult(methodName, error);
 
-                    return callback(error, null);
+                    return callback(error);
                 }
 
                 if (powerState === airstage.constants.TOGGLE_OFF) {
